@@ -1,0 +1,119 @@
+name: AgosecKeyboard
+options:
+  bundleIdPrefix: com.agosec
+  deploymentTarget:
+    iOS: "15.0"
+  groupSortPosition: top
+  useBaseInternationalization: false
+packages:
+  SharedCore:
+    path: Packages/SharedCore
+  Networking:
+    path: Packages/Networking
+  OCR:
+    path: Packages/OCR
+  UIComponents:
+    path: Packages/UIComponents
+targets:
+  AgosecApp:
+    type: application
+    platform: iOS
+    deploymentTarget: "15.0"
+    sources:
+      - AgosecApp
+    info:
+      path: AgosecApp/Info.plist
+      properties:
+        CFBundleDisplayName: Agosec Keyboard
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        UIRequiredDeviceCapabilities:
+          - armv7
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        CFBundleURLTypes:
+          - CFBundleURLSchemes:
+              - agosec
+        BACKEND_BASE_URL: "https://api.agosec.com"
+        SUBSCRIPTION_PRODUCT_ID: "com.agosec.keyboard.pro"
+        ENV: "prod"
+        FEATURE_AGENT_PHOTOS_ENABLED: true
+        MAX_SCREENSHOTS_PER_IMPORT: 5
+        MAX_CONTEXT_CHARS: 20000
+        MAX_TURNS_SENT: 12
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.agosec.keyboard.app
+      CODE_SIGN_ENTITLEMENTS: AgosecApp/AgosecApp.entitlements
+      CODE_SIGN_STYLE: Automatic
+      DEVELOPMENT_TEAM: ""
+      INFOPLIST_FILE: AgosecApp/Info.plist
+    dependencies:
+      - package: SharedCore
+      - package: Networking
+      - package: OCR
+      - package: UIComponents
+      - sdk: StoreKit.framework
+      - sdk: PhotosUI.framework
+    scheme:
+      testTargets:
+        - AgosecAppTests
+  AgosecKeyboardExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "15.0"
+    sources:
+      - AgosecKeyboardExtension
+    info:
+      path: AgosecKeyboardExtension/Info.plist
+      properties:
+        CFBundleDisplayName: Agosec Keyboard
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        NSExtension:
+          NSExtensionAttributes:
+            IsASCIICapable: false
+            PrefersRightToLeft: false
+            PrimaryLanguage: en-US
+            RequestsOpenAccess: true
+          NSExtensionMainStoryboard: MainInterface
+          NSExtensionPointIdentifier: com.apple.keyboard-service
+        BACKEND_BASE_URL: "https://api.agosec.com"
+        SUBSCRIPTION_PRODUCT_ID: "com.agosec.keyboard.pro"
+        ENV: "prod"
+        FEATURE_AGENT_PHOTOS_ENABLED: true
+        MAX_SCREENSHOTS_PER_IMPORT: 5
+        MAX_CONTEXT_CHARS: 20000
+        MAX_TURNS_SENT: 12
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.agosec.keyboard.extension
+      CODE_SIGN_ENTITLEMENTS: AgosecKeyboardExtension/AgosecKeyboardExtension.entitlements
+      CODE_SIGN_STYLE: Automatic
+      DEVELOPMENT_TEAM: ""
+      INFOPLIST_FILE: AgosecKeyboardExtension/Info.plist
+    dependencies:
+      - package: SharedCore
+      - package: Networking
+      - package: OCR
+      - package: UIComponents
+      - sdk: Vision.framework
+      - sdk: PhotosUI.framework
+    entitlements:
+      group.com.agosec.keyboard:
+        - group.com.agosec.keyboard
+  AgosecAppTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: AgosecAppTests
+    dependencies:
+      - target: AgosecApp
+fileGroups:
+  - Packages
+  - README.md
+  - LICENSE
