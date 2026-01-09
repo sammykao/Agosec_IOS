@@ -5,12 +5,13 @@ import Networking
 class KeyboardEntitlementGate {
     
     func verifyEntitlement() async {
-        guard let accessToken: String = AppGroupStorage.shared.get(String.self, for: "access_token") else {
-            return
-        }
+        let accessToken: String? = AppGroupStorage.shared.get(String.self, for: "access_token")
         
-        let client = APIClient(baseURL: Config.shared.backendBaseUrl)
-        let entitlementAPI = EntitlementAPI(client: client, accessToken: accessToken)
+        // Use ServiceFactory to get appropriate service (mock or real)
+        let entitlementAPI = ServiceFactory.createEntitlementAPI(
+            baseURL: Config.shared.backendBaseUrl,
+            accessToken: accessToken
+        )
         
         do {
             let entitlement = try await entitlementAPI.fetchEntitlement()

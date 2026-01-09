@@ -1,5 +1,9 @@
 import SwiftUI
 import UIKit
+import SharedCore
+import Networking
+import OCR
+import UIComponents
 
 struct AgentKeyboardView: View {
     let onClose: () -> Void
@@ -7,6 +11,10 @@ struct AgentKeyboardView: View {
     
     @StateObject private var sessionManager = AgentSessionManager()
     @State private var currentStep: AgentStep = .introChoice
+    @State private var isLoading = false
+    @State private var loadingMessage = ""
+    @State private var error: Error?
+    @EnvironmentObject var toastManager: ToastManager
     
     enum AgentStep {
         case introChoice
@@ -53,31 +61,62 @@ struct AgentKeyboardView: View {
     
     @ViewBuilder
     private var mainContent: some View {
+        ZStack {
         switch currentStep {
         case .introChoice:
             AgentIntroView { choice in
                 handleIntroChoice(choice)
             }
-        case .chat(let session):
-            AgentChatView(
-                session: session,
-                textDocumentProxy: textDocumentProxy,
-                onNewSession: {
-                    currentStep = .introChoice
-                }
-            )
+            .environmentObject(toastManager)
+            case .chat(let session):
+                AgentChatView(
+                    session: session,
+                    textDocumentProxy: textDocumentProxy,
+                    onNewSession: {
+                        currentStep = .introChoice
+                    }
+                )
+            }
+            
+            // Loading overlay
+            if isLoading {
+                LoadingOverlay(message: loadingMessage)
+            }
         }
     }
     
     private func handleIntroChoice(_ choice: IntroChoice) {
+        isLoading = true
+        
+        switch choice {
+        case .useAndDeleteScreenshots, .useScreenshots:
+            loadingMessage = "Processing screenshots..."
+        case .continueWithoutContext:
+            loadingMessage = "Starting conversation..."
+        }
+        
         Task {
             do {
                 let session = try await sessionManager.initializeSession(choice: choice)
                 await MainActor.run {
+                    isLoading = false
                     currentStep = .chat(session: session)
                 }
             } catch {
-                print("Failed to initialize session: \(error)")
+                await MainActor.run {
+                    isLoading = false
+                    let message = ErrorMapper.userFriendlyMessage(from: error)
+                    let shouldRetry = ErrorMapper.shouldShowRetry(for: error)
+                    
+                    toastManager.show(
+                        message,
+                        type: .error,
+                        duration: shouldRetry ? 5.0 : 3.0,
+                        retryAction: shouldRetry ? {
+                            handleIntroChoice(choice)
+                        } : nil
+                    )
+                }
             }
         }
     }
@@ -91,15 +130,32 @@ enum IntroChoice {
 
 class AgentSessionManager: ObservableObject {
     private let chatAPI: ChatAPIProtocol?
+    private let ocrService: OCRServiceProtocol
     
     init() {
-        if let accessToken: String = AppGroupStorage.shared.get(String.self, for: "access_token") {
-            self.chatAPI = ChatAPI(
-                client: APIClient(baseURL: Config.shared.backendBaseUrl),
-                accessToken: accessToken
+        // Use ServiceFactory to get appropriate service (mock or real)
+        let accessToken: String? = AppGroupStorage.shared.get(String.self, for: "access_token")
+        
+        // In mock mode, we can create ChatAPI even without access token
+        if BuildMode.isMockBackend {
+            self.chatAPI = ServiceFactory.createChatAPI(
+                baseURL: Config.shared.backendBaseUrl,
+                accessToken: accessToken,
+                sessionId: nil
             )
+            self.ocrService = MockOCRService()
         } else {
-            self.chatAPI = nil
+            // Real mode requires access token
+            if let accessToken = accessToken {
+                self.chatAPI = ServiceFactory.createChatAPI(
+                    baseURL: Config.shared.backendBaseUrl,
+                    accessToken: accessToken,
+                    sessionId: nil
+                )
+            } else {
+                self.chatAPI = nil
+            }
+            self.ocrService = OCRService()
         }
     }
     
@@ -124,7 +180,6 @@ class AgentSessionManager: ObservableObject {
     }
     
     private func extractContext(from images: [UIImage]) async throws -> ContextDoc {
-        let ocrService = OCRService()
         return try await ocrService.extractText(from: images)
     }
     

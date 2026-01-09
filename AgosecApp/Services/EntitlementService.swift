@@ -20,12 +20,13 @@ class EntitlementService: ObservableObject {
     }
     
     func refreshEntitlement() async {
-        guard let accessToken: String = AppGroupStorage.shared.get(String.self, for: "access_token") else {
-            return
-        }
+        let accessToken: String? = AppGroupStorage.shared.get(String.self, for: "access_token")
         
-        let client = APIClient(baseURL: Config.shared.backendBaseUrl)
-        let entitlementAPI = EntitlementAPI(client: client, accessToken: accessToken)
+        // In mock mode, we can create EntitlementAPI even without access token
+        let entitlementAPI = ServiceFactory.createEntitlementAPI(
+            baseURL: Config.shared.backendBaseUrl,
+            accessToken: accessToken
+        )
         
         do {
             let entitlement = try await entitlementAPI.fetchEntitlement()

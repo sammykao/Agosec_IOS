@@ -1,6 +1,7 @@
 import UIKit
 import SwiftUI
 import SharedCore
+import UIComponents
 
 class KeyboardViewController: UIInputViewController {
     
@@ -111,10 +112,17 @@ class KeyboardViewController: UIInputViewController {
     private func showAgentKeyboard() {
         clearSubviews()
         
+        // Check if user is subscribed before showing agent mode
+        if keyboardState.isLocked {
+            showLockedView()
+            return
+        }
+        
         let agentView = AgentKeyboardView(
             onClose: { self.showTypingKeyboard() },
             textDocumentProxy: textDocumentProxy
         )
+        .environmentObject(ToastManager.shared)
         
         let hostingController = UIHostingController(rootView: agentView)
         addChild(hostingController)

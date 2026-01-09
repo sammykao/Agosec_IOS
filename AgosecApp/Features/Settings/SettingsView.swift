@@ -117,19 +117,28 @@ struct SettingsView: View {
     }
     
     private func contactSupport() {
-        // Implement support contact
+        // TODO: Replace with actual support email or URL
+        if let url = URL(string: "mailto:support@agosec.com") {
+            UIApplication.shared.open(url)
+        }
     }
     
     private func openFAQ() {
-        // Implement FAQ opening
+        // TODO: Replace with actual FAQ URL
+        guard let url = URL(string: "https://agosec.com/faq") else { return }
+        UIApplication.shared.open(url)
     }
     
     private func openPrivacyPolicy() {
-        // Implement privacy policy opening
+        // TODO: Replace with actual Privacy Policy URL
+        guard let url = URL(string: "https://agosec.com/privacy") else { return }
+        UIApplication.shared.open(url)
     }
     
     private func openTerms() {
-        // Implement terms opening
+        // TODO: Replace with actual Terms of Service URL
+        guard let url = URL(string: "https://agosec.com/terms") else { return }
+        UIApplication.shared.open(url)
     }
     
     private var dateFormatter: DateFormatter {

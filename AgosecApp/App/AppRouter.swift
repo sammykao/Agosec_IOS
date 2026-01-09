@@ -1,6 +1,9 @@
 import SwiftUI
 import SharedCore
 
+import SwiftUI
+import SharedCore
+
 class AppRouter: ObservableObject {
     @Published var currentRoute: Route = .onboarding
     
@@ -10,7 +13,16 @@ class AppRouter: ObservableObject {
         case main
     }
     
+    init() {
+        // Check if onboarding is already complete
+        if let isComplete: Bool = AppGroupStorage.shared.get(Bool.self, for: "onboarding_complete"), isComplete {
+            currentRoute = .main
+        }
+    }
+    
     func navigateTo(_ route: Route) {
+        // Ignore if already on the same route (for deep links)
+        guard currentRoute != route else { return }
         currentRoute = route
     }
 }
@@ -35,24 +47,20 @@ struct ContentView: View {
                 router.navigateTo(.main)
             }
         }
+        .onReceive(DeepLinkService.shared.$navigationRequest) { navigation in
+            guard let navigation = navigation else { return }
+            
+            switch navigation {
+            case .paywall:
+                router.navigateTo(.paywall)
+            case .settings:
+                router.navigateTo(.main)
+            }
+            
+            // Clear the navigation request after handling
+            DeepLinkService.shared.clearNavigation()
+        }
     }
 }
 
-struct MainAppView: View {
-    @ObservedObject var router: AppRouter
-    @EnvironmentObject var entitlementService: EntitlementService
-    
-    var body: some View {
-        NavigationView {
-            SettingsView()
-                .navigationTitle("Agosec Keyboard")
-                .navigationBarItems(trailing: subscriptionButton)
-        }
-    }
-    
-    private var subscriptionButton: some View {
-        Button("Manage Subscription") {
-            router.navigateTo(.paywall)
-        }
-    }
-}
+// MainAppView moved to AgosecApp/Features/Main/MainAppView.swift

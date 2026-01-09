@@ -1,5 +1,8 @@
 import SwiftUI
 import UIKit
+import SharedCore
+import Networking
+import UIComponents
 
 struct AgentChatView: View {
     let session: ChatSession
@@ -9,6 +12,7 @@ struct AgentChatView: View {
     @State private var inputText = ""
     @State private var isLoading = false
     @StateObject private var chatManager: ChatManager
+    @EnvironmentObject var toastManager: ToastManager
     
     init(session: ChatSession, textDocumentProxy: UITextDocumentProxy, onNewSession: @escaping () -> Void) {
         self.session = session
@@ -31,22 +35,21 @@ struct AgentChatView: View {
         ScrollView {
             ScrollViewReader { scrollView in
                 VStack(spacing: 12) {
-                    ForEach(chatManager.messages) { message in
-                        MessageRowView(
-                            message: message,
-                            onCopy: { copyToClipboard(message.content) },
-                            onAutofill: { insertText(message.content) },
-                            onReplace: { replaceText(message.content) }
-                        )
+                    if chatManager.messages.isEmpty {
+                        EmptyChatStateView()
+                    } else {
+                        ForEach(chatManager.messages) { message in
+                            MessageRowView(
+                                message: message,
+                                onCopy: { copyToClipboard(message.content) },
+                                onAutofill: { insertText(message.content) },
+                                onReplace: { replaceText(message.content) }
+                            )
+                        }
                     }
                     
                     if isLoading {
-                        HStack {
-                            Spacer()
-                            ProgressView()
-                                .padding()
-                            Spacer()
-                        }
+                        InlineLoadingView(message: "Thinking...")
                     }
                 }
                 .padding()
@@ -112,7 +115,17 @@ struct AgentChatView: View {
             } catch {
                 await MainActor.run {
                     isLoading = false
-                    // Show error
+                    let message = ErrorMapper.userFriendlyMessage(from: error)
+                    let shouldRetry = ErrorMapper.shouldShowRetry(for: error)
+                    
+                    toastManager.show(
+                        message,
+                        type: .error,
+                        duration: shouldRetry ? 5.0 : 3.0,
+                        retryAction: shouldRetry ? {
+                            sendMessage()
+                        } : nil
+                    )
                 }
             }
         }
@@ -210,13 +223,27 @@ class ChatManager: ObservableObject {
     init(session: ChatSession) {
         self.session = session
         
-        if let accessToken: String = AppGroupStorage.shared.get(String.self, for: "access_token") {
-            self.chatAPI = ChatAPI(
-                client: APIClient(baseURL: Config.shared.backendBaseUrl),
-                accessToken: accessToken
+        // Use ServiceFactory to get appropriate service (mock or real)
+        let accessToken: String? = AppGroupStorage.shared.get(String.self, for: "access_token")
+        
+        // In mock mode, we can create ChatAPI even without access token
+        if BuildMode.isMockBackend {
+            self.chatAPI = ServiceFactory.createChatAPI(
+                baseURL: Config.shared.backendBaseUrl,
+                accessToken: accessToken,
+                sessionId: session.sessionId
             )
         } else {
-            self.chatAPI = nil
+            // Real mode requires access token
+            if let accessToken = accessToken {
+                self.chatAPI = ServiceFactory.createChatAPI(
+                    baseURL: Config.shared.backendBaseUrl,
+                    accessToken: accessToken,
+                    sessionId: session.sessionId
+                )
+            } else {
+                self.chatAPI = nil
+            }
         }
         
         // Convert existing turns to messages

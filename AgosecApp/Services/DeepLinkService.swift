@@ -1,8 +1,17 @@
 import Foundation
 import UIKit
+import Combine
 
-class DeepLinkService {
+class DeepLinkService: ObservableObject {
     static let shared = DeepLinkService()
+    
+    // Publisher for deep link navigation
+    @Published var navigationRequest: DeepLinkNavigation?
+    
+    enum DeepLinkNavigation {
+        case paywall
+        case settings
+    }
     
     private init() {}
     
@@ -12,26 +21,19 @@ class DeepLinkService {
         let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
         let path = components?.path ?? ""
         
-        switch path {
-        case "/subscribe":
-            handleSubscribe()
-        case "/settings":
-            handleSettings()
-        default:
-            break
+        DispatchQueue.main.async {
+            switch path {
+            case "/subscribe", "/paywall":
+                self.navigationRequest = .paywall
+            case "/settings":
+                self.navigationRequest = .settings
+            default:
+                break
+            }
         }
     }
     
-    private func handleSubscribe() {
-        NotificationCenter.default.post(name: .showPaywall, object: nil)
+    func clearNavigation() {
+        navigationRequest = nil
     }
-    
-    private func handleSettings() {
-        NotificationCenter.default.post(name: .showSettings, object: nil)
-    }
-}
-
-extension Notification.Name {
-    static let showPaywall = Notification.Name("showPaywall")
-    static let showSettings = Notification.Name("showSettings")
 }

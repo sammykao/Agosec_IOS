@@ -1,6 +1,8 @@
 import Foundation
 import StoreKit
 import SharedCore
+import Networking
+import UIComponents
 
 @MainActor
 class StoreKitManager: ObservableObject {
@@ -15,6 +17,7 @@ class StoreKitManager: ObservableObject {
     }
     
     private let productId = Config.shared.subscriptionProductId
+    private var toastManager: ToastManager?
     
     var isLoading: Bool {
         if case .loading = purchaseState {
@@ -23,12 +26,23 @@ class StoreKitManager: ObservableObject {
         return false
     }
     
+    func setToastManager(_ manager: ToastManager) {
+        self.toastManager = manager
+    }
+    
     func loadProducts() async {
         do {
             let products = try await Product.products(for: [productId])
             product = products.first
+            
+            if product == nil {
+                toastManager?.show("Subscription product not available. Please try again later.", type: .error)
+            }
         } catch {
-            print("Failed to load products: \(error)")
+            let message = ErrorMapper.userFriendlyMessage(from: error)
+            toastManager?.show(message, type: .error, duration: 4.0, retryAction: {
+                Task { await self.loadProducts() }
+            })
         }
     }
     
@@ -58,6 +72,8 @@ class StoreKitManager: ObservableObject {
             }
         } catch {
             purchaseState = .failure(error)
+            let message = ErrorMapper.userFriendlyMessage(from: error)
+            toastManager?.show(message, type: .error)
         }
     }
     
@@ -65,8 +81,12 @@ class StoreKitManager: ObservableObject {
         do {
             try await AppStore.sync()
             await refreshEntitlement()
+            toastManager?.show("Purchases restored successfully", type: .success)
         } catch {
-            print("Failed to restore purchases: \(error)")
+            let message = ErrorMapper.userFriendlyMessage(from: error)
+            toastManager?.show(message, type: .error, duration: 4.0, retryAction: {
+                Task { await self.restorePurchases() }
+            })
         }
     }
     
@@ -91,12 +111,14 @@ class StoreKitManager: ObservableObject {
         do {
             try await syncWithBackend(transaction: transaction)
         } catch {
-            print("Failed to sync with backend: \(error)")
+            // Show error but don't fail the purchase (entitlement is already saved locally)
+            let message = ErrorMapper.userFriendlyMessage(from: error)
+            toastManager?.show("Purchase successful, but sync failed: \(message)", type: .info, duration: 4.0)
         }
     }
     
     private func syncWithBackend(transaction: Transaction) async throws {
-        let authAPI = AuthAPI(client: APIClient(baseURL: Config.shared.backendBaseUrl))
+        let authAPI = ServiceFactory.createAuthAPI(baseURL: Config.shared.backendBaseUrl)
         
         _ = try await authAPI.attachTransaction(
             originalTransactionId: transaction.originalID.description,

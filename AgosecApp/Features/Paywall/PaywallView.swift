@@ -5,6 +5,7 @@ struct PaywallView: View {
     @ObservedObject var router: AppRouter
     @StateObject private var storeKitManager = StoreKitManager()
     @EnvironmentObject var entitlementService: EntitlementService
+    @EnvironmentObject var toastManager: ToastManager
     @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
@@ -32,9 +33,24 @@ struct PaywallView: View {
             .padding()
         }
         .navigationBarBackButtonHidden(true)
+        .onAppear {
+            storeKitManager.setToastManager(toastManager)
+        }
         .onReceive(storeKitManager.$purchaseState) { state in
             if case .success = state {
+                toastManager.show("Subscription activated successfully!", type: .success)
                 entitlementService.refreshEntitlement()
+            } else if case .failure(let error) = state {
+                let message = ErrorMapper.userFriendlyMessage(from: error)
+                let shouldRetry = ErrorMapper.shouldShowRetry(for: error)
+                toastManager.show(
+                    message,
+                    type: .error,
+                    duration: shouldRetry ? 5.0 : 3.0,
+                    retryAction: shouldRetry ? {
+                        Task { await storeKitManager.purchase() }
+                    } : nil
+                )
             }
         }
     }
@@ -137,17 +153,29 @@ struct PaywallView: View {
             
             HStack(spacing: 16) {
                 Button("Terms of Service") {
-                    // Open terms URL
+                    openTerms()
                 }
                 .font(.system(size: 12))
                 .foregroundColor(.blue)
                 
                 Button("Privacy Policy") {
-                    // Open privacy URL
+                    openPrivacyPolicy()
                 }
                 .font(.system(size: 12))
                 .foregroundColor(.blue)
             }
+    }
+    
+    private func openTerms() {
+        // TODO: Replace with actual Terms of Service URL
+        guard let url = URL(string: "https://agosec.com/terms") else { return }
+        UIApplication.shared.open(url)
+    }
+    
+    private func openPrivacyPolicy() {
+        // TODO: Replace with actual Privacy Policy URL
+        guard let url = URL(string: "https://agosec.com/privacy") else { return }
+        UIApplication.shared.open(url)
         }
     }
 }

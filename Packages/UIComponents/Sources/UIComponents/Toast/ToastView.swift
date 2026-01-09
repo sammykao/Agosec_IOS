@@ -3,6 +3,7 @@ import SwiftUI
 public struct ToastView: View {
     public let message: String
     public let type: ToastType
+    public let retryAction: (() -> Void)?
     
     public enum ToastType {
         case success
@@ -10,18 +11,33 @@ public struct ToastView: View {
         case info
     }
     
-    public init(message: String, type: ToastType = .info) {
+    public init(message: String, type: ToastType = .info, retryAction: (() -> Void)? = nil) {
         self.message = message
         self.type = type
+        self.retryAction = retryAction
     }
     
     public var body: some View {
-        HStack {
+        HStack(spacing: 12) {
             Image(systemName: iconName)
                 .foregroundColor(iconColor)
+            
             Text(message)
                 .font(.system(size: 14))
                 .foregroundColor(.white)
+                .lineLimit(2)
+            
+            if let retryAction = retryAction {
+                Button(action: retryAction) {
+                    Text("Retry")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.white.opacity(0.2))
+                        .cornerRadius(4)
+                }
+            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -66,26 +82,49 @@ public struct ToastView: View {
 
 public class ToastManager: ObservableObject {
     @Published public var currentToast: ToastMessage?
+    private var dismissTask: Task<Void, Never>?
     
     public init() {}
     
-    public func show(_ message: String, type: ToastView.ToastType = .info, duration: TimeInterval = 3.0) {
-        currentToast = ToastMessage(message: message, type: type, duration: duration)
+    public func show(_ message: String, type: ToastView.ToastType = .info, duration: TimeInterval = 3.0, retryAction: (() -> Void)? = nil) {
+        // Cancel any existing dismiss task
+        dismissTask?.cancel()
+        
+        currentToast = ToastMessage(message: message, type: type, duration: duration, retryAction: retryAction)
+        
+        // Auto-dismiss after duration (unless it's an error with retry, then give more time)
+        let dismissDuration = retryAction != nil ? duration + 2.0 : duration
+        dismissTask = Task {
+            try? await Task.sleep(nanoseconds: UInt64(dismissDuration * 1_000_000_000))
+            if !Task.isCancelled {
+                await MainActor.run {
+                    self.hide()
+                }
+            }
+        }
     }
     
     public func hide() {
+        dismissTask?.cancel()
         currentToast = nil
     }
+}
+
+// Global toast manager instance
+public extension ToastManager {
+    static let shared = ToastManager()
 }
 
 public struct ToastMessage {
     public let message: String
     public let type: ToastView.ToastType
     public let duration: TimeInterval
+    public let retryAction: (() -> Void)?
     
-    public init(message: String, type: ToastView.ToastType, duration: TimeInterval) {
+    public init(message: String, type: ToastView.ToastType, duration: TimeInterval = 3.0, retryAction: (() -> Void)? = nil) {
         self.message = message
         self.type = type
         self.duration = duration
+        self.retryAction = retryAction
     }
 }

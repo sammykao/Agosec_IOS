@@ -1,6 +1,6 @@
 name: AgosecKeyboard
 options:
-  bundleIdPrefix: com.agosec
+  bundleIdPrefix: io.agosec
   deploymentTarget:
     iOS: "15.0"
   groupSortPosition: top
@@ -42,17 +42,17 @@ targets:
           - CFBundleURLSchemes:
               - agosec
         BACKEND_BASE_URL: "https://api.agosec.com"
-        SUBSCRIPTION_PRODUCT_ID: "com.agosec.keyboard.pro"
+        SUBSCRIPTION_PRODUCT_ID: "io.agosec.keyboard.pro"
         ENV: "prod"
         FEATURE_AGENT_PHOTOS_ENABLED: true
         MAX_SCREENSHOTS_PER_IMPORT: 5
         MAX_CONTEXT_CHARS: 20000
         MAX_TURNS_SENT: 12
     settings:
-      PRODUCT_BUNDLE_IDENTIFIER: com.agosec.keyboard.app
+      PRODUCT_BUNDLE_IDENTIFIER: io.agosec.keyboard.app
       CODE_SIGN_ENTITLEMENTS: AgosecApp/AgosecApp.entitlements
       CODE_SIGN_STYLE: Automatic
-      DEVELOPMENT_TEAM: ""
+      DEVELOPMENT_TEAM: "V9CU7HF844"
       INFOPLIST_FILE: AgosecApp/Info.plist
     dependencies:
       - package: SharedCore
@@ -85,17 +85,17 @@ targets:
           NSExtensionMainStoryboard: MainInterface
           NSExtensionPointIdentifier: com.apple.keyboard-service
         BACKEND_BASE_URL: "https://api.agosec.com"
-        SUBSCRIPTION_PRODUCT_ID: "com.agosec.keyboard.pro"
+        SUBSCRIPTION_PRODUCT_ID: "io.agosec.keyboard.pro"
         ENV: "prod"
         FEATURE_AGENT_PHOTOS_ENABLED: true
         MAX_SCREENSHOTS_PER_IMPORT: 5
         MAX_CONTEXT_CHARS: 20000
         MAX_TURNS_SENT: 12
     settings:
-      PRODUCT_BUNDLE_IDENTIFIER: com.agosec.keyboard.extension
+      PRODUCT_BUNDLE_IDENTIFIER: io.agosec.keyboard.extension
       CODE_SIGN_ENTITLEMENTS: AgosecKeyboardExtension/AgosecKeyboardExtension.entitlements
       CODE_SIGN_STYLE: Automatic
-      DEVELOPMENT_TEAM: ""
+      DEVELOPMENT_TEAM: "V9CU7HF844"
       INFOPLIST_FILE: AgosecKeyboardExtension/Info.plist
     dependencies:
       - package: SharedCore
@@ -105,8 +105,8 @@ targets:
       - sdk: Vision.framework
       - sdk: PhotosUI.framework
     entitlements:
-      group.com.agosec.keyboard:
-        - group.com.agosec.keyboard
+      group.io.agosec.keyboard:
+        - group.io.agosec.keyboard
   AgosecAppTests:
     type: bundle.unit-test
     platform: iOS

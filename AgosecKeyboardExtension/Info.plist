@@ -41,7 +41,7 @@
     <key>BACKEND_BASE_URL</key>
     <string>https://api.agosec.com</string>
     <key>SUBSCRIPTION_PRODUCT_ID</key>
-    <string>com.agosec.keyboard.pro</string>
+    <string>io.agosec.keyboard.pro</string>
     <key>ENV</key>
     <string>prod</string>
     <key>FEATURE_AGENT_PHOTOS_ENABLED</key>
@@ -52,5 +52,7 @@
     <integer>20000</integer>
     <key>MAX_TURNS_SENT</key>
     <integer>12</integer>
+    <key>MOCK_BACKEND_ENABLED</key>
+    <true/>
 </dict>
 </plist>

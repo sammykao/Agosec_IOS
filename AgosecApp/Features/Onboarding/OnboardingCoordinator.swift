@@ -26,6 +26,8 @@ struct OnboardingCoordinator: View {
                     PhotosPermissionStepView(onNext: { currentStep = .demo })
                 case .demo:
                     DemoConversationStepView(onComplete: {
+                        // Save onboarding completion
+                        AppGroupStorage.shared.set(true, for: "onboarding_complete")
                         router.navigateTo(.paywall)
                     })
                 }
