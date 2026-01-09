@@ -7,13 +7,13 @@ public class AppGroupStorage {
     private let userDefaults: UserDefaults
     
     private init() {
-        self.appGroupId = "group.com.agosec.keyboard"
+        self.appGroupId = "group.io.agosec.keyboard"
         guard let defaults = UserDefaults(suiteName: appGroupId) else {
             fatalError("Failed to initialize App Group UserDefaults")
         }
         self.userDefaults = defaults
     }
-    
+
     public func set<T: Codable>(_ value: T, for key: String) {
         if let data = try? JSONEncoder().encode(value) {
             userDefaults.set(data, forKey: key)

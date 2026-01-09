@@ -23,7 +23,7 @@ public class MockAuthAPI: AuthAPIProtocol {
         let mockEntitlement = EntitlementState(
             isActive: true,
             expiresAt: Date().addingTimeInterval(86400 * 30), // 30 days
-            productId: "com.agosec.keyboard.pro"
+            productId: "io.agosec.keyboard.pro"
         )
         
         return AuthResponse(
@@ -148,7 +148,7 @@ public class MockEntitlementAPI: EntitlementAPIProtocol {
         return EntitlementState(
             isActive: true,
             expiresAt: Date().addingTimeInterval(86400 * 30), // 30 days
-            productId: "com.agosec.keyboard.pro"
+            productId: "io.agosec.keyboard.pro"
         )
     }
 }

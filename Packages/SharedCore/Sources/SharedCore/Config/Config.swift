@@ -18,7 +18,7 @@ public struct Config {
         let bundle = Bundle.main
         
         self.backendBaseUrl = bundle.infoDictionary?["BACKEND_BASE_URL"] as? String ?? "https://api.agosec.com"
-        self.subscriptionProductId = bundle.infoDictionary?["SUBSCRIPTION_PRODUCT_ID"] as? String ?? "com.agosec.keyboard.pro"
+        self.subscriptionProductId = bundle.infoDictionary?["SUBSCRIPTION_PRODUCT_ID"] as? String ?? "io.agosec.keyboard.pro"
         
         if let envString = bundle.infoDictionary?["ENV"] as? String,
            let env = Environment(rawValue: envString) {

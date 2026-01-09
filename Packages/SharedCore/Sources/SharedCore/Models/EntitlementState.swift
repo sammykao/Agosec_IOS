@@ -24,8 +24,8 @@ public enum SubscriptionTier: String, CaseIterable {
     
     public var productId: String {
         switch self {
-        case .basic: "com.agosec.keyboard.basic"
-        case .pro: "com.agosec.keyboard.pro"
-        }
+        case .basic: "io.agosec.keyboard.basic"
+        case .pro: "io.agosec.keyboard.pro"
+        }   
     }
 }

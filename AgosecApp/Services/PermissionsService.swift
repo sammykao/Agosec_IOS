@@ -7,7 +7,7 @@ class PermissionsService: ObservableObject {
             return false
         }
         
-        let bundleId = "com.agosec.keyboard.extension"
+        let bundleId = "io.agosec.keyboard.extension"
         return keyboards.contains { keyboard in
             guard let identifier = keyboard["BundleIdentifier"] as? String else { return false }
             return identifier == bundleId
