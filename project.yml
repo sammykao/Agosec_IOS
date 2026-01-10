@@ -104,9 +104,6 @@ targets:
       - package: UIComponents
       - sdk: Vision.framework
       - sdk: PhotosUI.framework
-    entitlements:
-      group.io.agosec.keyboard:
-        - group.io.agosec.keyboard
   AgosecAppTests:
     type: bundle.unit-test
     platform: iOS
