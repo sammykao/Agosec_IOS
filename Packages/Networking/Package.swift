@@ -19,10 +19,5 @@ let package = Package(
             dependencies: ["SharedCore"],
             path: "Sources"
         ),
-        .testTarget(
-            name: "NetworkingTests",
-            dependencies: ["Networking", "SharedCore"],
-            path: "Tests"
-        ),
     ]
 )

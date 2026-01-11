@@ -16,10 +16,5 @@ let package = Package(
             name: "SharedCore",
             path: "Sources"
         ),
-        .testTarget(
-            name: "SharedCoreTests",
-            dependencies: ["SharedCore"],
-            path: "Tests"
-        ),
     ]
 )

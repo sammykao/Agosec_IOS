@@ -8,6 +8,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.9"
+    ALWAYS_SEARCH_USER_PATHS: NO
 packages:
   SharedCore:
     path: Packages/SharedCore
