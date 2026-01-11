@@ -5,7 +5,9 @@ options:
     iOS: "15.0"
   groupSortPosition: top
   useBaseInternationalization: false
-  swiftVersion: "5.9"
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
 packages:
   SharedCore:
     path: Packages/SharedCore
@@ -55,6 +57,7 @@ targets:
       CODE_SIGN_STYLE: Automatic
       DEVELOPMENT_TEAM: "V9CU7HF844"
       INFOPLIST_FILE: AgosecApp/Info.plist
+      SWIFT_VERSION: "5.9"
     dependencies:
       - package: SharedCore
       - package: Networking
@@ -98,6 +101,7 @@ targets:
       CODE_SIGN_STYLE: Automatic
       DEVELOPMENT_TEAM: "V9CU7HF844"
       INFOPLIST_FILE: AgosecKeyboardExtension/Info.plist
+      SWIFT_VERSION: "5.9"
     dependencies:
       - package: SharedCore
       - package: Networking
@@ -109,6 +113,8 @@ targets:
     type: bundle.unit-test
     platform: iOS
     sources: AgosecAppTests
+    settings:
+      SWIFT_VERSION: "5.9"
     dependencies:
       - target: AgosecApp
 fileGroups:
