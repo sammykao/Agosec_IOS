@@ -5,6 +5,7 @@ options:
     iOS: "15.0"
   groupSortPosition: top
   useBaseInternationalization: false
+  swiftVersion: "5.9"
 packages:
   SharedCore:
     path: Packages/SharedCore
