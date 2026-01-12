@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import SharedCore
 import UIComponents
 
@@ -19,55 +20,56 @@ struct OnboardingCoordinator: View {
     }
     
     var body: some View {
-        NavigationView {
-            ZStack {
-                // Background gradient matching app theme
-                LinearGradient(
-                    gradient: Gradient(colors: [
-                        Color(red: 0.98, green: 0.98, blue: 1.0),
-                        Color(red: 0.95, green: 0.96, blue: 0.98),
-                        Color(red: 0.97, green: 0.97, blue: 0.99)
-                    ]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
-                
-                VStack(spacing: 0) {
-                    // Main content area
-                    Group {
-                        switch currentStep {
-                        case .welcome:
-                            WelcomeStepView(onNext: { currentStep = .enableKeyboard })
-                        case .enableKeyboard:
-                            EnableKeyboardStepView(onNext: { currentStep = .enableFullAccess })
-                        case .enableFullAccess:
-                            EnableFullAccessStepView(onNext: { currentStep = .photosPermission })
-                        case .photosPermission:
-                            PhotosPermissionStepView(onNext: { currentStep = .demo })
-                        case .demo:
-                            DemoConversationStepView(onComplete: {
-                                // Save onboarding completion
-                                AppGroupStorage.shared.set(true, for: "onboarding_complete")
-                                router.navigateTo(.paywall)
-                            })
-                        }
+        ZStack {
+            // Background gradient matching app theme
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.98, green: 0.98, blue: 1.0),
+                    Color(red: 0.95, green: 0.96, blue: 0.98),
+                    Color(red: 0.97, green: 0.97, blue: 0.99)
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea(.all)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            
+            VStack(spacing: 0) {
+                // Main content area
+                Group {
+                    switch currentStep {
+                    case .welcome:
+                        WelcomeStepView(onNext: { currentStep = .enableKeyboard })
+                    case .enableKeyboard:
+                        EnableKeyboardStepView(onNext: { currentStep = .enableFullAccess })
+                    case .enableFullAccess:
+                        EnableFullAccessStepView(onNext: { currentStep = .photosPermission })
+                    case .photosPermission:
+                        PhotosPermissionStepView(onNext: { currentStep = .demo })
+                    case .demo:
+                        DemoConversationStepView(onComplete: {
+                            // Save onboarding completion
+                            AppGroupStorage.shared.set(true, for: "onboarding_complete")
+                            router.navigateTo(.paywall)
+                        })
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    
-                    // Page indicator at the bottom
-                    VStack(spacing: 16) {
-                        PageIndicator(
-                            currentPage: currentStep.rawValue,
-                            totalPages: OnboardingStep.totalSteps
-                        )
-                    }
-                    .padding(.bottom, 40)
-                    .padding(.horizontal)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                
+                // Page indicator at the bottom
+                VStack(spacing: 16) {
+                    PageIndicator(
+                        currentPage: currentStep.rawValue,
+                        totalPages: OnboardingStep.totalSteps
+                    )
+                }
+                .padding(.bottom, 44)
+                .padding(.horizontal)
             }
-            .navigationBarBackButtonHidden(true)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea(.all)
     }
 }
 
@@ -86,17 +88,26 @@ struct WelcomeStepView: View {
                 
                 // Logo section
                 VStack(spacing: 32) {
-                    Image("agosec_logo", bundle: .main)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(
-                            width: min(geometry.size.width * 0.4, 160),
-                            height: min(geometry.size.width * 0.4, 160)
-                        )
-                        .scaleEffect(logoScale)
-                        .opacity(logoOpacity)
-                        .shadow(color: Color.black.opacity(0.08), radius: 20, x: 0, y: 10)
-                        .shadow(color: Color.blue.opacity(0.1), radius: 15, x: 0, y: 5)
+                    Group {
+                        if let uiImage = UIImage(named: "agosec_logo") {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                        } else {
+                            Image(systemName: "app.fill")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .foregroundColor(.gray)
+                        }
+                    }
+                    .frame(
+                        width: min(geometry.size.width * 0.4, 160),
+                        height: min(geometry.size.width * 0.4, 160)
+                    )
+                    .scaleEffect(logoScale)
+                    .opacity(logoOpacity)
+                    .shadow(color: Color.black.opacity(0.08), radius: 20, x: 0, y: 10)
+                    .shadow(color: Color.blue.opacity(0.1), radius: 15, x: 0, y: 5)
                     
                     // Welcome message
                     Text("Welcome to Agosec, your AI centered keyboard.")
@@ -119,7 +130,10 @@ struct WelcomeStepView: View {
                 }
                 .padding(.bottom, max(geometry.size.height * 0.1, 40))
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea(.all)
         .onAppear {
             // Animate logo entrance
             withAnimation(.spring(response: 0.8, dampingFraction: 0.6)) {
