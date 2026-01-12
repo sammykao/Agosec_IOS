@@ -1,4 +1,5 @@
 import SwiftUI
+import UIComponents
 
 struct EnableKeyboardStepView: View {
     @EnvironmentObject var permissionsService: PermissionsService
@@ -6,43 +7,51 @@ struct EnableKeyboardStepView: View {
     let onNext: () -> Void
     
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
-            
-            Image(systemName: "gear")
-                .font(.system(size: 80))
-                .foregroundColor(.blue)
-            
-            Text("Enable Keyboard")
-                .font(.system(size: 24, weight: .bold))
-                .multilineTextAlignment(.center)
-            
-            Text("Add Agosec Keyboard to your keyboards in Settings")
-                .font(.system(size: 16))
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-            
-            VStack(alignment: .leading, spacing: 12) {
-                InstructionStep(number: 1, text: "Tap Open Settings")
-                InstructionStep(number: 2, text: "Tap Keyboards")
-                InstructionStep(number: 3, text: "Enable Agosec Keyboard")
-            }
-            .padding()
-            .background(Color.gray.opacity(0.1))
-            .cornerRadius(12)
-            
-            Spacer()
-            
-            VStack(spacing: 12) {
-                ActionButton(title: "Open Settings", action: openSettings)
-                
-                if isKeyboardEnabled {
-                    ActionButton(title: "Continue", action: onNext)
+        GeometryReader { geometry in
+            ScrollView {
+                VStack(spacing: min(geometry.size.height * 0.03, 24)) {
+                    Spacer(minLength: max(geometry.size.height * 0.1, 40))
+                    
+                    Image(systemName: "gear")
+                        .font(.system(size: min(geometry.size.width * 0.2, 80)))
+                        .foregroundColor(.blue)
+                    
+                    Text("Enable Keyboard")
+                        .font(.system(size: min(geometry.size.width * 0.06, 24), weight: .bold))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                    
+                    Text("Add Agosec Keyboard to your keyboards in Settings")
+                        .font(.system(size: min(geometry.size.width * 0.04, 16)))
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
+                    
+                    VStack(alignment: .leading, spacing: 12) {
+                        InstructionStep(number: 1, text: "Tap Open Settings")
+                        InstructionStep(number: 2, text: "Tap Keyboards")
+                        InstructionStep(number: 3, text: "Enable Agosec Keyboard")
+                    }
+                    .padding()
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(12)
+                    .padding(.horizontal, max(geometry.size.width * 0.1, 24))
+                    
+                    Spacer(minLength: max(geometry.size.height * 0.1, 40))
+                    
+                    VStack(spacing: 12) {
+                        ActionButton(title: "Open Settings", action: openSettings)
+                        
+                        if isKeyboardEnabled {
+                            ActionButton(title: "Continue", action: onNext)
+                        }
+                    }
+                    .padding(.horizontal, max(geometry.size.width * 0.1, 24))
+                    .padding(.bottom, 40)
                 }
+                .frame(minHeight: geometry.size.height)
             }
-            .padding(.horizontal)
         }
-        .padding()
         .onAppear {
             checkKeyboardStatus()
         }

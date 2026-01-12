@@ -6,16 +6,6 @@ public protocol APIClientProtocol {
     func request(_ endpoint: APIEndpoint) async throws -> Data
 }
 
-public enum APIError: Error {
-    case invalidURL
-    case networkError(Error)
-    case invalidResponse
-    case httpError(Int)
-    case decodingError(Error)
-    case unauthorized
-    case serverError(String)
-}
-
 public struct APIEndpoint {
     public let path: String
     public let method: HTTPMethod

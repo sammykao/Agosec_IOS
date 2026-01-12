@@ -1,35 +1,69 @@
 import SwiftUI
+import SharedCore
+import UIComponents
 
 struct OnboardingCoordinator: View {
     @ObservedObject var router: AppRouter
     @State private var currentStep: OnboardingStep = .welcome
     
-    enum OnboardingStep {
-        case welcome
-        case enableKeyboard
-        case enableFullAccess
-        case photosPermission
-        case demo
+    enum OnboardingStep: Int, CaseIterable {
+        case welcome = 0
+        case enableKeyboard = 1
+        case enableFullAccess = 2
+        case photosPermission = 3
+        case demo = 4
+        
+        static var totalSteps: Int {
+            allCases.count
+        }
     }
     
     var body: some View {
         NavigationView {
-            Group {
-                switch currentStep {
-                case .welcome:
-                    WelcomeStepView(onNext: { currentStep = .enableKeyboard })
-                case .enableKeyboard:
-                    EnableKeyboardStepView(onNext: { currentStep = .enableFullAccess })
-                case .enableFullAccess:
-                    EnableFullAccessStepView(onNext: { currentStep = .photosPermission })
-                case .photosPermission:
-                    PhotosPermissionStepView(onNext: { currentStep = .demo })
-                case .demo:
-                    DemoConversationStepView(onComplete: {
-                        // Save onboarding completion
-                        AppGroupStorage.shared.set(true, for: "onboarding_complete")
-                        router.navigateTo(.paywall)
-                    })
+            ZStack {
+                // Background gradient matching app theme
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color(red: 0.98, green: 0.98, blue: 1.0),
+                        Color(red: 0.95, green: 0.96, blue: 0.98),
+                        Color(red: 0.97, green: 0.97, blue: 0.99)
+                    ]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
+                
+                VStack(spacing: 0) {
+                    // Main content area
+                    Group {
+                        switch currentStep {
+                        case .welcome:
+                            WelcomeStepView(onNext: { currentStep = .enableKeyboard })
+                        case .enableKeyboard:
+                            EnableKeyboardStepView(onNext: { currentStep = .enableFullAccess })
+                        case .enableFullAccess:
+                            EnableFullAccessStepView(onNext: { currentStep = .photosPermission })
+                        case .photosPermission:
+                            PhotosPermissionStepView(onNext: { currentStep = .demo })
+                        case .demo:
+                            DemoConversationStepView(onComplete: {
+                                // Save onboarding completion
+                                AppGroupStorage.shared.set(true, for: "onboarding_complete")
+                                router.navigateTo(.paywall)
+                            })
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    
+                    // Page indicator at the bottom
+                    VStack(spacing: 16) {
+                        PageIndicator(
+                            currentPage: currentStep.rawValue,
+                            totalPages: OnboardingStep.totalSteps
+                        )
+                    }
+                    .padding(.bottom, 40)
+                    .padding(.horizontal)
                 }
             }
             .navigationBarBackButtonHidden(true)
@@ -40,65 +74,71 @@ struct OnboardingCoordinator: View {
 struct WelcomeStepView: View {
     let onNext: () -> Void
     
-    var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
-            
-            Image(systemName: "keyboard.fill")
-                .font(.system(size: 80))
-                .foregroundColor(.blue)
-            
-            Text("Welcome to Agosec Keyboard")
-                .font(.system(size: 28, weight: .bold))
-                .multilineTextAlignment(.center)
-            
-            VStack(alignment: .leading, spacing: 16) {
-                FeatureRow(
-                    icon: "keyboard",
-                    title: "Smart Typing",
-                    description: "Full-featured keyboard with AI assistance"
-                )
-                
-                FeatureRow(
-                    icon: "photo",
-                    title: "Screenshot Context",
-                    description: "Import screenshots for AI context (optional)"
-                )
-                
-                FeatureRow(
-                    icon: "lock.fill",
-                    title: "Privacy First",
-                    description: "Your data stays on your device"
-                )
-            }
-            
-            Spacer()
-            
-            ActionButton(title: "Get Started", action: onNext)
-                .padding(.horizontal)
-        }
-        .padding()
-    }
-}
-
-struct FeatureRow: View {
-    let icon: String
-    let title: String
-    let description: String
+    @State private var logoScale: CGFloat = 0.8
+    @State private var logoOpacity: Double = 0.0
+    @State private var textOpacity: Double = 0.0
+    @State private var buttonOpacity: Double = 0.0
     
     var body: some View {
-        HStack(spacing: 16) {
-            Image(systemName: icon)
-                .font(.system(size: 24))
-                .foregroundColor(.blue)
-                .frame(width: 40)
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                Spacer()
+                
+                // Logo section
+                VStack(spacing: 32) {
+                    Image("agosec_logo", bundle: .main)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(
+                            width: min(geometry.size.width * 0.4, 160),
+                            height: min(geometry.size.width * 0.4, 160)
+                        )
+                        .scaleEffect(logoScale)
+                        .opacity(logoOpacity)
+                        .shadow(color: Color.black.opacity(0.08), radius: 20, x: 0, y: 10)
+                        .shadow(color: Color.blue.opacity(0.1), radius: 15, x: 0, y: 5)
+                    
+                    // Welcome message
+                    Text("Welcome to Agosec, your AI centered keyboard.")
+                        .font(.system(size: min(geometry.size.width * 0.06, 28), weight: .semibold, design: .default))
+                        .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(nil)
+                        .padding(.horizontal, 32)
+                        .opacity(textOpacity)
+                }
+                .padding(.top, max(geometry.size.height * 0.15, 60))
+                
+                Spacer()
+                
+                // Get Started button
+                VStack(spacing: 16) {
+                    ActionButton(title: "Get Started", action: onNext)
+                        .padding(.horizontal, max(geometry.size.width * 0.1, 24))
+                        .opacity(buttonOpacity)
+                }
+                .padding(.bottom, max(geometry.size.height * 0.1, 40))
+            }
+        }
+        .onAppear {
+            // Animate logo entrance
+            withAnimation(.spring(response: 0.8, dampingFraction: 0.6)) {
+                logoScale = 1.0
+                logoOpacity = 1.0
+            }
             
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.system(size: 16, weight: .semibold))
-                Text(description)
-                    .font(.system(size: 14))
-                    .foregroundColor(.gray)
+            // Animate text entrance
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                withAnimation(.easeIn(duration: 0.5)) {
+                    textOpacity = 1.0
+                }
+            }
+            
+            // Animate button entrance
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                withAnimation(.easeIn(duration: 0.5)) {
+                    buttonOpacity = 1.0
+                }
             }
         }
     }

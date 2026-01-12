@@ -1,5 +1,4 @@
 import Foundation
-import Networking
 
 /// Maps API errors to user-friendly messages
 public struct ErrorMapper {

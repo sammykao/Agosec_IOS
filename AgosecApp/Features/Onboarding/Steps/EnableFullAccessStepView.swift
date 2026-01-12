@@ -1,4 +1,5 @@
 import SwiftUI
+import UIComponents
 
 struct EnableFullAccessStepView: View {
     @EnvironmentObject var permissionsService: PermissionsService
@@ -6,50 +7,59 @@ struct EnableFullAccessStepView: View {
     let onNext: () -> Void
     
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
-            
-            Image(systemName: "lock.open.fill")
-                .font(.system(size: 80))
-                .foregroundColor(.orange)
-            
-            Text("Allow Full Access")
-                .font(.system(size: 24, weight: .bold))
-                .multilineTextAlignment(.center)
-            
-            VStack(spacing: 16) {
-                Text("Full Access is required for:")
-                    .font(.system(size: 16))
-                    .foregroundColor(.gray)
-                
-                VStack(alignment: .leading, spacing: 8) {
-                    AccessFeatureRow(text: "AI-powered responses")
-                    AccessFeatureRow(text: "Network connectivity")
-                    AccessFeatureRow(text: "Backend communication")
+        GeometryReader { geometry in
+            ScrollView {
+                VStack(spacing: min(geometry.size.height * 0.03, 24)) {
+                    Spacer(minLength: max(geometry.size.height * 0.1, 40))
+                    
+                    Image(systemName: "lock.open.fill")
+                        .font(.system(size: min(geometry.size.width * 0.2, 80)))
+                        .foregroundColor(.orange)
+                    
+                    Text("Allow Full Access")
+                        .font(.system(size: min(geometry.size.width * 0.06, 24), weight: .bold))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                    
+                    VStack(spacing: 16) {
+                        Text("Full Access is required for:")
+                            .font(.system(size: min(geometry.size.width * 0.04, 16)))
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            AccessFeatureRow(text: "AI-powered responses")
+                            AccessFeatureRow(text: "Network connectivity")
+                            AccessFeatureRow(text: "Backend communication")
+                        }
+                    }
+                    .padding(.horizontal, 32)
+                    
+                    VStack(alignment: .leading, spacing: 12) {
+                        InstructionStep(number: 1, text: "Tap Open Settings")
+                        InstructionStep(number: 2, text: "Tap Agosec Keyboard")
+                        InstructionStep(number: 3, text: "Enable 'Allow Full Access'")
+                    }
+                    .padding()
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(12)
+                    .padding(.horizontal, max(geometry.size.width * 0.1, 24))
+                    
+                    Spacer(minLength: max(geometry.size.height * 0.1, 40))
+                    
+                    VStack(spacing: 12) {
+                        ActionButton(title: "Open Settings", action: openSettings)
+                        
+                        if hasFullAccess {
+                            ActionButton(title: "Continue", action: onNext)
+                        }
+                    }
+                    .padding(.horizontal, max(geometry.size.width * 0.1, 24))
+                    .padding(.bottom, 40)
                 }
+                .frame(minHeight: geometry.size.height)
             }
-            
-            VStack(alignment: .leading, spacing: 12) {
-                InstructionStep(number: 1, text: "Tap Open Settings")
-                InstructionStep(number: 2, text: "Tap Agosec Keyboard")
-                InstructionStep(number: 3, text: "Enable 'Allow Full Access'")
-            }
-            .padding()
-            .background(Color.gray.opacity(0.1))
-            .cornerRadius(12)
-            
-            Spacer()
-            
-            VStack(spacing: 12) {
-                ActionButton(title: "Open Settings", action: openSettings)
-                
-                if hasFullAccess {
-                    ActionButton(title: "Continue", action: onNext)
-                }
-            }
-            .padding(.horizontal)
         }
-        .padding()
         .onAppear {
             checkFullAccessStatus()
         }

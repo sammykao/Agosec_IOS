@@ -1,0 +1,140 @@
+# Cursor Rules for Agosec Keyboard iOS Project
+
+## Code Style & Formatting
+
+### Swift Style Guidelines
+- Follow Swift API Design Guidelines
+- Use 4 spaces for indentation (not tabs)
+- Maximum line length: 120 characters
+- Prefer `let` over `var` when possible
+- Use trailing closures for better readability
+- Prefer explicit types over type inference when it improves clarity
+- Use `guard` statements for early returns
+- Prefer `if let` and `guard let` over force unwrapping
+
+### Naming Conventions
+- Use descriptive, clear names
+- Types: PascalCase (e.g., `KeyboardViewController`)
+- Variables/Functions: camelCase (e.g., `currentMode`, `refreshEntitlement()`)
+- Constants: camelCase with `let` (e.g., `let maxRetries = 3`)
+- Private properties: prefix with underscore only if needed for property wrappers
+- Protocols: end with `Protocol` suffix (e.g., `APIClientProtocol`)
+
+## Architecture & Structure
+
+### File Organization
+- **CRITICAL**: Keep all files under 500 lines of code
+- Split large files into smaller, focused components
+- Organize code into logical modules and folders
+- One type per file (with exceptions for small related types)
+- Group related functionality together
+
+### Swift Package Structure
+- Each package should have a single, clear responsibility
+- Packages should not have circular dependencies
+- Shared types (like errors) should be in SharedCore
+- Keep package interfaces minimal and focused
+
+### SwiftUI Best Practices
+- Extract complex views into separate components
+- Use `@StateObject` for view-owned ObservableObjects
+- Use `@ObservedObject` for passed-in ObservableObjects
+- Use `@EnvironmentObject` sparingly, only for truly global state
+- Prefer composition over inheritance
+- Use `ViewBuilder` for conditional views when appropriate
+
+### Error Handling
+- Use Result types or async/await error handling
+- Provide user-friendly error messages via ErrorMapper
+- Log errors appropriately for debugging
+- Never silently swallow errors
+
+## Technical Rules
+
+### Dependencies
+- Prefer Swift Package Manager over CocoaPods
+- Keep dependencies minimal and well-maintained
+- Document why each dependency is needed
+
+### Concurrency
+- Use `async/await` for asynchronous operations
+- Use `Task` blocks when calling async functions from sync contexts
+- Mark async functions with `@MainActor` when they update UI
+- Avoid blocking the main thread
+
+### Memory Management
+- Use weak references in closures to avoid retain cycles
+- Be careful with `@StateObject` and `@ObservedObject` to avoid leaks
+- Clean up timers and observers in `deinit` or `onDisappear`
+
+### Testing
+- Write unit tests for business logic
+- Mock external dependencies (APIs, services)
+- Test error cases, not just happy paths
+
+## Project-Specific Rules
+
+### Build Configuration
+- Use XcodeGen for project generation
+- Keep `project.yml` as the source of truth
+- Regenerate project after changing `project.yml`
+- Exclude x86_64 architecture for simulator builds on Apple Silicon
+
+### Code Organization
+- Features should be self-contained in their own folders
+- Services should be in the Services folder
+- Shared code goes in Packages
+- Keep UI components reusable in UIComponents package
+
+### API & Networking
+- Use protocol-based design for API clients
+- Implement both real and mock versions
+- Handle network errors gracefully
+- Use ServiceFactory pattern for dependency injection
+
+### Keyboard Extension
+- Keyboard extensions have limited capabilities
+- Use App Groups for sharing data between app and extension
+- Handle keyboard lifecycle events properly
+- Test on physical devices (keyboard extensions don't work well in simulator)
+
+## Documentation
+
+### Comments
+- Write self-documenting code (prefer clear code over comments)
+- Document public APIs with doc comments
+- Explain "why" not "what" in comments
+- Remove commented-out code before committing
+
+### Code Examples
+```swift
+// Good: Clear, descriptive naming
+func refreshEntitlement() async {
+    // Implementation
+}
+
+// Bad: Unclear naming
+func refresh() async {
+    // Implementation
+}
+```
+
+## What NOT to Do
+
+- Don't use force unwrapping (`!`) unless absolutely necessary
+- Don't create files over 500 lines
+- Don't create circular dependencies between packages
+- Don't block the main thread
+- Don't ignore compiler warnings
+- Don't commit commented-out code
+- Don't use `Any` or `AnyObject` unless necessary
+- Don't create god objects or massive view controllers
+
+## When Making Changes
+
+1. **Always** check if a file exceeds 500 lines before adding code
+2. **Always** split large files into smaller components
+3. **Always** ensure no circular dependencies are introduced
+4. **Always** test that the project builds after changes
+5. **Always** follow the existing code style in the file you're editing
+6. **Always** add necessary imports when using types from other modules

@@ -147,9 +147,6 @@ enum StoreError: Error {
 
 extension Product {
     var displayPrice: String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.locale = priceFormatStyle.locale
-        return formatter.string(from: NSNumber(value: Double(price))) ?? price.description
+        price.formatted(priceFormatStyle)
     }
 }

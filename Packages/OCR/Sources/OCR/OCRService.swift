@@ -78,9 +78,3 @@ public class OCRService: OCRServiceProtocol {
         return String(text[..<endIndex])
     }
 }
-
-public enum OCRError: Error {
-    case invalidImage
-    case visionError(Error)
-    case noTextFound
-}

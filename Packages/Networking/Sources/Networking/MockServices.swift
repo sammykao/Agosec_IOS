@@ -87,7 +87,7 @@ public class MockChatAPI: ChatAPIProtocol {
         let lowercased = userMessage.lowercased()
         
         // Context-aware responses
-        if let context = context {
+        if context != nil {
             if lowercased.contains("lunch") || lowercased.contains("food") || lowercased.contains("eat") {
                 return "Based on your conversation about lunch plans, I'd suggest checking out some local restaurants. Would you like me to help you draft a message to coordinate?"
             }

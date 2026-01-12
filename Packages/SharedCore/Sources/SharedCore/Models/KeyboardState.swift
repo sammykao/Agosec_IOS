@@ -1,6 +1,6 @@
 import Foundation
 
-public enum KeyboardMode {
+public enum KeyboardMode: Codable {
     case normal
     case agent
 }

@@ -1,9 +1,6 @@
 import SwiftUI
 import SharedCore
 
-import SwiftUI
-import SharedCore
-
 class AppRouter: ObservableObject {
     @Published var currentRoute: Route = .onboarding
     

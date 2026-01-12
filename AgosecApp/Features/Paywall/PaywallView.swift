@@ -1,5 +1,7 @@
 import SwiftUI
 import StoreKit
+import SharedCore
+import UIComponents
 
 struct PaywallView: View {
     @ObservedObject var router: AppRouter
@@ -39,7 +41,9 @@ struct PaywallView: View {
         .onReceive(storeKitManager.$purchaseState) { state in
             if case .success = state {
                 toastManager.show("Subscription activated successfully!", type: .success)
-                entitlementService.refreshEntitlement()
+                Task {
+                    await entitlementService.refreshEntitlement()
+                }
             } else if case .failure(let error) = state {
                 let message = ErrorMapper.userFriendlyMessage(from: error)
                 let shouldRetry = ErrorMapper.shouldShowRetry(for: error)
@@ -164,6 +168,7 @@ struct PaywallView: View {
                 .font(.system(size: 12))
                 .foregroundColor(.blue)
             }
+        }
     }
     
     private func openTerms() {
@@ -176,7 +181,6 @@ struct PaywallView: View {
         // TODO: Replace with actual Privacy Policy URL
         guard let url = URL(string: "https://agosec.com/privacy") else { return }
         UIApplication.shared.open(url)
-        }
     }
 }
 
