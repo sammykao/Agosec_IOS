@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// A sleek, modern splash screen with logo and physics-based loading animations
 public struct SplashScreenView: View {
@@ -33,7 +34,8 @@ public struct SplashScreenView: View {
                 startPoint: UnitPoint(x: 0.5 + backgroundOffset, y: 0.5),
                 endPoint: UnitPoint(x: 0.5 - backgroundOffset, y: 0.5)
             )
-            .ignoresSafeArea()
+            .ignoresSafeArea(.all)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .animation(.easeInOut(duration: 8).repeatForever(autoreverses: true), value: backgroundOffset)
             
             // Subtle floating particles with light colors
@@ -89,16 +91,26 @@ public struct SplashScreenView: View {
                     }
                     
                     // Logo image with bouncy spring animation
-                    Image(logoName, bundle: .main)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 160, height: 160)
-                        .scaleEffect(logoScale)
-                        .opacity(logoOpacity)
-                        .offset(y: logoYOffset)
-                        .rotationEffect(.degrees(logoRotation))
-                        .shadow(color: Color.black.opacity(0.08), radius: 20, x: 0, y: 10)
-                        .shadow(color: Color.blue.opacity(0.1), radius: 15, x: 0, y: 5)
+                    Group {
+                        if let uiImage = UIImage(named: logoName) {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                        } else {
+                            // Fallback if image not found
+                            Image(systemName: "app.fill")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .foregroundColor(.gray)
+                        }
+                    }
+                    .frame(width: 160, height: 160)
+                    .scaleEffect(logoScale)
+                    .opacity(logoOpacity)
+                    .offset(y: logoYOffset)
+                    .rotationEffect(.degrees(logoRotation))
+                    .shadow(color: Color.black.opacity(0.08), radius: 20, x: 0, y: 10)
+                    .shadow(color: Color.blue.opacity(0.1), radius: 15, x: 0, y: 5)
                 }
                 
                 // App name with clean, realistic font
@@ -111,7 +123,10 @@ public struct SplashScreenView: View {
                 
                 Spacer()
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea(.all)
         .onAppear {
             startAnimations()
         }
