@@ -7,7 +7,7 @@ struct AgosecApp: App {
     @StateObject private var entitlementService = EntitlementService()
     @StateObject private var permissionsService = PermissionsService()
     @StateObject private var toastManager = ToastManager.shared
-    @StateObject private var appInitializer = AppInitializer()
+    @State private var showSplash = true
     
     init() {
         setupAppearance()
@@ -16,7 +16,31 @@ struct AgosecApp: App {
     var body: some Scene {
         WindowGroup {
             ZStack {
-                if appInitializer.isInitialized {
+                // Background gradient for entire app
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color(red: 0.98, green: 0.98, blue: 1.0),
+                        Color(red: 0.95, green: 0.96, blue: 0.98),
+                        Color(red: 0.97, green: 0.97, blue: 0.99)
+                    ]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea(.all)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                
+                if showSplash {
+                    SplashScreenView(logoName: "agosec_logo", appName: "Agosec")
+                        .transition(.opacity)
+                        .onAppear {
+                            // Show splash screen for minimum 2 seconds
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                                withAnimation(.easeInOut(duration: 0.4)) {
+                                    showSplash = false
+                                }
+                            }
+                        }
+                } else {
                     ContentView()
                         .environmentObject(entitlementService)
                         .environmentObject(permissionsService)
@@ -29,12 +53,11 @@ struct AgosecApp: App {
                             insertion: .opacity.combined(with: .scale(scale: 0.95)),
                             removal: .opacity
                         ))
-                } else {
-                    SplashScreenView(logoName: "agosec_logo", appName: "Agosec")
-                        .transition(.opacity)
                 }
             }
-            .animation(.easeInOut(duration: 0.4), value: appInitializer.isInitialized)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .ignoresSafeArea(.all)
+            .animation(.easeInOut(duration: 0.4), value: showSplash)
         }
     }
     

@@ -168,7 +168,7 @@ struct PaywallView: View {
                 .font(.system(size: 12))
                 .foregroundColor(.blue)
             }
-        }
+            }
     }
     
     private func openTerms() {

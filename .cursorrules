@@ -43,6 +43,17 @@
 - Prefer composition over inheritance
 - Use `ViewBuilder` for conditional views when appropriate
 
+### Design System & UI Guidelines
+- **CRITICAL**: Follow the Design System document at `docs/DESIGN_SYSTEM.md`
+- **ALWAYS** ensure screens extend to full iPhone height (use `.ignoresSafeArea(.all)` and `.frame(maxWidth: .infinity, maxHeight: .infinity)`)
+- **NEVER** use `NavigationView` for full-screen layouts - it constrains height
+- Use the defined color palette and typography system
+- Use spring animations for natural, physics-based motion
+- All screens must fill the entire screen height - no black bars
+- Use `UIImage(named:)` pattern for logo loading with fallback
+- Follow spacing system (8, 12, 16, 24, 32, 40px)
+- Use system default font (`.default` design), never `.rounded` or `.serif`
+
 ### Error Handling
 - Use Result types or async/await error handling
 - Provide user-friendly error messages via ErrorMapper
