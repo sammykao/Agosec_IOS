@@ -39,8 +39,6 @@ struct ContentView: View {
                 MainAppView(router: router)
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .ignoresSafeArea(.all)
         .onReceive(entitlementService.$entitlementState) { state in
             if state.isValid {
                 router.navigateTo(.main)

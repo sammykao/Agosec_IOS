@@ -21,7 +21,7 @@ struct OnboardingCoordinator: View {
     
     var body: some View {
         ZStack {
-            // Background gradient - MUST fill entire screen
+            // Background gradient
             LinearGradient(
                 gradient: Gradient(colors: [
                     Color(red: 0.98, green: 0.98, blue: 1.0),
@@ -31,9 +31,8 @@ struct OnboardingCoordinator: View {
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
-            .ignoresSafeArea(.all)
             
-            // Main content area - fills entire screen
+            // Main content area
             Group {
                 switch currentStep {
                 case .welcome:
@@ -52,8 +51,6 @@ struct OnboardingCoordinator: View {
                     })
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .ignoresSafeArea(.all)
             
             // Page indicator overlaid at the bottom
             VStack {
@@ -65,11 +62,7 @@ struct OnboardingCoordinator: View {
                 .padding(.bottom, 44)
                 .padding(.horizontal)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .ignoresSafeArea(.all)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .ignoresSafeArea(.all)
     }
 }
 
@@ -187,12 +180,8 @@ struct WelcomeStepView: View {
                     .opacity(buttonOpacity)
                     .padding(.bottom, max(geometry.size.height * 0.15, 80))
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .ignoresSafeArea(.all)
         .onAppear {
             // Logo entrance with bounce
             withAnimation(.spring(response: 0.7, dampingFraction: 0.6, blendDuration: 0)) {

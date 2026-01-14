@@ -34,8 +34,6 @@ public struct SplashScreenView: View {
                 startPoint: UnitPoint(x: 0.5 + backgroundOffset, y: 0.5),
                 endPoint: UnitPoint(x: 0.5 - backgroundOffset, y: 0.5)
             )
-            .ignoresSafeArea(.all)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .animation(.easeInOut(duration: 8).repeatForever(autoreverses: true), value: backgroundOffset)
             
             // Subtle floating particles with light colors
@@ -123,10 +121,7 @@ public struct SplashScreenView: View {
                 
                 Spacer()
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .ignoresSafeArea(.all)
         .onAppear {
             startAnimations()
         }
