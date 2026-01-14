@@ -17,7 +17,8 @@ struct PaywallView: View {
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
-            .ignoresSafeArea()
+            .ignoresSafeArea(.all)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             
             VStack(spacing: 24) {
                 Spacer()
@@ -34,6 +35,8 @@ struct PaywallView: View {
             }
             .padding()
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea(.all)
         .navigationBarBackButtonHidden(true)
         .onAppear {
             storeKitManager.setToastManager(toastManager)

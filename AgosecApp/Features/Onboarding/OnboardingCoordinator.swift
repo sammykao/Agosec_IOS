@@ -31,6 +31,8 @@ struct OnboardingCoordinator: View {
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
+            .ignoresSafeArea(.all)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             
             // Main content area
             Group {
@@ -63,6 +65,8 @@ struct OnboardingCoordinator: View {
                 .padding(.horizontal)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea(.all)
     }
 }
 

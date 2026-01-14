@@ -5,19 +5,43 @@ struct MainAppView: View {
     @ObservedObject var router: AppRouter
     @EnvironmentObject var entitlementService: EntitlementService
     @EnvironmentObject var permissionsService: PermissionsService
+    @State private var showingSettings = false
     
     var body: some View {
-        NavigationView {
+        ZStack {
+            // Background gradient
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.98, green: 0.98, blue: 1.0),
+                    Color(red: 0.95, green: 0.96, blue: 0.98),
+                    Color(red: 0.97, green: 0.97, blue: 0.99)
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea(.all)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            
             ScrollView {
                 VStack(spacing: 24) {
+                    // Header
+                    HStack {
+                        Text("Agosec Keyboard")
+                            .font(.system(size: 28, weight: .bold))
+                        Spacer()
+                        subscriptionButton
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+                    
                     // Status Section
                     statusSection
                     
                     // Quick Actions
                     quickActionsSection
                     
-                    // Settings Link
-                    NavigationLink(destination: SettingsView()) {
+                    // Settings Button
+                    Button(action: { showingSettings = true }) {
                         HStack {
                             Image(systemName: "gear")
                                 .font(.system(size: 20))
@@ -32,11 +56,17 @@ struct MainAppView: View {
                         .background(Color.gray.opacity(0.1))
                         .cornerRadius(12)
                     }
+                    .foregroundColor(.primary)
                 }
                 .padding()
             }
-            .navigationTitle("Agosec Keyboard")
-            .navigationBarItems(trailing: subscriptionButton)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea(.all)
+        .sheet(isPresented: $showingSettings) {
+            NavigationView {
+                SettingsView()
+            }
         }
     }
     
