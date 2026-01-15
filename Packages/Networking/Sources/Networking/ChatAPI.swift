@@ -51,11 +51,14 @@ public class ChatAPI: ChatAPIProtocol {
             fieldContext: fieldContext
         )
         
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        
         let endpoint = APIEndpoint(
             path: "/v1/chat",
             method: .post,
             headers: ["Authorization": "Bearer \(accessToken)"],
-            body: try JSONEncoder().encode(request)
+            body: try encoder.encode(request)
         )
         
         return try await client.request(endpoint)

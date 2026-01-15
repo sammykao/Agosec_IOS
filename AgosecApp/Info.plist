@@ -43,6 +43,8 @@
 	<integer>12</integer>
 	<key>SUBSCRIPTION_PRODUCT_ID</key>
 	<string>io.agosec.keyboard.pro</string>
+	<key>UILaunchScreen</key>
+	<dict/>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>

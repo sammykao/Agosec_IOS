@@ -11,6 +11,10 @@ struct AgentChatView: View {
     
     @State private var inputText = ""
     @State private var isLoading = false
+    
+    private var trimmedInput: String {
+        inputText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
     @StateObject private var chatManager: ChatManager
     @EnvironmentObject var toastManager: ToastManager
     
@@ -50,14 +54,16 @@ struct AgentChatView: View {
                     
                     if isLoading {
                         InlineLoadingView(message: "Thinking...")
+                            .id("loading-indicator")
                     }
                 }
                 .padding()
-                .onReceive(chatManager.$messages) { _ in
-                    if let lastMessage = chatManager.messages.last {
-                        withAnimation {
-                            scrollView.scrollTo(lastMessage.id, anchor: .bottom)
-                        }
+                .onChange(of: chatManager.messages.count) { _ in
+                    scrollToBottom(scrollView)
+                }
+                .onChange(of: isLoading) { loading in
+                    if loading {
+                        scrollToBottom(scrollView)
                     }
                 }
             }
@@ -82,39 +88,47 @@ struct AgentChatView: View {
                 Button(action: sendMessage) {
                     Image(systemName: "arrow.up.circle.fill")
                         .font(.system(size: 28))
-                        .foregroundColor(inputText.isEmpty ? .gray : .blue)
+                        .foregroundColor(trimmedInput.isEmpty ? .gray : .blue)
                 }
-                .disabled(inputText.isEmpty || isLoading)
+                .disabled(trimmedInput.isEmpty || isLoading)
             }
             .padding(8)
         }
     }
     
     private func sendMessage() {
-        guard !inputText.isEmpty else { return }
+        let messageText = trimmedInput
+        guard !messageText.isEmpty else { return }
         
+        inputText = ""
+        
+        sendMessageWithText(messageText)
+    }
+    
+    private func sendMessageWithText(_ text: String) {
         let userMessage = ChatMessage(
             id: UUID(),
-            content: inputText,
+            content: text,
             isUser: true,
             timestamp: Date()
         )
         
         chatManager.addMessage(userMessage)
-        
-        let messageText = inputText
-        inputText = ""
         isLoading = true
         
         Task {
             do {
-                let response = try await chatManager.sendMessage(messageText)
+                let response = try await chatManager.sendMessage(text)
                 await MainActor.run {
                     isLoading = false
                 }
             } catch {
                 await MainActor.run {
                     isLoading = false
+                    
+                    // Remove the failed user message so retry can re-add it
+                    chatManager.removeLastMessage()
+                    
                     let message = ErrorMapper.userFriendlyMessage(from: error)
                     let shouldRetry = ErrorMapper.shouldShowRetry(for: error)
                     
@@ -122,11 +136,21 @@ struct AgentChatView: View {
                         message,
                         type: .error,
                         duration: shouldRetry ? 5.0 : 3.0,
-                        retryAction: shouldRetry ? {
-                            sendMessage()
+                        retryAction: shouldRetry ? { [text] in
+                            self.sendMessageWithText(text)
                         } : nil
                     )
                 }
+            }
+        }
+    }
+    
+    private func scrollToBottom(_ scrollView: ScrollViewProxy) {
+        withAnimation {
+            if isLoading {
+                scrollView.scrollTo("loading-indicator", anchor: .bottom)
+            } else if let lastMessage = chatManager.messages.last {
+                scrollView.scrollTo(lastMessage.id, anchor: .bottom)
             }
         }
     }
@@ -217,7 +241,7 @@ struct ChatMessage: Identifiable, Equatable {
 
 class ChatManager: ObservableObject {
     @Published private(set) var messages: [ChatMessage] = []
-    private let session: ChatSession
+    private var session: ChatSession
     private let chatAPI: ChatAPIProtocol?
     
     init(session: ChatSession) {
@@ -270,14 +294,22 @@ class ChatManager: ObservableObject {
         session.turns.append(turn)
     }
     
+    func removeLastMessage() {
+        guard !messages.isEmpty else { return }
+        messages.removeLast()
+        
+        // Also remove from session turns
+        if !session.turns.isEmpty {
+            session.turns.removeLast()
+        }
+    }
+    
     func sendMessage(_ text: String) async throws {
         guard let chatAPI = chatAPI else {
             throw ChatError.noAPIAccess
         }
         
-        let userTurn = ChatTurn(role: .user, text: text)
-        session.turns.append(userTurn)
-        
+        // Note: User turn is already added via addMessage() before this is called
         let recentTurns = Array(session.turns.suffix(Config.shared.featureFlags.maxTurnsSent))
         
         let response = try await chatAPI.sendMessage(
@@ -289,7 +321,6 @@ class ChatManager: ObservableObject {
         )
         
         let assistantTurn = ChatTurn(role: .assistant, text: response.reply)
-        session.turns.append(assistantTurn)
         
         let message = ChatMessage(
             id: UUID(),
@@ -299,6 +330,7 @@ class ChatManager: ObservableObject {
         )
         
         await MainActor.run {
+            session.turns.append(assistantTurn)
             messages.append(message)
         }
     }

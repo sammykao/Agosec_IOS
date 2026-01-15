@@ -33,6 +33,7 @@ targets:
         CFBundleDisplayName: Agosec
         CFBundleShortVersionString: "1.0"
         CFBundleVersion: "1"
+        UILaunchScreen: {}
         UIRequiredDeviceCapabilities:
           - armv7
         UISupportedInterfaceOrientations:

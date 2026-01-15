@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -14,6 +14,7 @@
 		1F5B09E45AC800986527BDFB /* OCR in Frameworks */ = {isa = PBXBuildFile; productRef = A30109D67123C0BB58408A2D /* OCR */; };
 		213710D1A51215815C51369A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 74F02A9B23651FC9CF6E037D /* Assets.xcassets */; };
 		2234092A0B8CBF8D1A1F408B /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBC85B4A0BAC4729C0D36F43 /* AppRouter.swift */; };
+		24F0E65BD3C4A709992E3687 /* agosecapp.swift~ in Resources */ = {isa = PBXBuildFile; fileRef = EB50F27D1DA82B4A72BF1DAE /* agosecapp.swift~ */; };
 		27CB8A3ADD094EE5BB8523EE /* StoreKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CA2D3DAA96E5A5CA5A77385 /* StoreKitManager.swift */; };
 		28C58638F594BF9452A92BB4 /* Networking in Frameworks */ = {isa = PBXBuildFile; productRef = D5110BE9DEBAAA9DCF6DBF9A /* Networking */; };
 		2973F0BCC89F82364979A4DF /* PhotosPermissionStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 578DA0C01724A0584D22C718 /* PhotosPermissionStepView.swift */; };
@@ -44,6 +45,7 @@
 		DB9D3EAE88B99DA059EE0F89 /* SharedCore in Frameworks */ = {isa = PBXBuildFile; productRef = 9F34A3C15C9412DE4484E5A3 /* SharedCore */; };
 		DE6F5AEE00CC0E24B93E2810 /* OnboardingCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C556C5FC97E31392448D5EA1 /* OnboardingCoordinator.swift */; };
 		E083FD6177C2ACDDE75D5956 /* AgentKeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CBB4005A3D49462F0290F46 /* AgentKeyboardView.swift */; };
+		EB42895D14EEA78D17781CDB /* .agosecapp.swift.un~ in Resources */ = {isa = PBXBuildFile; fileRef = 7B18FD422674C8263B5F60E9 /* .agosecapp.swift.un~ */; };
 		FCBE9A29DB237CD4B92A504F /* AgentIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370422D27A7B2572EEE77040 /* AgentIntroView.swift */; };
 		FCF0FA98A0D76754524C1550 /* KeyboardHeightManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4CCF91574F43C111200C91E /* KeyboardHeightManager.swift */; };
 		FF9094ADA1B226A114FBE198 /* EmptyChatStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E56E1793F9347F73634BE9E /* EmptyChatStateView.swift */; };
@@ -74,6 +76,7 @@
 		1EB66CCBA4581A1C2FCCEBBC /* xcschememanagement.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = xcschememanagement.plist; sourceTree = "<group>"; };
 		20EAFAD5E446F6F8804CD899 /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		23176F82F88190C1AAD3917C /* DeepLinkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLinkService.swift; sourceTree = "<group>"; };
+		23FB1FF16ED9F153AA737BBE /* xcschememanagement.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = xcschememanagement.plist; sourceTree = "<group>"; };
 		26D62785F217E799EA0F3094 /* EntitlementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementService.swift; sourceTree = "<group>"; };
 		28AF3FB53C6ACB9CA821C12C /* EnableFullAccessStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnableFullAccessStepView.swift; sourceTree = "<group>"; };
 		28C4AFEFE3B95617A1048344 /* BuildMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildMode.swift; sourceTree = "<group>"; };
@@ -98,10 +101,13 @@
 		60FF0CC9582B37B5811FB19B /* AgosecApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AgosecApp.entitlements; sourceTree = "<group>"; };
 		650E9FC7A6A71A5255824425 /* KeyboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardViewController.swift; sourceTree = "<group>"; };
 		6B359B48AAD67DF96F0C966C /* MockServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockServices.swift; sourceTree = "<group>"; };
+		6DA6599380AFD5276ACA0229 /* xcschememanagement.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = xcschememanagement.plist; sourceTree = "<group>"; };
 		6EBC6137A6DF29B24F67425C /* LockedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockedView.swift; sourceTree = "<group>"; };
+		721A03CDCB5DB67064C44C1B /* xcschememanagement.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = xcschememanagement.plist; sourceTree = "<group>"; };
 		74F02A9B23651FC9CF6E037D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		75CB467E633965711606A355 /* AgosecAppTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = AgosecAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		76C8B3E24E65445642D45217 /* xcschememanagement.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = xcschememanagement.plist; sourceTree = "<group>"; };
+		7B18FD422674C8263B5F60E9 /* .agosecapp.swift.un~ */ = {isa = PBXFileReference; path = ".agosecapp.swift.un~"; sourceTree = "<group>"; };
 		7D06274BDAD00F01ED188AA5 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		7E6AC848F49CC73C3C497EE8 /* OCRError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRError.swift; sourceTree = "<group>"; };
 		7EC57E1A6ECDC11D4D927758 /* AgosecApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AgosecApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -133,6 +139,8 @@
 		DBC85B4A0BAC4729C0D36F43 /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
 		DC8D64B689AC51651C72EE2F /* AgosecApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgosecApp.swift; sourceTree = "<group>"; };
 		E3FA90E6E8A311B6E881EB4B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		EB50F27D1DA82B4A72BF1DAE /* agosecapp.swift~ */ = {isa = PBXFileReference; path = "agosecapp.swift~"; sourceTree = "<group>"; };
+		EE1ED459CAF6F7D563FB8CF3 /* xcschememanagement.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = xcschememanagement.plist; sourceTree = "<group>"; };
 		EED5DC25EEC7657424461B7D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		F21935E90B8819D2F70143A5 /* SplashScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashScreenView.swift; sourceTree = "<group>"; };
 		F86EE979776A305E345A0D50 /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
@@ -206,6 +214,14 @@
 			path = SharedCore;
 			sourceTree = "<group>";
 		};
+		0E44DCD1B4DE5EA1E84D0464 /* user290905.xcuserdatad */ = {
+			isa = PBXGroup;
+			children = (
+				307B667B454FEE3566F623B5 /* xcschemes */,
+			);
+			path = user290905.xcuserdatad;
+			sourceTree = "<group>";
+		};
 		0E6F0F20C9C831D24C835684 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
@@ -233,6 +249,14 @@
 				EA39137189A04B4FF07FAD38 /* Frameworks */,
 				FD41717693FFB9DE3981FA94 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		15BC8EE8A6F69ED90B0CEBCD /* user290905.xcuserdatad */ = {
+			isa = PBXGroup;
+			children = (
+				85A160671150BF4E80BFF04D /* xcschemes */,
+			);
+			path = user290905.xcuserdatad;
 			sourceTree = "<group>";
 		};
 		17EEE3EC9A7C10312F384CFF /* Main */ = {
@@ -288,10 +312,28 @@
 		2F625392CE712FD24F9633B5 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				7B18FD422674C8263B5F60E9 /* .agosecapp.swift.un~ */,
 				DC8D64B689AC51651C72EE2F /* AgosecApp.swift */,
+				EB50F27D1DA82B4A72BF1DAE /* agosecapp.swift~ */,
 				DBC85B4A0BAC4729C0D36F43 /* AppRouter.swift */,
 			);
 			path = App;
+			sourceTree = "<group>";
+		};
+		307B667B454FEE3566F623B5 /* xcschemes */ = {
+			isa = PBXGroup;
+			children = (
+				721A03CDCB5DB67064C44C1B /* xcschememanagement.plist */,
+			);
+			path = xcschemes;
+			sourceTree = "<group>";
+		};
+		3115501EFA5C7B63FEDDF3D6 /* xcschemes */ = {
+			isa = PBXGroup;
+			children = (
+				23FB1FF16ED9F153AA737BBE /* xcschememanagement.plist */,
+			);
+			path = xcschemes;
 			sourceTree = "<group>";
 		};
 		332661E29BCA1648E10907E4 /* miahall.xcuserdatad */ = {
@@ -459,6 +501,7 @@
 			isa = PBXGroup;
 			children = (
 				F142C2A193412020C579D31E /* miahall.xcuserdatad */,
+				9B60E5119A9E8CDCAC232562 /* user290905.xcuserdatad */,
 			);
 			path = xcuserdata;
 			sourceTree = "<group>";
@@ -494,6 +537,14 @@
 			path = TypingMode;
 			sourceTree = "<group>";
 		};
+		85A160671150BF4E80BFF04D /* xcschemes */ = {
+			isa = PBXGroup;
+			children = (
+				6DA6599380AFD5276ACA0229 /* xcschememanagement.plist */,
+			);
+			path = xcschemes;
+			sourceTree = "<group>";
+		};
 		8DA7581590E612F5FD0E2E18 /* AgosecKeyboardExtension */ = {
 			isa = PBXGroup;
 			children = (
@@ -518,6 +569,14 @@
 				CBE93BD0BAADDA9A78423784 /* xcuserdata */,
 			);
 			path = xcode;
+			sourceTree = "<group>";
+		};
+		9B60E5119A9E8CDCAC232562 /* user290905.xcuserdatad */ = {
+			isa = PBXGroup;
+			children = (
+				3115501EFA5C7B63FEDDF3D6 /* xcschemes */,
+			);
+			path = user290905.xcuserdatad;
 			sourceTree = "<group>";
 		};
 		9D92E2FD98C843C05E4C43B5 /* xcode */ = {
@@ -626,6 +685,14 @@
 			path = Suggestions;
 			sourceTree = "<group>";
 		};
+		C39723786AD72B173A70BF4A /* xcschemes */ = {
+			isa = PBXGroup;
+			children = (
+				EE1ED459CAF6F7D563FB8CF3 /* xcschememanagement.plist */,
+			);
+			path = xcschemes;
+			sourceTree = "<group>";
+		};
 		C72FE2B4A11BE9D9FF25F092 /* UIComponents */ = {
 			isa = PBXGroup;
 			children = (
@@ -643,6 +710,7 @@
 			isa = PBXGroup;
 			children = (
 				0185AB67BF3420D19F98EB13 /* miahall.xcuserdatad */,
+				15BC8EE8A6F69ED90B0CEBCD /* user290905.xcuserdatad */,
 			);
 			path = xcuserdata;
 			sourceTree = "<group>";
@@ -712,6 +780,7 @@
 			isa = PBXGroup;
 			children = (
 				8F18511A255516C554092987 /* miahall.xcuserdatad */,
+				F9BB02A41358250384386676 /* user290905.xcuserdatad */,
 			);
 			path = xcuserdata;
 			sourceTree = "<group>";
@@ -730,6 +799,7 @@
 			isa = PBXGroup;
 			children = (
 				332661E29BCA1648E10907E4 /* miahall.xcuserdatad */,
+				0E44DCD1B4DE5EA1E84D0464 /* user290905.xcuserdatad */,
 			);
 			path = xcuserdata;
 			sourceTree = "<group>";
@@ -740,6 +810,14 @@
 				5AEDFB8EC54966E22A094CCC /* xcschemes */,
 			);
 			path = miahall.xcuserdatad;
+			sourceTree = "<group>";
+		};
+		F9BB02A41358250384386676 /* user290905.xcuserdatad */ = {
+			isa = PBXGroup;
+			children = (
+				C39723786AD72B173A70BF4A /* xcschemes */,
+			);
+			path = user290905.xcuserdatad;
 			sourceTree = "<group>";
 		};
 		FD41717693FFB9DE3981FA94 /* Products */ = {
@@ -812,6 +890,8 @@
 				8BD167809D1D74F7D1B4E44E /* PBXTargetDependency */,
 			);
 			name = AgosecAppTests;
+			packageProductDependencies = (
+			);
 			productName = AgosecAppTests;
 			productReference = 75CB467E633965711606A355 /* AgosecAppTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -843,6 +923,14 @@
 				en,
 			);
 			mainGroup = 1256CF361FA3C8AB05532BA0;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				5328905F9A1FBB6ABBF2A84C /* XCLocalSwiftPackageReference "Packages/Networking" */,
+				D6271B42C84CBD299B77C426 /* XCLocalSwiftPackageReference "Packages/OCR" */,
+				AC4772AC2680165BE10089F5 /* XCLocalSwiftPackageReference "Packages/SharedCore" */,
+				B33E446CC51C568B6F0AA0F5 /* XCLocalSwiftPackageReference "Packages/UIComponents" */,
+			);
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -858,7 +946,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EB42895D14EEA78D17781CDB /* .agosecapp.swift.un~ in Resources */,
 				213710D1A51215815C51369A /* Assets.xcassets in Resources */,
+				24F0E65BD3C4A709992E3687 /* agosecapp.swift~ in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1062,6 +1152,25 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		5328905F9A1FBB6ABBF2A84C /* XCLocalSwiftPackageReference "Packages/Networking" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Networking;
+		};
+		AC4772AC2680165BE10089F5 /* XCLocalSwiftPackageReference "Packages/SharedCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/SharedCore;
+		};
+		B33E446CC51C568B6F0AA0F5 /* XCLocalSwiftPackageReference "Packages/UIComponents" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/UIComponents;
+		};
+		D6271B42C84CBD299B77C426 /* XCLocalSwiftPackageReference "Packages/OCR" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/OCR;
+		};
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		27E92FF186CE5E553BB70DF9 /* UIComponents */ = {
