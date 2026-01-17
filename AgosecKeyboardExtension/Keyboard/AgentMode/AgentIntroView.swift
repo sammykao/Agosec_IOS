@@ -96,8 +96,8 @@ struct AgentIntroView: View {
     }
     
     private func openSettings() {
-        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
-        UIApplication.shared.open(url)
+        // Note: UIApplication.shared is not available in keyboard extensions
+        // The user will need to manually go to Settings to enable photo access
     }
     
     private var headerSection: some View {

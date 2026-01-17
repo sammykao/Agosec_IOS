@@ -3,12 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		005D99DACA923E40027BDBA3 /* TypingKeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DC64481119C12F0DCEA8B44 /* TypingKeyboardView.swift */; };
 		022725235ABB20088D813D5D /* MainAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E3C9E30D6040D7BBE4943EE /* MainAppView.swift */; };
+		02E53328CA7FA0D2264093B1 /* WelcomeStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0E3B48A96B89265B704E9D /* WelcomeStepView.swift */; };
 		101BE96550FD506F7E5453A0 /* UIComponents in Frameworks */ = {isa = PBXBuildFile; productRef = AF861022745E8E3F3129D1A9 /* UIComponents */; };
 		11D8942B3755A57E7EE54E5B /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB7D06C4DB5E16B7ACAD33F /* PaywallView.swift */; };
 		1F5B09E45AC800986527BDFB /* OCR in Frameworks */ = {isa = PBXBuildFile; productRef = A30109D67123C0BB58408A2D /* OCR */; };
@@ -45,6 +46,7 @@
 		DB9D3EAE88B99DA059EE0F89 /* SharedCore in Frameworks */ = {isa = PBXBuildFile; productRef = 9F34A3C15C9412DE4484E5A3 /* SharedCore */; };
 		DE6F5AEE00CC0E24B93E2810 /* OnboardingCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C556C5FC97E31392448D5EA1 /* OnboardingCoordinator.swift */; };
 		E083FD6177C2ACDDE75D5956 /* AgentKeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CBB4005A3D49462F0290F46 /* AgentKeyboardView.swift */; };
+		E0D8E745F6DE201B776F8548 /* AgosecKeyboardExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C04ED5D49B07F41FD02A4C3F /* AgosecKeyboardExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		EB42895D14EEA78D17781CDB /* .agosecapp.swift.un~ in Resources */ = {isa = PBXBuildFile; fileRef = 7B18FD422674C8263B5F60E9 /* .agosecapp.swift.un~ */; };
 		FCBE9A29DB237CD4B92A504F /* AgentIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370422D27A7B2572EEE77040 /* AgentIntroView.swift */; };
 		FCF0FA98A0D76754524C1550 /* KeyboardHeightManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4CCF91574F43C111200C91E /* KeyboardHeightManager.swift */; };
@@ -59,7 +61,28 @@
 			remoteGlobalIDString = 3A70232E9527D4D618B77439;
 			remoteInfo = AgosecApp;
 		};
+		DA1BBB66F223F87C79F0A1C2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F5F71E15A87BE87F33E36436 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 494F1080882E39B2D8727B54;
+			remoteInfo = AgosecKeyboardExtension;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		BA18829303B924F86D29E535 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				E0D8E745F6DE201B776F8548 /* AgosecKeyboardExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		0A04280F899B7AB26AF9408E /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
@@ -105,18 +128,19 @@
 		6EBC6137A6DF29B24F67425C /* LockedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockedView.swift; sourceTree = "<group>"; };
 		721A03CDCB5DB67064C44C1B /* xcschememanagement.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = xcschememanagement.plist; sourceTree = "<group>"; };
 		74F02A9B23651FC9CF6E037D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		75CB467E633965711606A355 /* .xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = .xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		75CB467E633965711606A355 /* AgosecAppTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = AgosecAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		76C8B3E24E65445642D45217 /* xcschememanagement.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = xcschememanagement.plist; sourceTree = "<group>"; };
-		7B18FD422674C8263B5F60E9 /* .agosecapp.swift.un~ */ = {isa = PBXFileReference; lastKnownFileType = file; path = ".agosecapp.swift.un~"; sourceTree = "<group>"; };
+		7B18FD422674C8263B5F60E9 /* .agosecapp.swift.un~ */ = {isa = PBXFileReference; path = ".agosecapp.swift.un~"; sourceTree = "<group>"; };
 		7D06274BDAD00F01ED188AA5 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		7E6AC848F49CC73C3C497EE8 /* OCRError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRError.swift; sourceTree = "<group>"; };
-		7EC57E1A6ECDC11D4D927758 /* AgosecApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AgosecApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7EC57E1A6ECDC11D4D927758 /* AgosecApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AgosecApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		819C7F546A48C5B88AEDAE59 /* PermissionsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsService.swift; sourceTree = "<group>"; };
 		84CC9BE6B5FCE0C3F3AC4293 /* AgentChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentChatView.swift; sourceTree = "<group>"; };
 		8891D0DAC1911294B740A3D1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8A5F2ECCE82BC728FC269D98 /* ChatAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatAPI.swift; sourceTree = "<group>"; };
 		8E3C9E30D6040D7BBE4943EE /* MainAppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainAppView.swift; sourceTree = "<group>"; };
 		8E6AE9001CA03D73768CC5B6 /* UIComponents */ = {isa = PBXFileReference; lastKnownFileType = folder; name = UIComponents; path = Packages/UIComponents; sourceTree = SOURCE_ROOT; };
+		92F19468DFDB89C4C2C66E39 /* OnboardingStepTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStepTemplate.swift; sourceTree = "<group>"; };
 		93FC215F1D66E33BBAB38768 /* OCR */ = {isa = PBXFileReference; lastKnownFileType = folder; name = OCR; path = Packages/OCR; sourceTree = SOURCE_ROOT; };
 		9455AA86CD42B9C25A0274E5 /* ErrorMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorMapper.swift; sourceTree = "<group>"; };
 		973ECDA8ED61604EEFB87538 /* DemoConversationStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoConversationStepView.swift; sourceTree = "<group>"; };
@@ -128,7 +152,8 @@
 		ADE08D66AA046CD22CB9F18F /* xcschememanagement.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = xcschememanagement.plist; sourceTree = "<group>"; };
 		B37A7322D453F8F967B0EFBE /* EntitlementState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementState.swift; sourceTree = "<group>"; };
 		B9F56E3B9D9678923B9A526C /* ClipboardService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardService.swift; sourceTree = "<group>"; };
-		C04ED5D49B07F41FD02A4C3F /* .appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = .appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF0E3B48A96B89265B704E9D /* WelcomeStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeStepView.swift; sourceTree = "<group>"; };
+		C04ED5D49B07F41FD02A4C3F /* AgosecKeyboardExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = AgosecKeyboardExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		C23D63E94F6154B26B31D78B /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		C51D39BA82041055988575E3 /* ChatTurn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatTurn.swift; sourceTree = "<group>"; };
 		C556C5FC97E31392448D5EA1 /* OnboardingCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCoordinator.swift; sourceTree = "<group>"; };
@@ -139,7 +164,7 @@
 		DBC85B4A0BAC4729C0D36F43 /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
 		DC8D64B689AC51651C72EE2F /* AgosecApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgosecApp.swift; sourceTree = "<group>"; };
 		E3FA90E6E8A311B6E881EB4B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		EB50F27D1DA82B4A72BF1DAE /* agosecapp.swift~ */ = {isa = PBXFileReference; lastKnownFileType = text; path = "agosecapp.swift~"; sourceTree = "<group>"; };
+		EB50F27D1DA82B4A72BF1DAE /* agosecapp.swift~ */ = {isa = PBXFileReference; path = "agosecapp.swift~"; sourceTree = "<group>"; };
 		EE1ED459CAF6F7D563FB8CF3 /* xcschememanagement.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = xcschememanagement.plist; sourceTree = "<group>"; };
 		EED5DC25EEC7657424461B7D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		F21935E90B8819D2F70143A5 /* SplashScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashScreenView.swift; sourceTree = "<group>"; };
@@ -528,6 +553,14 @@
 			path = AgosecApp;
 			sourceTree = "<group>";
 		};
+		844D5927E9B36D6D3936D89E /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				92F19468DFDB89C4C2C66E39 /* OnboardingStepTemplate.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
 		847656DC6695DE13817BAE0E /* TypingMode */ = {
 			isa = PBXGroup;
 			children = (
@@ -699,6 +732,7 @@
 				3E4EFDC74149F5B97A14327C /* Buttons */,
 				398EE1245324283303B1FD24 /* Loading */,
 				39F9843049C32DD03FF8A983 /* Modifiers */,
+				844D5927E9B36D6D3936D89E /* Onboarding */,
 				1080A2FA15EF2E597044FEDE /* PageIndicator */,
 				B61A6F8341B9E4D6EDA528D6 /* Splash */,
 				D6F177AB7CA042CA1E8D8FA4 /* Toast */,
@@ -737,6 +771,7 @@
 				28AF3FB53C6ACB9CA821C12C /* EnableFullAccessStepView.swift */,
 				14B707FCB09D726FA9EA0A07 /* EnableKeyboardStepView.swift */,
 				578DA0C01724A0584D22C718 /* PhotosPermissionStepView.swift */,
+				BF0E3B48A96B89265B704E9D /* WelcomeStepView.swift */,
 			);
 			path = Steps;
 			sourceTree = "<group>";
@@ -824,8 +859,8 @@
 			isa = PBXGroup;
 			children = (
 				7EC57E1A6ECDC11D4D927758 /* AgosecApp.app */,
-				75CB467E633965711606A355 /* .xctest */,
-				C04ED5D49B07F41FD02A4C3F /* .appex */,
+				75CB467E633965711606A355 /* AgosecAppTests.xctest */,
+				C04ED5D49B07F41FD02A4C3F /* AgosecKeyboardExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -840,10 +875,12 @@
 				D551D059FFC7A67FD5F785F1 /* Sources */,
 				72C22A205D009AFD181A62D0 /* Resources */,
 				70E5806B3B18F410793322D6 /* Frameworks */,
+				BA18829303B924F86D29E535 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				1037BC1FD1EAF3CA12EDC6A8 /* PBXTargetDependency */,
 			);
 			name = AgosecApp;
 			packageProductDependencies = (
@@ -875,7 +912,7 @@
 				AF861022745E8E3F3129D1A9 /* UIComponents */,
 			);
 			productName = AgosecKeyboardExtension;
-			productReference = C04ED5D49B07F41FD02A4C3F /* .appex */;
+			productReference = C04ED5D49B07F41FD02A4C3F /* AgosecKeyboardExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 		D28BA209549A3307371BF0E1 /* AgosecAppTests */ = {
@@ -890,10 +927,8 @@
 				8BD167809D1D74F7D1B4E44E /* PBXTargetDependency */,
 			);
 			name = AgosecAppTests;
-			packageProductDependencies = (
-			);
 			productName = AgosecAppTests;
-			productReference = 75CB467E633965711606A355 /* .xctest */;
+			productReference = 75CB467E633965711606A355 /* AgosecAppTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -903,10 +938,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				KnownAssetTags = (
-					Agosec_logo,
-				);
-				LastUpgradeCheck = 2620;
+				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					3A70232E9527D4D618B77439 = {
 						DevelopmentTeam = V9CU7HF844;
@@ -924,16 +956,8 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
-				Base,
 			);
 			mainGroup = 1256CF361FA3C8AB05532BA0;
-			minimizedProjectReferenceProxies = 1;
-			packageReferences = (
-				5328905F9A1FBB6ABBF2A84C /* XCLocalSwiftPackageReference "Packages/Networking" */,
-				D6271B42C84CBD299B77C426 /* XCLocalSwiftPackageReference "Packages/OCR" */,
-				AC4772AC2680165BE10089F5 /* XCLocalSwiftPackageReference "Packages/SharedCore" */,
-				B33E446CC51C568B6F0AA0F5 /* XCLocalSwiftPackageReference "Packages/UIComponents" */,
-			);
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -1003,12 +1027,18 @@
 				2973F0BCC89F82364979A4DF /* PhotosPermissionStepView.swift in Sources */,
 				8D08D8E97B41F5826E3D042E /* SettingsView.swift in Sources */,
 				27CB8A3ADD094EE5BB8523EE /* StoreKitManager.swift in Sources */,
+				02E53328CA7FA0D2264093B1 /* WelcomeStepView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		1037BC1FD1EAF3CA12EDC6A8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 494F1080882E39B2D8727B54 /* AgosecKeyboardExtension */;
+			targetProxy = DA1BBB66F223F87C79F0A1C2 /* PBXContainerItemProxy */;
+		};
 		8BD167809D1D74F7D1B4E44E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 3A70232E9527D4D618B77439 /* AgosecApp */;
@@ -1021,7 +1051,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_ENABLE_OBJC_WEAK = YES;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = AgosecApp/AgosecApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = V9CU7HF844;
@@ -1036,7 +1067,6 @@
 		09D7DD17983A14B468AE1DDB /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = io.agosec.AgosecAppTests;
 				SWIFT_VERSION = 5.9;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AgosecApp.app/AgosecApp";
@@ -1046,13 +1076,13 @@
 		6E1CC0CB5F649C76138B7E6D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = AgosecKeyboardExtension/AgosecKeyboardExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = V9CU7HF844;
 				INFOPLIST_FILE = AgosecKeyboardExtension/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				PRODUCT_BUNDLE_IDENTIFIER = io.agosec.keyboard.extension;
+				PRODUCT_BUNDLE_IDENTIFIER = io.agosec.keyboard.app.keyboard;
+				PRODUCT_NAME = AgosecKeyboardExtension;
 				SWIFT_VERSION = 5.9;
 			};
 			name = Debug;
@@ -1060,13 +1090,13 @@
 		74EA0AD18331EFDEBBB140FA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = AgosecKeyboardExtension/AgosecKeyboardExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = V9CU7HF844;
 				INFOPLIST_FILE = AgosecKeyboardExtension/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				PRODUCT_BUNDLE_IDENTIFIER = io.agosec.keyboard.extension;
+				PRODUCT_BUNDLE_IDENTIFIER = io.agosec.keyboard.app.keyboard;
+				PRODUCT_NAME = AgosecKeyboardExtension;
 				SWIFT_VERSION = 5.9;
 			};
 			name = Release;
@@ -1075,7 +1105,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_ENABLE_OBJC_WEAK = YES;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = AgosecApp/AgosecApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = V9CU7HF844;
@@ -1090,7 +1121,6 @@
 		8E038F31AC8B20E43AEB46DC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = io.agosec.AgosecAppTests;
 				SWIFT_VERSION = 5.9;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AgosecApp.app/AgosecApp";
@@ -1101,40 +1131,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_VERSION = 5.9;
 			};
 			name = Release;
@@ -1143,40 +1143,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_VERSION = 5.9;
 			};
 			name = Debug;
@@ -1221,25 +1191,6 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCLocalSwiftPackageReference section */
-		5328905F9A1FBB6ABBF2A84C /* XCLocalSwiftPackageReference "Packages/Networking" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Networking;
-		};
-		AC4772AC2680165BE10089F5 /* XCLocalSwiftPackageReference "Packages/SharedCore" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/SharedCore;
-		};
-		B33E446CC51C568B6F0AA0F5 /* XCLocalSwiftPackageReference "Packages/UIComponents" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/UIComponents;
-		};
-		D6271B42C84CBD299B77C426 /* XCLocalSwiftPackageReference "Packages/OCR" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/OCR;
-		};
-/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		27E92FF186CE5E553BB70DF9 /* UIComponents */ = {

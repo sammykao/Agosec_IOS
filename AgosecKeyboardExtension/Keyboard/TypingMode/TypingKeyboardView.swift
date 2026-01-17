@@ -22,9 +22,9 @@ struct TypingKeyboardView: View {
     
     private var keyboardGrid: some View {
         VStack(spacing: 6) {
-            ForEach(keyboardLayout.rows, id: \\.self) { row in
+            ForEach(keyboardLayout.rows, id: \.self) { row in
                 HStack(spacing: 6) {
-                    ForEach(row, id: \\.id) { key in
+                    ForEach(row, id: \.id) { key in
                         KeyView(key: key) {
                             handleKeyPress(key)
                         }

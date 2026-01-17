@@ -160,7 +160,7 @@ class AgentSessionManager: ObservableObject {
     }
     
     func initializeSession(choice: IntroChoice) async throws -> ChatSession {
-        let session = ChatSession()
+        var session = ChatSession()
         
         switch choice {
         case .useAndDeleteScreenshots(let images),

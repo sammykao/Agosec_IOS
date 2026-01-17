@@ -66,7 +66,13 @@ struct SettingsView: View {
     private var permissionsSection: some View {
         Section("Permissions") {
             Button(action: openKeyboardSettings) {
-                Label("Keyboard Settings", systemImage: "gear")
+                HStack {
+                    Label("Add Agosec Keyboard", systemImage: "keyboard.badge.ellipsis")
+                    Spacer()
+                    Image(systemName: "arrow.up.forward.app")
+                        .font(.system(size: 14))
+                        .foregroundColor(.gray)
+                }
             }
             
             Button(action: openAppSettings) {
@@ -107,6 +113,7 @@ struct SettingsView: View {
     }
     
     private func openKeyboardSettings() {
+        // Open app settings - user will see "Keyboards" option to add Agosec keyboard
         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
         UIApplication.shared.open(url)
     }

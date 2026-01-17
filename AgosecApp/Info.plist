@@ -43,6 +43,8 @@
 	<integer>12</integer>
 	<key>SUBSCRIPTION_PRODUCT_ID</key>
 	<string>io.agosec.keyboard.pro</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Agosec needs access to your photos to import screenshots for AI context awareness. This helps the AI understand what you're looking at and provide better responses.</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UIRequiredDeviceCapabilities</key>

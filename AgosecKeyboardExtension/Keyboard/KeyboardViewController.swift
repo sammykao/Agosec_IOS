@@ -9,9 +9,9 @@ class KeyboardViewController: UIInputViewController {
     private var keyboardHeightManager: KeyboardHeightManager!
     private var entitlementGate: KeyboardEntitlementGate!
     
-    private var typingKeyboardView: TypingKeyboardView?
-    private var agentKeyboardView: AgentKeyboardView?
-    private var lockedView: LockedView?
+    private var typingKeyboardView: UIView?
+    private var agentKeyboardView: UIView?
+    private var lockedView: UIView?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -20,6 +20,10 @@ class KeyboardViewController: UIInputViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        // Save full access status to App Group for main app to read
+        AppGroupStorage.shared.set(hasFullAccess, for: "keyboard_has_full_access")
+        
         checkEntitlement()
     }
     
@@ -195,9 +199,5 @@ class KeyboardViewController: UIInputViewController {
     private func openContainerApp() {
         guard let url = URL(string: "agosec://subscribe") else { return }
         extensionContext?.open(url)
-    }
-    
-    private var hasFullAccess: Bool {
-        return UserDefaults.standard.bool(forKey: "com.apple.keyboard.extension.hasFullAccess")
     }
 }

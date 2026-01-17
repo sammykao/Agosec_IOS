@@ -6,7 +6,7 @@ struct SuggestionBarView: View {
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                ForEach(suggestions, id: \\.self) { suggestion in
+                ForEach(suggestions, id: \.self) { suggestion in
                     SuggestionButton(text: suggestion) {
                         // Handle suggestion tap
                     }

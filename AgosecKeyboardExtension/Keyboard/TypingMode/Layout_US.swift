@@ -25,7 +25,7 @@ enum KeyType {
     case shift
     case globe
     case symbol
-    case return
+    case `return`
 }
 
 enum KeySize {
@@ -42,8 +42,6 @@ struct QWERTYKeyboardLayout: KeyboardLayout {
     let isShiftEnabled: Bool
     
     var rows: [[Key]] {
-        let caseValue = isShiftEnabled ? uppercasedValue : lowercasedValue
-        
         return [
             // Row 1: QWERTYUIOP
             ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"].map {

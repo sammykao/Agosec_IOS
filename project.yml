@@ -48,6 +48,7 @@ targets:
         CFBundleURLTypes:
           - CFBundleURLSchemes:
               - agosec
+        NSPhotoLibraryUsageDescription: "Agosec needs access to your photos to import screenshots for AI context awareness."
         BACKEND_BASE_URL: "https://api.agosec.com"
         SUBSCRIPTION_PRODUCT_ID: "io.agosec.keyboard.pro"
         ENV: "prod"
@@ -73,6 +74,8 @@ targets:
       - package: UIComponents
       - sdk: StoreKit.framework
       - sdk: PhotosUI.framework
+      - target: AgosecKeyboardExtension
+        embed: true
     scheme:
       testTargets:
         - AgosecAppTests
@@ -104,7 +107,8 @@ targets:
         MAX_CONTEXT_CHARS: 20000
         MAX_TURNS_SENT: 12
     settings:
-      PRODUCT_BUNDLE_IDENTIFIER: io.agosec.keyboard.extension
+      PRODUCT_BUNDLE_IDENTIFIER: io.agosec.keyboard.app.keyboard
+      PRODUCT_NAME: AgosecKeyboardExtension
       CODE_SIGN_ENTITLEMENTS: AgosecKeyboardExtension/AgosecKeyboardExtension.entitlements
       CODE_SIGN_STYLE: Automatic
       DEVELOPMENT_TEAM: "V9CU7HF844"

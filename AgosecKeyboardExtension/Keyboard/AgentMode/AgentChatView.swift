@@ -75,8 +75,7 @@ struct AgentChatView: View {
             Divider()
             
             HStack(spacing: 8) {
-                TextField("Ask something...", text: $inputText, axis: .vertical)
-                    .lineLimit(1...3)
+                TextField("Ask something...", text: $inputText)
                     .padding(8)
                     .background(Color.white)
                     .cornerRadius(16)
@@ -118,7 +117,7 @@ struct AgentChatView: View {
         
         Task {
             do {
-                let response = try await chatManager.sendMessage(text)
+                try await chatManager.sendMessage(text)
                 await MainActor.run {
                     isLoading = false
                 }

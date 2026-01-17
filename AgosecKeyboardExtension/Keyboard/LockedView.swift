@@ -1,5 +1,6 @@
 import SwiftUI
 import SharedCore
+import UIComponents
 
 struct LockedView: View {
     let onSubscribeTapped: () -> Void

@@ -1,6 +1,6 @@
-# Agosec Design System
+# Agosec Design System - Modern & Innovative UI
 
-This document defines the design system and UI guidelines for the Agosec iOS app. **All AI assistants working on this project should follow these guidelines.**
+This document defines the cutting-edge design system and UI guidelines for the Agosec iOS app. **All AI assistants working on this project should follow these guidelines.**
 
 ## Design Framework
 
@@ -8,6 +8,7 @@ This document defines the design system and UI guidelines for the Agosec iOS app
 - Use native SwiftUI components and modifiers
 - Prefer declarative UI patterns
 - Leverage SwiftUI's built-in animations and transitions
+- Embrace modern design trends: glassmorphism, bold typography, micro-interactions
 
 ## Core Design Principles
 
@@ -16,60 +17,137 @@ This document defines the design system and UI guidelines for the Agosec iOS app
    - Use `.frame(maxWidth: .infinity, maxHeight: .infinity)` on main containers
    - Never use `NavigationView` wrapper that constrains height (use `ZStack` with full-frame instead)
 
-2. **Light, Modern Theme**: Clean, minimal aesthetic with subtle gradients
-3. **Physics-Based Animations**: Use spring animations for natural, bouncy motion
-4. **Consistent Spacing**: Use standardized spacing values
-5. **Accessibility**: Support Dynamic Type and accessibility features
+2. **Modern Glassmorphic Aesthetic**: Frosted glass effects, translucent panels, soft depth layers
+3. **Bold Typography**: Expressive, large headings with clear hierarchy
+4. **Micro-Interactions**: Every interaction should provide delightful feedback
+5. **Physics-Based Animations**: Use spring animations for natural, bouncy motion
+6. **Consistent Spacing**: Use standardized spacing values
+7. **Accessibility**: Support Dynamic Type, dark mode, and accessibility features
 
 ---
 
 ## Color Palette
 
-### Primary Colors
+### Primary Colors (Dark Theme - Default)
 ```swift
-// Light Background Gradient (Primary)
-Color(red: 0.98, green: 0.98, blue: 1.0)    // Very light blue-white
-Color(red: 0.95, green: 0.96, blue: 0.98)   // Light blue-gray
-Color(red: 0.97, green: 0.97, blue: 0.99)   // Light gray-blue
+// Dark Background (Primary - Used for all screens)
+Color(red: 0.05, green: 0.05, blue: 0.08)     // Deep dark base
+Color(red: 0.08, green: 0.08, blue: 0.12)    // Dark blue-gray
+Color(red: 0.06, green: 0.06, blue: 0.1)     // Dark accent
 
-// Text Colors
-Color(red: 0.15, green: 0.15, blue: 0.2)    // Dark gray-blue (primary text)
-Color.gray                                   // Secondary text
-Color.white                                  // Text on colored backgrounds
+// Container/Card backgrounds
+Color(red: 0.12, green: 0.12, blue: 0.15)    // Dark card background
+Color.white.opacity(0.08)                     // Glassmorphic card fill
+Color.white.opacity(0.1)                      // Slightly brighter card
 
-// Accent Colors
-Color.blue                                   // Primary accent
-Color.purple                                 // Secondary accent
+// Text Colors (Dark Theme)
+Color.white                                   // Primary text
+Color(red: 0.9, green: 0.9, blue: 0.95)      // Heading text
+Color(red: 0.85, green: 0.85, blue: 0.9)     // Body text
+Color(red: 0.7, green: 0.7, blue: 0.75)      // Secondary text
+Color(red: 0.6, green: 0.6, blue: 0.65)      // Tertiary/hint text
+
+// Vibrant Accent Colors
+Color(red: 0.0, green: 0.48, blue: 1.0)      // Vibrant blue (primary)
+Color(red: 0.58, green: 0.0, blue: 1.0)      // Vibrant purple (secondary)
+Color(red: 0.0, green: 0.78, blue: 0.33)     // Success green
+Color(red: 1.0, green: 0.58, blue: 0.0)      // Warning orange
+
+// Glassmorphic Overlay Colors
+Color.white.opacity(0.7)                      // Light glass overlay
+Color.white.opacity(0.25)                     // Subtle light glass
+Color.black.opacity(0.3)                      // Dark glass overlay
+Color.black.opacity(0.15)                     // Subtle dark glass
 ```
 
 ### Usage Guidelines
-- **Backgrounds**: Always use the light gradient for screens
-- **Text**: Use dark gray-blue for primary text, gray for secondary
-- **Accents**: Use blue for primary actions, purple for secondary elements
-- **Shadows**: Use subtle black shadows with low opacity (0.05-0.1)
+- **Backgrounds**: Use dark gradient backgrounds as the primary theme
+- **Text**: Light text on dark backgrounds for high contrast (WCAG AA minimum)
+- **Accents**: Use vibrant blue/purple gradients for emphasis and CTAs
+- **Glass Effects**: Use semi-transparent white overlays (0.08-0.15 opacity) on dark
+- **Borders**: Use white with low opacity (0.1-0.3) for subtle borders
+- **Shadows**: Use darker shadows with higher opacity on dark backgrounds
 
 ---
 
 ## Typography
 
-### Font System
+### Font System (Bold & Expressive)
 ```swift
-// Headings
-.font(.system(size: 36, weight: .semibold, design: .default))  // Large headings
-.font(.system(size: 28, weight: .semibold, design: .default))  // Medium headings
-.font(.system(size: 24, weight: .bold, design: .default))      // Section headings
+// Display Headings (Splash, Onboarding Titles)
+.font(.system(size: 64, weight: .bold, design: .default))    // Hero text
+.font(.system(size: 48, weight: .bold, design: .default))    // Large heading
+.font(.system(size: 36, weight: .bold, design: .default))    // Section heading
 
 // Body Text
-.font(.system(size: 18, weight: .medium, design: .default))     // Body text
-.font(.system(size: 16, weight: .regular, design: .default))    // Regular text
-.font(.system(size: 14, weight: .regular, design: .default))   // Small text
+.font(.system(size: 20, weight: .medium, design: .default))  // Emphasized body
+.font(.system(size: 18, weight: .regular, design: .default))  // Body text
+.font(.system(size: 16, weight: .regular, design: .default))  // Regular text
+.font(.system(size: 14, weight: .regular, design: .default)) // Small text
+.font(.system(size: 12, weight: .medium, design: .default))  // Caption
 ```
 
 ### Typography Rules
 - **Always use `.default` design** (San Francisco) - never use `.rounded` or `.serif`
-- Use `.semibold` for headings, `.medium` for emphasis, `.regular` for body
-- Support Dynamic Type with relative sizing where appropriate
-- Line spacing: Use default SwiftUI line spacing (no manual adjustments)
+- **Bold for Impact**: Use `.bold` for headings, `.semibold` for emphasis
+- **Generous Line Height**: Add 4-8px extra line spacing for readability
+- **Support Dynamic Type**: Use relative sizing where appropriate
+- **Letter Spacing**: Use `.tracking()` for display text (0.5-2.0)
+
+---
+
+## Glassmorphism & Depth
+
+### Glassmorphic Panels (Dark Theme)
+```swift
+// Dark Theme Glass Panel (Primary Style)
+.background(
+    Color.white.opacity(0.08),
+    in: RoundedRectangle(cornerRadius: 24)
+)
+.overlay(
+    RoundedRectangle(cornerRadius: 24)
+        .stroke(
+            LinearGradient(
+                colors: [
+                    Color.white.opacity(0.3),
+                    Color.white.opacity(0.1)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            ),
+            lineWidth: 1
+        )
+)
+.shadow(color: Color.black.opacity(0.3), radius: 30, x: 0, y: 15)
+.shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
+
+// Dark Container for Logo/Icons (when content is white)
+Circle()
+    .fill(Color(red: 0.12, green: 0.12, blue: 0.15))
+    .overlay(
+        Circle()
+            .stroke(
+                LinearGradient(
+                    colors: [
+                        Color.white.opacity(0.3),
+                        Color.white.opacity(0.1)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ),
+                lineWidth: 2
+            )
+    )
+    .shadow(color: Color.black.opacity(0.5), radius: 50, x: 0, y: 25)
+    .shadow(color: Color.blue.opacity(0.3), radius: 30, x: 0, y: 15)
+```
+
+### Depth Layers
+- **Layer 1 (Base)**: Background gradient
+- **Layer 2 (Mid)**: Glassmorphic panels with blur
+- **Layer 3 (Top)**: Interactive elements with stronger shadows
+- **Elevation**: Use multiple soft shadows for depth perception
 
 ---
 
@@ -78,64 +156,162 @@ Color.purple                                 // Secondary accent
 ### Standard Spacing Values
 ```swift
 // Padding
-.padding(8)      // Tight spacing (buttons, icons)
+.padding(4)      // Minimal spacing
+.padding(8)      // Tight spacing (icons, small elements)
 .padding(12)     // Compact spacing
 .padding(16)     // Standard spacing
 .padding(24)     // Comfortable spacing
 .padding(32)     // Generous spacing
 .padding(40)     // Large spacing (screen edges)
+.padding(48)     // Extra large spacing
 
 // VStack/HStack Spacing
 VStack(spacing: 8)   // Tight vertical spacing
 VStack(spacing: 16)  // Standard vertical spacing
 VStack(spacing: 24)  // Comfortable vertical spacing
 VStack(spacing: 32)  // Generous vertical spacing
+VStack(spacing: 40)  // Extra large spacing
 ```
 
 ### Layout Rules
 - **Screen Edges**: Use minimum 24px horizontal padding, 40px for bottom safe area
 - **Component Spacing**: Use 16-24px between major UI elements
 - **Content Width**: Max content width should be responsive, use `min(geometry.size.width * 0.9, 400)` for constrained content
+- **Glass Panels**: Add 20-32px padding inside glassmorphic containers
 
 ---
 
 ## Component Guidelines
 
-### Buttons
+### Modern Buttons
 ```swift
-// Primary Action Button
-ActionButton(title: "Get Started", action: { })
-  .padding(.horizontal, 24)
+// Primary Action Button (Glassmorphic with Gradient)
+Button(action: { }) {
+    HStack(spacing: 12) {
+        Text("Get Started")
+            .font(.system(size: 19, weight: .semibold, design: .default))
+        Image(systemName: "arrow.right")
+            .font(.system(size: 17, weight: .semibold))
+    }
+    .foregroundColor(.white)
+    .frame(maxWidth: .infinity)
+    .frame(height: 60)
+    .background(
+        ZStack {
+            // Gradient base
+            LinearGradient(
+                colors: [
+                    Color(red: 0.0, green: 0.48, blue: 1.0),
+                    Color(red: 0.58, green: 0.0, blue: 1.0)
+                ],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+            
+            // Glassmorphic overlay
+            Color.white.opacity(0.1)
+        }
+    )
+    .cornerRadius(20)
+    .shadow(color: Color.blue.opacity(0.4), radius: 20, x: 0, y: 10)
+    .shadow(color: Color.purple.opacity(0.2), radius: 10, x: 0, y: 5)
+}
+.buttonStyle(ScaleButtonStyle())
 
-// Button Styling
-- Rounded corners: 12px
-- Full width with horizontal padding
-- Use ActionButton component from UIComponents package
+// Secondary Button (Glassmorphic)
+Button(action: { }) {
+    Text("Skip")
+        .font(.system(size: 17, weight: .medium, design: .default))
+        .foregroundColor(Color(red: 0.1, green: 0.1, blue: 0.15))
+        .frame(maxWidth: .infinity)
+        .frame(height: 56)
+        .background(
+            .ultraThinMaterial,
+            in: RoundedRectangle(cornerRadius: 18)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(Color.white.opacity(0.3), lineWidth: 1)
+        )
+}
 ```
 
-### Cards/Containers
+### Glassmorphic Cards/Containers
 ```swift
-.background(Color.gray.opacity(0.1))
-.cornerRadius(12)
-.padding()
+VStack {
+    // Content
+}
+.padding(24)
+.background(
+    .ultraThinMaterial,
+    in: RoundedRectangle(cornerRadius: 24)
+)
+.overlay(
+    RoundedRectangle(cornerRadius: 24)
+        .stroke(
+            LinearGradient(
+                colors: [
+                    Color.white.opacity(0.5),
+                    Color.white.opacity(0.1)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            ),
+            lineWidth: 1.5
+        )
+)
+.shadow(color: Color.black.opacity(0.1), radius: 30, x: 0, y: 15)
+.shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
 ```
 
 ### Images/Logos
 ```swift
-// Logo Loading Pattern
-Group {
-    if let uiImage = UIImage(named: "agosec_logo") {
-        Image(uiImage: uiImage)
-            .resizable()
-            .aspectRatio(contentMode: .fit)
-    } else {
-        Image(systemName: "app.fill")
-            .resizable()
-            .aspectRatio(contentMode: .fit)
-            .foregroundColor(.gray)
+// Logo Loading Pattern with Glassmorphic Container
+ZStack {
+    // Glassmorphic background
+    Circle()
+        .fill(.ultraThinMaterial)
+        .frame(width: 200, height: 200)
+        .overlay(
+            Circle()
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.6),
+                            Color.white.opacity(0.2)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 2
+                )
+        )
+        .shadow(color: Color.black.opacity(0.15), radius: 40, x: 0, y: 20)
+    
+    // Logo
+    Group {
+        if let uiImage = UIImage(named: "agosec_logo") {
+            Image(uiImage: uiImage)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+        } else {
+            Image(systemName: "sparkles")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.0, green: 0.48, blue: 1.0),
+                            Color(red: 0.58, green: 0.0, blue: 1.0)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+        }
     }
+    .frame(width: 140, height: 140)
 }
-.frame(width: 160, height: 160)
 ```
 
 ---
@@ -144,27 +320,47 @@ Group {
 
 ### Spring Animations (Preferred)
 ```swift
-// Logo/Element Entrance
-withAnimation(.spring(response: 0.8, dampingFraction: 0.6)) {
+// Logo/Element Entrance (Bouncy)
+withAnimation(.spring(response: 0.6, dampingFraction: 0.65, blendDuration: 0)) {
     // Animation code
 }
 
-// Button/Interactive Elements
-withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+// Button/Interactive Elements (Snappy)
+withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
     // Animation code
 }
 
-// Continuous Animations
-withAnimation(.easeInOut(duration: 2.5).repeatForever(autoreverses: true)) {
+// Continuous Animations (Smooth)
+withAnimation(.easeInOut(duration: 3.0).repeatForever(autoreverses: true)) {
     // Animation code
+}
+
+// Micro-Interactions (Quick Feedback)
+withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+    // Button press, hover effects
 }
 ```
 
 ### Animation Rules
-- **Entrance**: Use spring animations with response 0.6-0.8, damping 0.5-0.7
-- **Continuous**: Use easeInOut with 2-3 second duration for floating/breathing effects
-- **Transitions**: Use `.opacity` and `.scale` for screen transitions
-- **Stagger**: Delay animations by 0.2-0.3 seconds for sequential effects
+- **Entrance**: Use spring animations with response 0.4-0.6, damping 0.6-0.8 for snappy feel
+- **Continuous**: Use easeInOut with 2-4 second duration for floating/breathing effects
+- **Transitions**: Combine `.opacity`, `.scale`, and `.move` for rich transitions
+- **Stagger**: Delay animations by 0.1-0.2 seconds for sequential effects
+- **Micro-Interactions**: All buttons should have scale/ripple feedback (200-300ms)
+
+### Advanced Transitions
+```swift
+// Rich Page Transition
+.transition(.asymmetric(
+    insertion: .opacity
+        .combined(with: .scale(scale: 0.9))
+        .combined(with: .move(edge: .trailing)),
+    removal: .opacity
+        .combined(with: .scale(scale: 0.95))
+        .combined(with: .move(edge: .leading))
+))
+.animation(.spring(response: 0.5, dampingFraction: 0.8), value: state)
+```
 
 ---
 
@@ -174,44 +370,89 @@ withAnimation(.easeInOut(duration: 2.5).repeatForever(autoreverses: true)) {
 ```swift
 var body: some View {
     ZStack {
-        // Background
-        LinearGradient(...)
+        // Glassmorphic Background
+        modernBackground
             .ignoresSafeArea(.all)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         
         // Content
         VStack {
-            // Content here
+            // Your content here
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .ignoresSafeArea(.all)
 }
+
+private var modernBackground: some View {
+    ZStack {
+        // Base gradient
+        LinearGradient(
+            gradient: Gradient(colors: [
+                Color(red: 0.99, green: 0.99, blue: 1.0),
+                Color(red: 0.97, green: 0.98, blue: 0.99),
+                Color(red: 0.95, green: 0.96, blue: 0.98)
+            ]),
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+        
+        // Glassmorphic accent orbs
+        floatingGlassOrbs
+    }
+}
 ```
 
 ### Onboarding Screen Pattern
 ```swift
 GeometryReader { geometry in
-    VStack(spacing: 0) {
-        Spacer()
+    ZStack {
+        // Modern background
+        modernBackground
         
-        // Main content (centered)
-        VStack(spacing: 32) {
-            // Logo, text, etc.
+        VStack(spacing: 0) {
+            Spacer()
+            
+            // Main content in glassmorphic panel
+            VStack(spacing: 32) {
+                // Icon/Illustration
+                // Title (bold, large)
+                // Description
+            }
+            .padding(32)
+            .background(
+                .ultraThinMaterial,
+                in: RoundedRectangle(cornerRadius: 32)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 32)
+                    .stroke(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.6),
+                                Color.white.opacity(0.2)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+            )
+            .shadow(color: Color.black.opacity(0.1), radius: 40, x: 0, y: 20)
+            .padding(.horizontal, 24)
+            
+            Spacer()
+            
+            // Bottom actions
+            VStack {
+                // Buttons, indicators
+            }
+            .padding(.bottom, max(geometry.size.height * 0.1, 40))
         }
-        
-        Spacer()
-        
-        // Bottom actions
-        VStack {
-            // Buttons, indicators
-        }
-        .padding(.bottom, max(geometry.size.height * 0.1, 40))
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
 }
-.frame(maxWidth: .infinity, maxHeight: .infinity)
 .ignoresSafeArea(.all)
 ```
 
@@ -221,25 +462,32 @@ GeometryReader { geometry in
 3. **ALWAYS use `.frame(maxWidth: .infinity, maxHeight: .infinity)`** on main containers
 4. **Use GeometryReader** for responsive sizing when needed
 5. **Test on different iPhone sizes** to ensure full-height coverage
+6. **Apply glassmorphism** to main content panels for depth
 
 ---
 
 ## Shadows & Depth
 
-### Shadow Guidelines
+### Modern Shadow System
 ```swift
-// Subtle shadows for depth
-.shadow(color: Color.black.opacity(0.08), radius: 20, x: 0, y: 10)
-.shadow(color: Color.blue.opacity(0.1), radius: 15, x: 0, y: 5)
+// Multi-layered shadows for depth
+.shadow(color: Color.black.opacity(0.15), radius: 40, x: 0, y: 20)  // Large, soft
+.shadow(color: Color.black.opacity(0.08), radius: 20, x: 0, y: 10)  // Medium
+.shadow(color: Color.black.opacity(0.04), radius: 10, x: 0, y: 5)   // Small, sharp
 
-// Text shadows
-.shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+// Colored shadows for accent elements
+.shadow(color: Color.blue.opacity(0.3), radius: 30, x: 0, y: 15)
+.shadow(color: Color.purple.opacity(0.2), radius: 15, x: 0, y: 8)
+
+// Text shadows (subtle)
+.shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
 ```
 
 ### Shadow Rules
-- Use low opacity (0.05-0.1) for subtle depth
-- Combine black and colored shadows for logos/elevated elements
-- Keep radius between 2-20px depending on element size
+- Use multiple layered shadows for realistic depth
+- Combine black and colored shadows for branded elements
+- Keep opacity low (0.04-0.15) for subtlety
+- Larger radius for softer, more diffused shadows
 
 ---
 
@@ -250,22 +498,24 @@ GeometryReader { geometry in
 - **Loading Pattern**: Always use `UIImage(named:)` with fallback
 - **Sizing**: Standard 160x160 for splash/welcome, scale proportionally
 - **Animation**: Spring entrance with subtle floating animation
+- **Container**: Use glassmorphic circle or rounded square background
 
 ### App Icon
 - **Location**: `AppIcon.appiconset` in Assets.xcassets
 - **Sizes**: All required sizes generated from logo
 - **Display Name**: "Agosec" (not "Agosec Keyboard")
+- **Style**: Modern, minimal, glassmorphic effects if appropriate
 
 ---
 
 ## Component Library
 
 ### Available Components (UIComponents Package)
-- `ActionButton`: Primary action button with consistent styling
-- `LoadingOverlay`: Full-screen loading indicator
-- `SplashScreenView`: Animated splash screen with logo
+- `ActionButton`: Primary action button with glassmorphic gradient styling
+- `LoadingOverlay`: Full-screen loading indicator with modern animations
+- `SplashScreenView`: Animated splash screen with glassmorphic effects
 - `ToastOverlay`: Toast notification system
-- `PageIndicator`: Onboarding pagination dots
+- `PageIndicator`: Onboarding pagination with glassmorphic background
 
 ### Usage
 ```swift
@@ -284,11 +534,13 @@ SplashScreenView(logoName: "agosec_logo", appName: "Agosec")
 - Provide accessibility labels for images and icons
 - Ensure sufficient color contrast (WCAG AA minimum)
 - Support VoiceOver navigation
+- Support Dark Mode with proper contrast
 
 ### Implementation
 ```swift
 .accessibilityLabel("Agosec logo")
 .accessibilityHint("Welcome screen")
+.preferredColorScheme(.light)  // Or .dark, or nil for system
 ```
 
 ---
@@ -298,10 +550,14 @@ SplashScreenView(logoName: "agosec_logo", appName: "Agosec")
 ### Screen Transition
 ```swift
 .transition(.asymmetric(
-    insertion: .opacity.combined(with: .scale(scale: 0.95)),
+    insertion: .opacity
+        .combined(with: .scale(scale: 0.9))
+        .combined(with: .move(edge: .trailing)),
     removal: .opacity
+        .combined(with: .scale(scale: 0.95))
+        .combined(with: .move(edge: .leading))
 ))
-.animation(.easeInOut(duration: 0.4), value: state)
+.animation(.spring(response: 0.5, dampingFraction: 0.8), value: state)
 ```
 
 ### Responsive Sizing
@@ -321,6 +577,31 @@ Group {
 }
 ```
 
+### Glassmorphic Floating Orbs
+```swift
+ForEach(0..<3) { index in
+    Circle()
+        .fill(
+            RadialGradient(
+                gradient: Gradient(colors: [
+                    Color.blue.opacity(0.15 - Double(index) * 0.05),
+                    Color.purple.opacity(0.1 - Double(index) * 0.03),
+                    Color.clear
+                ]),
+                center: .center,
+                startRadius: 0,
+                endRadius: 80 + CGFloat(index) * 40
+            )
+        )
+        .frame(width: 160 + CGFloat(index) * 80, height: 160 + CGFloat(index) * 80)
+        .blur(radius: 30)
+        .offset(
+            x: CGFloat(index) * 100 - 150,
+            y: CGFloat(index) * 120 - 180
+        )
+}
+```
+
 ---
 
 ## Anti-Patterns (DO NOT USE)
@@ -330,8 +611,10 @@ Group {
 ❌ **Fixed font sizes** without responsive alternatives
 ❌ **Screens that don't extend to full height**
 ❌ **Rounded design** font - use `.default`
-❌ **Heavy shadows** - keep opacity low
+❌ **Heavy shadows** - keep opacity low, use multiple layers
 ❌ **Complex custom animations** - prefer spring physics
+❌ **Opaque backgrounds** - use glassmorphism for depth
+❌ **Flat buttons** - add depth with shadows and gradients
 
 ---
 
@@ -356,37 +639,63 @@ Before considering a screen complete, verify:
 - [ ] Logo displays correctly (with fallback if missing)
 - [ ] Animations are smooth and use spring physics
 - [ ] Colors match the design system palette
-- [ ] Typography uses system default font
+- [ ] Typography uses system default font with bold headings
 - [ ] Spacing follows the spacing system
-- [ ] Shadows are subtle and appropriate
+- [ ] Glassmorphic effects are applied appropriately
+- [ ] Shadows are multi-layered and subtle
 - [ ] Works on different iPhone sizes (SE, Pro, Pro Max)
 - [ ] Accessibility labels are present
+- [ ] Dark mode support (if applicable)
 
 ---
 
 ## Quick Reference
 
-### Full-Screen Template
+### Full-Screen Template (Dark Theme)
 ```swift
 struct MyScreenView: View {
     var body: some View {
         ZStack {
-            // Background
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color(red: 0.98, green: 0.98, blue: 1.0),
-                    Color(red: 0.95, green: 0.96, blue: 0.98),
-                    Color(red: 0.97, green: 0.97, blue: 0.99)
-                ]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            // Dark Background
+            ZStack {
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color(red: 0.05, green: 0.05, blue: 0.08),
+                        Color(red: 0.08, green: 0.08, blue: 0.12),
+                        Color(red: 0.06, green: 0.06, blue: 0.1)
+                    ]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                
+                // Accent overlay
+                RadialGradient(
+                    gradient: Gradient(colors: [
+                        Color(red: 0.0, green: 0.48, blue: 1.0).opacity(0.15),
+                        Color(red: 0.58, green: 0.0, blue: 1.0).opacity(0.08),
+                        Color.clear
+                    ]),
+                    center: .center,
+                    startRadius: 100,
+                    endRadius: 600
+                )
+            }
             .ignoresSafeArea(.all)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             
-            // Content
+            // Content with light text
             VStack {
-                // Your content here
+                Text("Title")
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [Color.white, Color.blue],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                
+                Text("Subtitle")
+                    .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.75))
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
@@ -398,6 +707,8 @@ struct MyScreenView: View {
 
 ---
 
-**Last Updated**: 2024
+**Last Updated**: 2026
 **Framework**: SwiftUI (iOS 15.0+)
+**Design Trend**: Dark Theme, Modern Glassmorphism, Bold Typography, Micro-Interactions
+**Theme**: Dark mode primary (dark backgrounds with light text and vibrant accents)
 **Maintained By**: Agosec Development Team

@@ -12,54 +12,93 @@ struct DemoConversationStepView: View {
     
     var body: some View {
         GeometryReader { geometry in
-            VStack(spacing: 0) {
-                Spacer()
-                    .frame(height: geometry.size.height * 0.06)
-                
-                // Animated icon
-                ZStack {
-                    // Glow
-                    Circle()
-                        .fill(Color.purple.opacity(0.15))
-                        .frame(width: 120, height: 120)
-                        .blur(radius: 20)
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 0) {
+                    Spacer()
+                        .frame(height: max(geometry.size.height * 0.04, 20))
                     
-                    // Icon background
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [Color.purple.opacity(0.2), Color.purple.opacity(0.1)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
+                    // Animated icon with modern design
+                    ZStack {
+                    // Animated glow rings
+                    ForEach(0..<2) { index in
+                        Circle()
+                            .stroke(
+                                LinearGradient(
+                                    colors: [
+                                        Color.purple.opacity(0.4 - Double(index) * 0.2),
+                                        Color.purple.opacity(0.15 - Double(index) * 0.1)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 2
                             )
-                        )
-                        .frame(width: 100, height: 100)
+                            .frame(width: 100 + CGFloat(index) * 16, height: 100 + CGFloat(index) * 16)
+                            .scaleEffect(1.0 + CGFloat(index) * 0.1)
+                            .opacity(iconOpacity * (1.0 - Double(index) * 0.3))
+                    }
                     
-                    Image(systemName: "bubble.left.and.bubble.right.fill")
-                        .font(.system(size: 40, weight: .medium))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [Color.purple, Color.purple.opacity(0.7)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
+                    // Icon background with glassmorphism
+                    ZStack {
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color.purple.opacity(0.25),
+                                        Color.purple.opacity(0.12)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
                             )
-                        )
+                            .frame(width: 90, height: 90)
+                        
+                        Circle()
+                            .stroke(
+                                LinearGradient(
+                                    colors: [
+                                        Color.purple.opacity(0.4),
+                                        Color.purple.opacity(0.15)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1
+                            )
+                            .frame(width: 90, height: 90)
+                        
+                        Image(systemName: "bubble.left.and.bubble.right.fill")
+                            .font(.system(size: 36, weight: .medium))
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [Color.purple, Color.purple.opacity(0.8)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                    }
                 }
                 .scaleEffect(iconScale)
                 .opacity(iconOpacity)
-                .padding(.bottom, 28)
+                .padding(.bottom, 20)
                 
                 // Title
                 Text("Try It Out")
-                    .font(.system(size: 32, weight: .bold, design: .default))
-                    .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
+                    .font(.system(size: 28, weight: .bold, design: .default))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [Color.white, Color.purple],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
                     .opacity(contentOpacity)
                     .offset(y: contentOffset)
                 
                 // Subtitle
                 Text("See how Agosec helps you communicate smarter")
                     .font(.system(size: 17, weight: .regular, design: .default))
-                    .foregroundColor(Color(red: 0.4, green: 0.4, blue: 0.45))
+                    .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.75))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
                     .padding(.top, 10)
@@ -68,31 +107,34 @@ struct DemoConversationStepView: View {
                 
                 // Demo conversation
                 conversationPreview
-                    .padding(.top, 28)
+                    .padding(.top, 20)
                     .opacity(contentOpacity)
                     .offset(y: contentOffset)
                 
-                Spacer()
-                
-                // Buttons
-                VStack(spacing: 14) {
-                    ModernActionButton(
-                        title: "Try Demo",
-                        icon: "keyboard",
-                        action: { showKeyboardDemo = true }
-                    )
+                    Spacer(minLength: 16)
                     
-                    ModernActionButton(
-                        title: "Get Started",
-                        icon: "arrow.right",
-                        style: .secondary,
-                        action: onComplete
-                    )
+                    // Buttons
+                    VStack(spacing: 14) {
+                        ModernActionButton(
+                            title: "Try Demo",
+                            icon: "keyboard",
+                            action: { showKeyboardDemo = true }
+                        )
+                        
+                        ModernActionButton(
+                            title: "Get Started",
+                            icon: "arrow.right",
+                            style: .secondary,
+                            action: onComplete
+                        )
+                    }
+                    .padding(.horizontal, 28)
+                    .padding(.bottom, 80) // Account for page indicator
+                    .opacity(contentOpacity)
+                    .offset(y: contentOffset)
                 }
-                .padding(.horizontal, 28)
-                .padding(.bottom, 100)
-                .opacity(contentOpacity)
-                .offset(y: contentOffset)
+                .frame(maxWidth: .infinity)
+                .frame(minHeight: geometry.size.height)
             }
         }
         .sheet(isPresented: $showKeyboardDemo) {
@@ -128,7 +170,7 @@ struct DemoConversationStepView: View {
                     
                     Text("Agosec suggests contextual responses")
                         .font(.system(size: 14, weight: .medium, design: .default))
-                        .foregroundColor(Color(red: 0.4, green: 0.4, blue: 0.45))
+                        .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.75))
                 }
                 .padding(.top, 8)
                 .transition(.opacity.combined(with: .scale(scale: 0.9)))
@@ -184,7 +226,7 @@ struct MessageBubble: View {
             
             Text(text)
                 .font(.system(size: 16, weight: .regular, design: .default))
-                .foregroundColor(isUser ? .white : Color(red: 0.2, green: 0.2, blue: 0.25))
+                .foregroundColor(isUser ? .white : Color(red: 0.9, green: 0.9, blue: 0.95))
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
                 .background(
@@ -192,18 +234,22 @@ struct MessageBubble: View {
                         .fill(
                             isUser ?
                             LinearGradient(
-                                colors: [Color.blue, Color.blue.opacity(0.85)],
+                                colors: [Color.blue, Color.purple],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ) :
                             LinearGradient(
-                                colors: [Color(red: 0.94, green: 0.94, blue: 0.96), Color(red: 0.92, green: 0.92, blue: 0.94)],
+                                colors: [Color.white.opacity(0.15), Color.white.opacity(0.08)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
                         )
                 )
-                .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(Color.white.opacity(isUser ? 0 : 0.2), lineWidth: 1)
+                )
+                .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
             
             if !isUser { Spacer(minLength: 60) }
         }
@@ -220,38 +266,49 @@ struct KeyboardDemoView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                Spacer()
+            ZStack {
+                // Dark background
+                Color(red: 0.08, green: 0.08, blue: 0.12)
+                    .ignoresSafeArea()
                 
-                // Demo chat area
-                VStack(spacing: 16) {
-                    Image(systemName: "keyboard.fill")
-                        .font(.system(size: 48, weight: .light))
-                        .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.75))
+                VStack(spacing: 0) {
+                    Spacer()
                     
-                    Text("Switch to Agosec Keyboard")
-                        .font(.system(size: 18, weight: .semibold, design: .default))
-                        .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
+                    // Demo chat area
+                    VStack(spacing: 16) {
+                        Image(systemName: "keyboard.fill")
+                            .font(.system(size: 48, weight: .light))
+                            .foregroundColor(Color(red: 0.5, green: 0.5, blue: 0.55))
+                        
+                        Text("Switch to Agosec Keyboard")
+                            .font(.system(size: 18, weight: .semibold, design: .default))
+                            .foregroundColor(Color(red: 0.9, green: 0.9, blue: 0.95))
+                        
+                        Text("Tap the globe icon on your keyboard to switch")
+                            .font(.system(size: 15, weight: .regular, design: .default))
+                            .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.65))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
+                    }
                     
-                    Text("Tap the globe icon on your keyboard to switch")
-                        .font(.system(size: 15, weight: .regular, design: .default))
-                        .foregroundColor(Color(red: 0.5, green: 0.5, blue: 0.55))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 40)
+                    Spacer()
+                    
+                    // Text field
+                    TextField("Type something...", text: $text)
+                        .font(.system(size: 17, design: .default))
+                        .foregroundColor(.white)
+                        .padding(16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.white.opacity(0.1))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        )
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 20)
                 }
-                
-                Spacer()
-                
-                // Text field
-                TextField("Type something...", text: $text)
-                    .font(.system(size: 17, design: .default))
-                    .padding(16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(red: 0.95, green: 0.95, blue: 0.97))
-                    )
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
             }
             .navigationTitle("Try Agosec")
             .navigationBarTitleDisplayMode(.inline)
@@ -261,7 +318,20 @@ struct KeyboardDemoView: View {
                         dismiss()
                     }
                     .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.blue)
                 }
+            }
+            .onAppear {
+                // Configure dark navigation bar for iOS 15+
+                let appearance = UINavigationBarAppearance()
+                appearance.configureWithOpaqueBackground()
+                appearance.backgroundColor = UIColor(red: 0.08, green: 0.08, blue: 0.12, alpha: 1.0)
+                appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
+                appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
+                
+                UINavigationBar.appearance().standardAppearance = appearance
+                UINavigationBar.appearance().scrollEdgeAppearance = appearance
+                UINavigationBar.appearance().compactAppearance = appearance
             }
         }
     }
