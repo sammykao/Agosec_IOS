@@ -466,6 +466,237 @@ GeometryReader { geometry in
 
 ---
 
+## Responsiveness Guidelines
+
+All screens MUST be responsive across different iPhone device types. This section defines the rules for building adaptive layouts.
+
+### Device Size Categories
+```swift
+// Small screens (iPhone SE, iPhone 8, iPhone mini)
+geometry.size.width < 380
+
+// Standard screens (iPhone 14, iPhone 15)
+geometry.size.width >= 380 && geometry.size.width < 430
+
+// Large screens (iPhone Pro Max, iPhone Plus)
+geometry.size.width >= 430
+```
+
+### Responsive Font Sizing
+**NEVER use fixed font sizes.** Always calculate sizes based on screen dimensions:
+
+```swift
+// ❌ BAD - Fixed font size
+.font(.system(size: 28, weight: .bold, design: .default))
+
+// ✅ GOOD - Responsive font size with max limit
+.font(.system(size: min(geometry.size.width * 0.07, 28), weight: .bold, design: .default))
+```
+
+#### Font Size Formulas
+```swift
+// Display/Hero text (splash screens)
+min(geometry.size.width * 0.15, 48)    // Max 48pt
+
+// Large headings (screen titles)
+min(geometry.size.width * 0.08, 32)    // Max 32pt
+
+// Section headings
+min(geometry.size.width * 0.07, 28)    // Max 28pt
+
+// Body text
+min(geometry.size.width * 0.045, 18)   // Max 18pt
+
+// Secondary/subtitle text
+min(geometry.size.width * 0.043, 17)   // Max 17pt
+
+// Small text/captions
+min(geometry.size.width * 0.035, 14)   // Max 14pt
+
+// Tiny text/hints
+min(geometry.size.width * 0.033, 13)   // Max 13pt
+```
+
+### Responsive Icon & Element Sizing
+```swift
+// Icon containers (circles, etc.)
+let iconSize = min(geometry.size.width * 0.22, 90)
+let containerSize = iconSize * 1.15
+
+// Ring/glow effects
+let ringBaseSize = min(geometry.size.width * 0.25, 100)
+
+// Logo sizing
+let logoSize = min(geometry.size.width * 0.35, 140)
+```
+
+### Responsive Spacing
+```swift
+// Horizontal padding
+.padding(.horizontal, geometry.size.width * 0.06)  // ~6% of width
+.padding(.horizontal, geometry.size.width * 0.07)  // ~7% of width
+.padding(.horizontal, geometry.size.width * 0.08)  // ~8% of width
+
+// Vertical spacing between sections
+.padding(.bottom, min(geometry.size.height * 0.04, 32))
+.padding(.top, min(geometry.size.height * 0.03, 24))
+
+// Top safe area offset
+.frame(height: geometry.size.height * 0.08)  // Push content down
+```
+
+### Small Screen Detection Pattern
+Always detect small screens and adjust accordingly:
+
+```swift
+GeometryReader { geometry in
+    let isSmallScreen = geometry.size.width < 380
+    
+    VStack(spacing: isSmallScreen ? 10 : 14) {
+        Text("Title")
+            .font(.system(
+                size: isSmallScreen ? 24 : 28,
+                weight: .bold,
+                design: .default
+            ))
+        
+        // Adjust line widths for small screens
+        Circle()
+            .stroke(lineWidth: isSmallScreen ? 1.5 : 2)
+    }
+}
+```
+
+### Responsive Component Template
+```swift
+struct ResponsiveCard: View {
+    var body: some View {
+        GeometryReader { geometry in
+            let isSmallScreen = geometry.size.width < 380
+            let titleSize = min(geometry.size.width * 0.05, 20)
+            let bodySize = min(geometry.size.width * 0.04, 16)
+            let padding: CGFloat = isSmallScreen ? 16 : 20
+            let spacing: CGFloat = isSmallScreen ? 10 : 14
+            
+            VStack(spacing: spacing) {
+                Text("Title")
+                    .font(.system(size: titleSize, weight: .semibold))
+                
+                Text("Body text that adapts to screen size")
+                    .font(.system(size: bodySize, weight: .regular))
+            }
+            .padding(padding)
+            .background(
+                RoundedRectangle(cornerRadius: isSmallScreen ? 14 : 16)
+                    .fill(Color.white.opacity(0.08))
+            )
+        }
+    }
+}
+```
+
+### Text Truncation & Scaling
+Always provide fallback for long text:
+
+```swift
+Text("Long Title That Might Not Fit")
+    .lineLimit(2)
+    .minimumScaleFactor(0.7)
+    .multilineTextAlignment(.center)
+
+// For single-line text
+Text("Single Line")
+    .lineLimit(1)
+    .minimumScaleFactor(0.8)
+```
+
+### Responsive Button Heights
+```swift
+// Primary action buttons
+.frame(height: min(geometry.size.height * 0.08, 64))
+
+// Secondary buttons
+.frame(height: isSmallScreen ? 50 : 56)
+```
+
+### ScrollView for Overflow Content
+When content might overflow on smaller screens, wrap in ScrollView:
+
+```swift
+GeometryReader { geometry in
+    ScrollView(showsIndicators: false) {
+        VStack {
+            // Content
+        }
+        .frame(maxWidth: .infinity)
+        .frame(minHeight: geometry.size.height)
+    }
+}
+```
+
+### Responsive Constraints Pattern
+Use `max()` and `min()` to constrain values:
+
+```swift
+// Ensure minimum spacing
+Spacer(minLength: 16)
+
+// Constrain orb positions to screen bounds
+.offset(
+    x: max(-geometry.size.width * 0.3, min(geometry.size.width * 0.3, xPosition)),
+    y: max(-geometry.size.height * 0.3, min(geometry.size.height * 0.3, yPosition))
+)
+
+// Responsive element sizing with bounds
+.frame(
+    width: min(240 + CGFloat(index) * 100, geometry.size.width * 0.7),
+    height: min(240 + CGFloat(index) * 100, geometry.size.width * 0.7)
+)
+```
+
+### Device Testing Checklist
+Test on ALL these device sizes:
+- [ ] iPhone SE (3rd gen) - 375 x 667 (small)
+- [ ] iPhone 13 mini - 375 x 812 (small with notch)
+- [ ] iPhone 14 - 390 x 844 (standard)
+- [ ] iPhone 15 Pro - 393 x 852 (standard)
+- [ ] iPhone 15 Pro Max - 430 x 932 (large)
+- [ ] iPhone 15 Plus - 428 x 926 (large)
+
+### Responsiveness Anti-Patterns
+
+❌ **Fixed pixel sizes for fonts, icons, or spacing**
+```swift
+// BAD
+.font(.system(size: 28))
+.frame(width: 100, height: 100)
+.padding(24)
+```
+
+❌ **Hard-coded minimum spacer sizes that break on small screens**
+```swift
+// BAD
+Spacer(minLength: 60)
+```
+
+❌ **Fixed message bubble widths**
+```swift
+// BAD
+if isUser { Spacer(minLength: 60) }
+```
+
+✅ **Use proportional sizing**
+```swift
+// GOOD
+.font(.system(size: min(geometry.size.width * 0.07, 28)))
+.frame(width: min(geometry.size.width * 0.26, 100))
+.padding(geometry.size.width * 0.06)
+Spacer(minLength: 40)
+if isUser { Spacer(minLength: 40) }
+```
+
+---
+
 ## Shadows & Depth
 
 ### Modern Shadow System
@@ -606,14 +837,24 @@ ForEach(0..<3) { index in
 
 ## Anti-Patterns (DO NOT USE)
 
+### Layout Anti-Patterns
 ❌ **NavigationView** for full-screen layouts
-❌ **Hard-coded colors** - use the color palette
-❌ **Fixed font sizes** without responsive alternatives
 ❌ **Screens that don't extend to full height**
+❌ **Opaque backgrounds** - use glassmorphism for depth
+
+### Responsiveness Anti-Patterns
+❌ **Fixed font sizes** - use `min(geometry.size.width * X, maxSize)`
+❌ **Fixed icon/element sizes** - use proportional sizing
+❌ **Fixed padding values** - use geometry-based spacing
+❌ **Missing GeometryReader** - always wrap responsive views
+❌ **No small screen handling** - check for `geometry.size.width < 380`
+❌ **Missing lineLimit/minimumScaleFactor** - text may overflow
+
+### Style Anti-Patterns
+❌ **Hard-coded colors** - use the color palette
 ❌ **Rounded design** font - use `.default`
 ❌ **Heavy shadows** - keep opacity low, use multiple layers
 ❌ **Complex custom animations** - prefer spring physics
-❌ **Opaque backgrounds** - use glassmorphism for depth
 ❌ **Flat buttons** - add depth with shadows and gradients
 
 ---
@@ -635,7 +876,24 @@ ForEach(0..<3) { index in
 ## Testing Checklist
 
 Before considering a screen complete, verify:
+
+### Layout & Full-Screen
 - [ ] Screen extends to full iPhone height (no black bars)
+- [ ] Uses `.ignoresSafeArea(.all)` on backgrounds
+- [ ] Uses `.frame(maxWidth: .infinity, maxHeight: .infinity)` on containers
+
+### Responsiveness (CRITICAL)
+- [ ] All font sizes use `min(geometry.size.width * X, maxSize)` pattern
+- [ ] Icon/element sizes are proportional to screen width
+- [ ] Spacing uses geometry-based calculations
+- [ ] Small screen detection (`geometry.size.width < 380`) implemented
+- [ ] Text has `lineLimit` and `minimumScaleFactor` for overflow
+- [ ] ScrollView used for potentially overflowing content
+- [ ] Tested on iPhone SE (375pt width)
+- [ ] Tested on iPhone 14/15 (390pt width)
+- [ ] Tested on iPhone Pro Max (430pt width)
+
+### Visual Design
 - [ ] Logo displays correctly (with fallback if missing)
 - [ ] Animations are smooth and use spring physics
 - [ ] Colors match the design system palette
@@ -643,9 +901,11 @@ Before considering a screen complete, verify:
 - [ ] Spacing follows the spacing system
 - [ ] Glassmorphic effects are applied appropriately
 - [ ] Shadows are multi-layered and subtle
-- [ ] Works on different iPhone sizes (SE, Pro, Pro Max)
+
+### Accessibility
 - [ ] Accessibility labels are present
 - [ ] Dark mode support (if applicable)
+- [ ] Dynamic Type support where appropriate
 
 ---
 

@@ -4,6 +4,7 @@ import UIKit
 struct TypingKeyboardView: View {
     let onAgentModeTapped: () -> Void
     let onKeyTapped: (Key) -> Void
+    var onGlobeTapped: (() -> Void)?
     
     @State private var isShiftEnabled = false
     @State private var isSymbolMode = false
@@ -25,8 +26,14 @@ struct TypingKeyboardView: View {
             ForEach(keyboardLayout.rows, id: \.self) { row in
                 HStack(spacing: 6) {
                     ForEach(row, id: \.id) { key in
-                        KeyView(key: key) {
-                            handleKeyPress(key)
+                        if key.type == .globe {
+                            GlobeKeyView(key: key, onTap: {
+                                onGlobeTapped?()
+                            })
+                        } else {
+                            KeyView(key: key) {
+                                handleKeyPress(key)
+                            }
                         }
                     }
                 }
@@ -49,12 +56,70 @@ struct TypingKeyboardView: View {
             isShiftEnabled.toggle()
         case .symbol:
             isSymbolMode.toggle()
+        case .globe:
+            // Handled separately by GlobeKeyView
+            break
         default:
             onKeyTapped(key)
             if isShiftEnabled && key.type == .character {
                 isShiftEnabled = false
             }
         }
+    }
+}
+
+// Special view for globe key that uses UIKit for proper keyboard switching
+struct GlobeKeyView: UIViewRepresentable {
+    let key: Key
+    let onTap: () -> Void
+    
+    func makeUIView(context: Context) -> GlobeButton {
+        let button = GlobeButton(onTap: onTap)
+        return button
+    }
+    
+    func updateUIView(_ uiView: GlobeButton, context: Context) {}
+}
+
+class GlobeButton: UIButton {
+    private let onTap: () -> Void
+    
+    init(onTap: @escaping () -> Void) {
+        self.onTap = onTap
+        super.init(frame: .zero)
+        setupButton()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupButton() {
+        // Appearance
+        backgroundColor = UIColor.systemGray5
+        layer.cornerRadius = 4
+        layer.borderWidth = 1
+        layer.borderColor = UIColor.systemGray4.cgColor
+        
+        // Globe icon
+        let config = UIImage.SymbolConfiguration(pointSize: 16, weight: .regular)
+        let image = UIImage(systemName: "globe", withConfiguration: config)
+        setImage(image, for: .normal)
+        tintColor = .label
+        
+        // Size
+        translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            widthAnchor.constraint(equalToConstant: 32),
+            heightAnchor.constraint(equalToConstant: 44)
+        ])
+        
+        // Tap action
+        addTarget(self, action: #selector(handleTap), for: .touchUpInside)
+    }
+    
+    @objc private func handleTap() {
+        onTap()
     }
 }
 

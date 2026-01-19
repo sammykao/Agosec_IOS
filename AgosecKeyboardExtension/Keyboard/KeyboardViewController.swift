@@ -22,7 +22,9 @@ class KeyboardViewController: UIInputViewController {
         super.viewWillAppear(animated)
         
         // Save full access status to App Group for main app to read
+        // synchronize() ensures the write is persisted immediately
         AppGroupStorage.shared.set(hasFullAccess, for: "keyboard_has_full_access")
+        AppGroupStorage.shared.synchronize()
         
         checkEntitlement()
     }
@@ -30,6 +32,14 @@ class KeyboardViewController: UIInputViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         updateHeight()
+    }
+    
+    override func textWillChange(_ textInput: UITextInput?) {
+        // Called when text is about to change
+    }
+    
+    override func textDidChange(_ textInput: UITextInput?) {
+        // Called after text changed - can update suggestions here
     }
     
     private func setupKeyboard() {
@@ -93,7 +103,10 @@ class KeyboardViewController: UIInputViewController {
         
         let typingView = TypingKeyboardView(
             onAgentModeTapped: { self.toggleAgentMode() },
-            onKeyTapped: { key in self.handleKeyPress(key) }
+            onKeyTapped: { key in self.handleKeyPress(key) },
+            onGlobeTapped: { [weak self] in
+                self?.advanceToNextInputMode()
+            }
         )
         
         let hostingController = UIHostingController(rootView: typingView)

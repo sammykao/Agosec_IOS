@@ -97,7 +97,7 @@ targets:
             PrefersRightToLeft: false
             PrimaryLanguage: en-US
             RequestsOpenAccess: true
-          NSExtensionMainStoryboard: MainInterface
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).KeyboardViewController
           NSExtensionPointIdentifier: com.apple.keyboard-service
         BACKEND_BASE_URL: "https://api.agosec.com"
         SUBSCRIPTION_PRODUCT_ID: "io.agosec.keyboard.pro"

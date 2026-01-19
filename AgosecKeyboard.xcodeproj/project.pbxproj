@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -927,6 +927,8 @@
 				8BD167809D1D74F7D1B4E44E /* PBXTargetDependency */,
 			);
 			name = AgosecAppTests;
+			packageProductDependencies = (
+			);
 			productName = AgosecAppTests;
 			productReference = 75CB467E633965711606A355 /* AgosecAppTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -958,6 +960,14 @@
 				en,
 			);
 			mainGroup = 1256CF361FA3C8AB05532BA0;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				5328905F9A1FBB6ABBF2A84C /* XCLocalSwiftPackageReference "Packages/Networking" */,
+				D6271B42C84CBD299B77C426 /* XCLocalSwiftPackageReference "Packages/OCR" */,
+				AC4772AC2680165BE10089F5 /* XCLocalSwiftPackageReference "Packages/SharedCore" */,
+				B33E446CC51C568B6F0AA0F5 /* XCLocalSwiftPackageReference "Packages/UIComponents" */,
+			);
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -1191,6 +1201,25 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		5328905F9A1FBB6ABBF2A84C /* XCLocalSwiftPackageReference "Packages/Networking" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Networking;
+		};
+		AC4772AC2680165BE10089F5 /* XCLocalSwiftPackageReference "Packages/SharedCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/SharedCore;
+		};
+		B33E446CC51C568B6F0AA0F5 /* XCLocalSwiftPackageReference "Packages/UIComponents" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/UIComponents;
+		};
+		D6271B42C84CBD299B77C426 /* XCLocalSwiftPackageReference "Packages/OCR" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/OCR;
+		};
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		27E92FF186CE5E553BB70DF9 /* UIComponents */ = {

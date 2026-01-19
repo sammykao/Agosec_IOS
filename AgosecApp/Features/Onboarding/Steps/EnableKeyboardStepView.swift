@@ -163,19 +163,6 @@ struct EnableKeyboardStepView: View {
                                 .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.65))
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal, 24)
-                            
-                            // Skip option for users who already enabled
-                            Button {
-                                // Use DispatchQueue to avoid animation conflicts
-                                DispatchQueue.main.async {
-                                    onNext()
-                                }
-                            } label: {
-                                Text("I've already added the keyboard →")
-                                    .font(.system(size: 15, weight: .medium))
-                                    .foregroundColor(.blue)
-                            }
-                            .padding(.top, 8)
                         }
                     }
                     .padding(.horizontal, min(geometry.size.width * 0.07, 28))
@@ -297,6 +284,8 @@ struct EnableKeyboardStepView: View {
     }
     
     private func checkKeyboardStatus() {
+        // Refresh to get latest from App Group storage
+        permissionsService.refreshStatus()
         isKeyboardEnabled = permissionsService.isKeyboardExtensionEnabled
     }
 }

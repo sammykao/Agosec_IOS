@@ -32,20 +32,27 @@ public struct OnboardingStepTemplate<Content: View, BottomContent: View>: View {
     
     public var body: some View {
         GeometryReader { geometry in
+            let isSmallScreen = geometry.size.width < 380
+            let iconContainerSize = min(geometry.size.width * 0.26, 100)
+            let glowSize = iconContainerSize * 1.2
+            let iconFontSize = min(geometry.size.width * 0.11, 44)
+            let titleSize = min(geometry.size.width * 0.08, 32)
+            let subtitleSize = min(geometry.size.width * 0.043, 17)
+            
             VStack(spacing: 0) {
-                // Top spacing
+                // Top spacing (responsive)
                 Spacer()
                     .frame(height: geometry.size.height * 0.08)
                 
-                // Icon with animated glow
+                // Icon with animated glow (responsive)
                 ZStack {
                     // Glow background
                     Circle()
                         .fill(iconColor.opacity(0.15))
-                        .frame(width: 120, height: 120)
-                        .blur(radius: 20)
+                        .frame(width: glowSize, height: glowSize)
+                        .blur(radius: isSmallScreen ? 15 : 20)
                     
-                    // Icon container
+                    // Icon container (responsive)
                     ZStack {
                         Circle()
                             .fill(
@@ -58,10 +65,10 @@ public struct OnboardingStepTemplate<Content: View, BottomContent: View>: View {
                                     endPoint: .bottomTrailing
                                 )
                             )
-                            .frame(width: 100, height: 100)
+                            .frame(width: iconContainerSize, height: iconContainerSize)
                         
                         Image(systemName: icon)
-                            .font(.system(size: 44, weight: .medium))
+                            .font(.system(size: iconFontSize, weight: .medium))
                             .foregroundStyle(
                                 LinearGradient(
                                     colors: [iconColor, iconColor.opacity(0.7)],
@@ -73,40 +80,42 @@ public struct OnboardingStepTemplate<Content: View, BottomContent: View>: View {
                 }
                 .scaleEffect(iconScale)
                 .opacity(iconOpacity)
-                .padding(.bottom, 32)
+                .padding(.bottom, min(geometry.size.height * 0.04, 32))
                 
-                // Title
+                // Title (responsive)
                 Text(title)
-                    .font(.system(size: 32, weight: .bold, design: .default))
+                    .font(.system(size: titleSize, weight: .bold, design: .default))
                     .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
+                    .padding(.horizontal, geometry.size.width * 0.08)
                     .opacity(contentOpacity)
                     .offset(y: contentOffset)
                 
-                // Subtitle
+                // Subtitle (responsive)
                 Text(subtitle)
-                    .font(.system(size: 17, weight: .regular, design: .default))
+                    .font(.system(size: subtitleSize, weight: .regular, design: .default))
                     .foregroundColor(Color(red: 0.4, green: 0.4, blue: 0.45))
                     .multilineTextAlignment(.center)
-                    .lineSpacing(4)
-                    .padding(.horizontal, 40)
-                    .padding(.top, 12)
+                    .lineSpacing(isSmallScreen ? 3 : 4)
+                    .padding(.horizontal, geometry.size.width * 0.1)
+                    .padding(.top, min(geometry.size.height * 0.015, 12))
                     .opacity(contentOpacity)
                     .offset(y: contentOffset)
                 
-                // Custom content
+                // Custom content (responsive)
                 content
-                    .padding(.top, 32)
+                    .padding(.top, min(geometry.size.height * 0.04, 32))
                     .opacity(contentOpacity)
                     .offset(y: contentOffset)
                 
                 Spacer()
                 
-                // Bottom content (buttons)
+                // Bottom content (buttons) (responsive)
                 bottomContent
-                    .padding(.horizontal, 28)
-                    .padding(.bottom, 100)
+                    .padding(.horizontal, geometry.size.width * 0.07)
+                    .padding(.bottom, min(geometry.size.height * 0.12, 100))
                     .opacity(contentOpacity)
                     .offset(y: contentOffset)
             }
@@ -138,47 +147,57 @@ public struct ModernInstructionCard: View {
     }
     
     public var body: some View {
-        VStack(spacing: 0) {
-            ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
-                HStack(spacing: 16) {
-                    // Step number with gradient
-                    ZStack {
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color.blue, Color.blue.opacity(0.7)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
+        GeometryReader { geometry in
+            let isSmallScreen = geometry.size.width < 380
+            let circleSize: CGFloat = isSmallScreen ? 28 : 32
+            let numberFontSize: CGFloat = isSmallScreen ? 13 : 15
+            let textFontSize: CGFloat = isSmallScreen ? 14 : 16
+            let spacing: CGFloat = isSmallScreen ? 12 : 16
+            
+            VStack(spacing: 0) {
+                ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
+                    HStack(spacing: spacing) {
+                        // Step number with gradient (responsive)
+                        ZStack {
+                            Circle()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color.blue, Color.blue.opacity(0.7)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
                                 )
-                            )
-                            .frame(width: 32, height: 32)
+                                .frame(width: circleSize, height: circleSize)
+                            
+                            Text("\(index + 1)")
+                                .font(.system(size: numberFontSize, weight: .bold, design: .default))
+                                .foregroundColor(.white)
+                        }
                         
-                        Text("\(index + 1)")
-                            .font(.system(size: 15, weight: .bold, design: .default))
-                            .foregroundColor(.white)
+                        Text(step.text)
+                            .font(.system(size: textFontSize, weight: .medium, design: .default))
+                            .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
+                            .fixedSize(horizontal: false, vertical: true)
+                        
+                        Spacer()
                     }
+                    .padding(.vertical, isSmallScreen ? 12 : 14)
                     
-                    Text(step.text)
-                        .font(.system(size: 16, weight: .medium, design: .default))
-                        .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
-                    
-                    Spacer()
-                }
-                .padding(.vertical, 14)
-                
-                if index < steps.count - 1 {
-                    Divider()
-                        .padding(.leading, 48)
+                    if index < steps.count - 1 {
+                        Divider()
+                            .padding(.leading, circleSize + spacing)
+                    }
                 }
             }
+            .padding(.horizontal, isSmallScreen ? 16 : 20)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.white)
+                    .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
+            )
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 8)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
-        )
+        .frame(height: CGFloat(steps.count) * 56 + 16)
         .padding(.horizontal, 24)
     }
 }
@@ -206,17 +225,26 @@ public struct ModernFeatureRow: View {
     }
     
     public var body: some View {
-        HStack(spacing: 14) {
-            Image(systemName: icon)
-                .font(.system(size: 20, weight: .medium))
-                .foregroundColor(color)
+        GeometryReader { geometry in
+            let isSmallScreen = geometry.size.width < 380
+            let iconSize: CGFloat = isSmallScreen ? 18 : 20
+            let textSize: CGFloat = isSmallScreen ? 14 : 16
+            let spacing: CGFloat = isSmallScreen ? 12 : 14
             
-            Text(text)
-                .font(.system(size: 16, weight: .medium, design: .default))
-                .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
-            
-            Spacer()
+            HStack(spacing: spacing) {
+                Image(systemName: icon)
+                    .font(.system(size: iconSize, weight: .medium))
+                    .foregroundColor(color)
+                
+                Text(text)
+                    .font(.system(size: textSize, weight: .medium, design: .default))
+                    .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
+                    .fixedSize(horizontal: false, vertical: true)
+                
+                Spacer()
+            }
         }
+        .frame(height: 28)
     }
 }
 
@@ -246,41 +274,50 @@ public struct ModernActionButton: View {
     }
     
     public var body: some View {
-        Button(action: action) {
-            HStack(spacing: 10) {
-                Text(title)
-                    .font(.system(size: 17, weight: .semibold, design: .default))
-                
-                if let icon = icon {
-                    Image(systemName: icon)
-                        .font(.system(size: 15, weight: .semibold))
-                }
-            }
-            .foregroundColor(style == .primary ? .white : Color.blue)
-            .frame(maxWidth: .infinity)
-            .frame(height: 56)
-            .background(
-                Group {
-                    if style == .primary {
-                        LinearGradient(
-                            colors: [Color.blue, Color.blue.opacity(0.85)],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    } else {
-                        Color.blue.opacity(0.1)
+        GeometryReader { geometry in
+            let isSmallScreen = geometry.size.width < 380
+            let titleSize: CGFloat = isSmallScreen ? 15 : 17
+            let iconSize: CGFloat = isSmallScreen ? 13 : 15
+            let buttonHeight: CGFloat = isSmallScreen ? 50 : 56
+            let spacing: CGFloat = isSmallScreen ? 8 : 10
+            
+            Button(action: action) {
+                HStack(spacing: spacing) {
+                    Text(title)
+                        .font(.system(size: titleSize, weight: .semibold, design: .default))
+                    
+                    if let icon = icon {
+                        Image(systemName: icon)
+                            .font(.system(size: iconSize, weight: .semibold))
                     }
                 }
-            )
-            .cornerRadius(16)
-            .shadow(
-                color: style == .primary ? Color.blue.opacity(0.3) : Color.clear,
-                radius: 12,
-                x: 0,
-                y: 6
-            )
+                .foregroundColor(style == .primary ? .white : Color.blue)
+                .frame(maxWidth: .infinity)
+                .frame(height: buttonHeight)
+                .background(
+                    Group {
+                        if style == .primary {
+                            LinearGradient(
+                                colors: [Color.blue, Color.blue.opacity(0.85)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        } else {
+                            Color.blue.opacity(0.1)
+                        }
+                    }
+                )
+                .cornerRadius(isSmallScreen ? 14 : 16)
+                .shadow(
+                    color: style == .primary ? Color.blue.opacity(0.3) : Color.clear,
+                    radius: isSmallScreen ? 10 : 12,
+                    x: 0,
+                    y: isSmallScreen ? 4 : 6
+                )
+            }
+            .buttonStyle(ScaleButtonStyle())
         }
-        .buttonStyle(ScaleButtonStyle())
+        .frame(height: 56)
     }
 }
 

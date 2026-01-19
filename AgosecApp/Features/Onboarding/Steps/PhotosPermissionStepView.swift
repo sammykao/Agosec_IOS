@@ -20,7 +20,7 @@ struct PhotosPermissionStepView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
                     Spacer()
-                        .frame(height: max(geometry.size.height * 0.05, 24))
+                        .frame(height: max(geometry.size.height * 0.12, 60))
                     
                     // Animated icon with modern design (responsive)
                     ZStack {

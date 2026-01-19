@@ -4,6 +4,7 @@ import UIComponents
 struct DemoConversationStepView: View {
     let onComplete: () -> Void
     @State private var showKeyboardDemo = false
+    @State private var hasTriedDemo = false
     @State private var iconScale: CGFloat = 0.5
     @State private var iconOpacity: Double = 0
     @State private var contentOpacity: Double = 0
@@ -12,123 +13,138 @@ struct DemoConversationStepView: View {
     
     var body: some View {
         GeometryReader { geometry in
+            let isSmallScreen = geometry.size.width < 380
+            let iconSize = min(geometry.size.width * 0.22, 90)
+            let ringBaseSize = min(geometry.size.width * 0.25, 100)
+            
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
                     Spacer()
-                        .frame(height: max(geometry.size.height * 0.04, 20))
+                        .frame(height: max(geometry.size.height * 0.12, 60))
                     
-                    // Animated icon with modern design
+                    // Animated icon with modern design (responsive)
                     ZStack {
-                    // Animated glow rings
-                    ForEach(0..<2) { index in
-                        Circle()
-                            .stroke(
-                                LinearGradient(
-                                    colors: [
-                                        Color.purple.opacity(0.4 - Double(index) * 0.2),
-                                        Color.purple.opacity(0.15 - Double(index) * 0.1)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 2
-                            )
-                            .frame(width: 100 + CGFloat(index) * 16, height: 100 + CGFloat(index) * 16)
-                            .scaleEffect(1.0 + CGFloat(index) * 0.1)
-                            .opacity(iconOpacity * (1.0 - Double(index) * 0.3))
+                        // Animated glow rings (responsive)
+                        ForEach(0..<2) { index in
+                            Circle()
+                                .stroke(
+                                    LinearGradient(
+                                        colors: [
+                                            Color.purple.opacity(0.4 - Double(index) * 0.2),
+                                            Color.purple.opacity(0.15 - Double(index) * 0.1)
+                                        ],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: isSmallScreen ? 1.5 : 2
+                                )
+                                .frame(width: ringBaseSize + CGFloat(index) * 16, height: ringBaseSize + CGFloat(index) * 16)
+                                .scaleEffect(1.0 + CGFloat(index) * 0.1)
+                                .opacity(iconOpacity * (1.0 - Double(index) * 0.3))
+                        }
+                        
+                        // Icon background with glassmorphism (responsive)
+                        ZStack {
+                            Circle()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [
+                                            Color.purple.opacity(0.25),
+                                            Color.purple.opacity(0.12)
+                                        ],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: iconSize, height: iconSize)
+                            
+                            Circle()
+                                .stroke(
+                                    LinearGradient(
+                                        colors: [
+                                            Color.purple.opacity(0.4),
+                                            Color.purple.opacity(0.15)
+                                        ],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 1
+                                )
+                                .frame(width: iconSize, height: iconSize)
+                            
+                            Image(systemName: "bubble.left.and.bubble.right.fill")
+                                .font(.system(size: min(geometry.size.width * 0.09, 36), weight: .medium))
+                                .foregroundStyle(
+                                    LinearGradient(
+                                        colors: [Color.purple, Color.purple.opacity(0.8)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                        }
                     }
+                    .scaleEffect(iconScale)
+                    .opacity(iconOpacity)
+                    .padding(.bottom, min(geometry.size.height * 0.025, 20))
                     
-                    // Icon background with glassmorphism
-                    ZStack {
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    colors: [
-                                        Color.purple.opacity(0.25),
-                                        Color.purple.opacity(0.12)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
+                    // Title (responsive)
+                    Text("Try It Out")
+                        .font(.system(size: min(geometry.size.width * 0.07, 28), weight: .bold, design: .default))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [Color.white, Color.purple],
+                                startPoint: .leading,
+                                endPoint: .trailing
                             )
-                            .frame(width: 90, height: 90)
-                        
-                        Circle()
-                            .stroke(
-                                LinearGradient(
-                                    colors: [
-                                        Color.purple.opacity(0.4),
-                                        Color.purple.opacity(0.15)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 1
-                            )
-                            .frame(width: 90, height: 90)
-                        
-                        Image(systemName: "bubble.left.and.bubble.right.fill")
-                            .font(.system(size: 36, weight: .medium))
-                            .foregroundStyle(
-                                LinearGradient(
-                                    colors: [Color.purple, Color.purple.opacity(0.8)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                    }
-                }
-                .scaleEffect(iconScale)
-                .opacity(iconOpacity)
-                .padding(.bottom, 20)
-                
-                // Title
-                Text("Try It Out")
-                    .font(.system(size: 28, weight: .bold, design: .default))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [Color.white, Color.purple],
-                            startPoint: .leading,
-                            endPoint: .trailing
                         )
-                    )
-                    .opacity(contentOpacity)
-                    .offset(y: contentOffset)
-                
-                // Subtitle
-                Text("See how Agosec helps you communicate smarter")
-                    .font(.system(size: 17, weight: .regular, design: .default))
-                    .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.75))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
-                    .padding(.top, 10)
-                    .opacity(contentOpacity)
-                    .offset(y: contentOffset)
-                
-                // Demo conversation
-                conversationPreview
-                    .padding(.top, 20)
-                    .opacity(contentOpacity)
-                    .offset(y: contentOffset)
-                
+                        .opacity(contentOpacity)
+                        .offset(y: contentOffset)
+                    
+                    // Subtitle (responsive)
+                    Text("See how Agosec helps you communicate smarter")
+                        .font(.system(size: min(geometry.size.width * 0.043, 17), weight: .regular, design: .default))
+                        .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.75))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, geometry.size.width * 0.1)
+                        .padding(.top, min(geometry.size.height * 0.012, 10))
+                        .opacity(contentOpacity)
+                        .offset(y: contentOffset)
+                    
+                    // Demo conversation (responsive)
+                    conversationPreview(in: geometry)
+                        .padding(.top, min(geometry.size.height * 0.025, 20))
+                        .opacity(contentOpacity)
+                        .offset(y: contentOffset)
+                    
                     Spacer(minLength: 16)
                     
-                    // Buttons
-                    VStack(spacing: 14) {
-                        ModernActionButton(
-                            title: "Try Demo",
-                            icon: "keyboard",
-                            action: { showKeyboardDemo = true }
-                        )
-                        
-                        ModernActionButton(
-                            title: "Get Started",
-                            icon: "arrow.right",
-                            style: .secondary,
-                            action: onComplete
-                        )
+                    // Buttons (responsive)
+                    VStack(spacing: isSmallScreen ? 10 : 14) {
+                        if hasTriedDemo {
+                            ModernActionButton(
+                                title: "Continue",
+                                icon: "arrow.right",
+                                action: onComplete
+                            )
+                            
+                            Button(action: { showKeyboardDemo = true }) {
+                                Text("Try Demo Again")
+                                    .font(.system(size: isSmallScreen ? 14 : 16, weight: .medium))
+                                    .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.75))
+                            }
+                        } else {
+                            ModernActionButton(
+                                title: "Try Demo",
+                                icon: "keyboard",
+                                action: { showKeyboardDemo = true }
+                            )
+                            
+                            Text("Complete the demo to continue")
+                                .font(.system(size: isSmallScreen ? 12 : 13, weight: .regular))
+                                .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.65))
+                        }
                     }
-                    .padding(.horizontal, 28)
+                    .padding(.horizontal, geometry.size.width * 0.07)
                     .padding(.bottom, 80) // Account for page indicator
                     .opacity(contentOpacity)
                     .offset(y: contentOffset)
@@ -137,7 +153,9 @@ struct DemoConversationStepView: View {
                 .frame(minHeight: geometry.size.height)
             }
         }
-        .sheet(isPresented: $showKeyboardDemo) {
+        .sheet(isPresented: $showKeyboardDemo, onDismiss: {
+            hasTriedDemo = true
+        }) {
             KeyboardDemoView()
         }
         .onAppear {
@@ -145,38 +163,44 @@ struct DemoConversationStepView: View {
         }
     }
     
-    private var conversationPreview: some View {
-        VStack(spacing: 12) {
+    private func conversationPreview(in geometry: GeometryProxy) -> some View {
+        let isSmallScreen = geometry.size.width < 380
+        let fontSize = min(geometry.size.width * 0.04, 16)
+        let hintFontSize = min(geometry.size.width * 0.035, 14)
+        
+        return VStack(spacing: isSmallScreen ? 10 : 12) {
             // Incoming message
             MessageBubble(
                 text: "Hey! Can you help me draft a professional email?",
                 isUser: false,
-                isVisible: messageAnimations[0]
+                isVisible: messageAnimations[0],
+                fontSize: fontSize
             )
             
             // User message
             MessageBubble(
                 text: "Sure! I'll help you write it.",
                 isUser: true,
-                isVisible: messageAnimations[1]
+                isVisible: messageAnimations[1],
+                fontSize: fontSize
             )
             
             // AI suggestion hint
             if messageAnimations[2] {
-                HStack(spacing: 8) {
+                HStack(spacing: isSmallScreen ? 6 : 8) {
                     Image(systemName: "sparkles")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(.system(size: hintFontSize, weight: .medium))
                         .foregroundColor(.purple)
                     
                     Text("Agosec suggests contextual responses")
-                        .font(.system(size: 14, weight: .medium, design: .default))
+                        .font(.system(size: hintFontSize, weight: .medium, design: .default))
                         .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.75))
                 }
-                .padding(.top, 8)
+                .padding(.top, isSmallScreen ? 6 : 8)
                 .transition(.opacity.combined(with: .scale(scale: 0.9)))
             }
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, geometry.size.width * 0.06)
     }
     
     private func startAnimations() {
@@ -219,18 +243,19 @@ struct MessageBubble: View {
     let text: String
     let isUser: Bool
     let isVisible: Bool
+    var fontSize: CGFloat = 16
     
     var body: some View {
         HStack {
-            if isUser { Spacer(minLength: 60) }
+            if isUser { Spacer(minLength: 40) }
             
             Text(text)
-                .font(.system(size: 16, weight: .regular, design: .default))
+                .font(.system(size: fontSize, weight: .regular, design: .default))
                 .foregroundColor(isUser ? .white : Color(red: 0.9, green: 0.9, blue: 0.95))
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
+                .padding(.horizontal, max(fontSize * 0.9, 12))
+                .padding(.vertical, max(fontSize * 0.7, 10))
                 .background(
-                    RoundedRectangle(cornerRadius: 18)
+                    RoundedRectangle(cornerRadius: max(fontSize * 1.1, 16))
                         .fill(
                             isUser ?
                             LinearGradient(
@@ -246,12 +271,12 @@ struct MessageBubble: View {
                         )
                 )
                 .overlay(
-                    RoundedRectangle(cornerRadius: 18)
+                    RoundedRectangle(cornerRadius: max(fontSize * 1.1, 16))
                         .stroke(Color.white.opacity(isUser ? 0 : 0.2), lineWidth: 1)
                 )
                 .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
             
-            if !isUser { Spacer(minLength: 60) }
+            if !isUser { Spacer(minLength: 40) }
         }
         .opacity(isVisible ? 1 : 0)
         .offset(y: isVisible ? 0 : 20)
