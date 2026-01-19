@@ -25,22 +25,27 @@ struct AgentKeyboardView: View {
         VStack(spacing: 0) {
             headerView
                 .frame(height: 44)
-                .background(Color.gray.opacity(0.1))
+                .background(Color.clear)
             
             mainContent
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .background(Color(UIColor.systemBackground))
+        .background(Color.clear)
     }
     
     private var headerView: some View {
-        HStack {
-            Button(action: onClose) {
+        HStack(spacing: 0) {
+            Button(action: {
+                print("🔙 Back button tapped - closing agent mode")
+                onClose()
+            }) {
                 Image(systemName: "xmark")
-                    .font(.system(size: 18))
+                    .font(.system(size: 18, weight: .medium))
                     .foregroundColor(.primary)
-                    .padding(8)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
+            .buttonStyle(PlainButtonStyle())
             
             Spacer()
             
@@ -49,14 +54,20 @@ struct AgentKeyboardView: View {
             
             Spacer()
             
-            Button(action: { currentStep = .introChoice }) {
+            Button(action: {
+                print("➕ New session button tapped")
+                currentStep = .introChoice
+            }) {
                 Image(systemName: "plus")
-                    .font(.system(size: 18))
+                    .font(.system(size: 18, weight: .medium))
                     .foregroundColor(.primary)
-                    .padding(8)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
+            .buttonStyle(PlainButtonStyle())
         }
-        .padding(.horizontal)
+        .padding(.horizontal, 8)
+        .frame(height: 44)
     }
     
     @ViewBuilder
@@ -64,9 +75,12 @@ struct AgentKeyboardView: View {
         ZStack {
         switch currentStep {
         case .introChoice:
-            AgentIntroView { choice in
-                handleIntroChoice(choice)
-            }
+            AgentIntroView(
+                onChoiceMade: { choice in
+                    handleIntroChoice(choice)
+                },
+                onClose: onClose
+            )
             .environmentObject(toastManager)
             case .chat(let session):
                 AgentChatView(
@@ -76,6 +90,7 @@ struct AgentKeyboardView: View {
                         currentStep = .introChoice
                     }
                 )
+                .environmentObject(toastManager)
             }
             
             // Loading overlay
@@ -143,7 +158,8 @@ class AgentSessionManager: ObservableObject {
                 accessToken: accessToken,
                 sessionId: nil
             )
-            self.ocrService = MockOCRService()
+            // Use REAL OCR service in mock mode so user can see actual extracted text
+            self.ocrService = OCRService()
         } else {
             // Real mode requires access token
             if let accessToken = accessToken {
@@ -166,9 +182,27 @@ class AgentSessionManager: ObservableObject {
         case .useAndDeleteScreenshots(let images),
              .useScreenshots(let images):
             let context = try await extractContext(from: images)
-            let summary = try await fetchSummary(session: session, context: context)
-            let turn = ChatTurn(role: .assistant, text: summary)
-            session.turns.append(turn)
+            
+            // In mock backend mode, display the extracted OCR text directly
+            if BuildMode.isMockBackend {
+                // Show the raw extracted text so user can see what was extracted
+                let extractedText = context.rawText
+                let displayText = """
+                📸 **OCR Extracted Text:**
+                
+                \(extractedText)
+                
+                ---
+                *This is the text extracted from your screenshots. In production mode, this would be sent to the AI for context.*
+                """
+                let turn = ChatTurn(role: .assistant, text: displayText)
+                session.turns.append(turn)
+            } else {
+                // Real mode: send to API for summary
+                let summary = try await fetchSummary(session: session, context: context)
+                let turn = ChatTurn(role: .assistant, text: summary)
+                session.turns.append(turn)
+            }
             
         case .continueWithoutContext:
             let intro = try await fetchIntro(session: session)

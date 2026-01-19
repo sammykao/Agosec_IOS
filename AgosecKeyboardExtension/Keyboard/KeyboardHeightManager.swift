@@ -4,22 +4,33 @@ import SharedCore
 class KeyboardHeightManager {
     private weak var view: UIView?
     
+    // Default heights for when window isn't available
+    private let defaultNormalHeight: CGFloat = 260
+    private let defaultAgentHeight: CGFloat = 500
+    
     init(view: UIView) {
         self.view = view
     }
     
     func calculateHeight(mode: KeyboardMode, isExpanded: Bool) -> CGFloat {
-        guard let window = view?.window else { return 260 }
+        // ALWAYS use UIScreen.main.bounds.height for screen height
+        // Don't use window or superview bounds as they may be the keyboard's current height
+        let screenHeight = UIScreen.main.bounds.height
         
-        let screenHeight = window.bounds.height
+        print("📏 Screen height: \(screenHeight) (from UIScreen.main.bounds)")
+        
         let orientation = UIDevice.current.orientation
         
+        let height: CGFloat
         switch mode {
         case .normal:
-            return calculateNormalHeight(screenHeight: screenHeight, orientation: orientation)
+            height = calculateNormalHeight(screenHeight: screenHeight, orientation: orientation)
         case .agent:
-            return calculateAgentHeight(screenHeight: screenHeight, orientation: orientation)
+            height = calculateAgentHeight(screenHeight: screenHeight, orientation: orientation)
         }
+        
+        print("📏 KeyboardHeightManager - mode: \(mode), screenHeight: \(screenHeight), calculated height: \(height), percentage: \(Int((height/screenHeight)*100))%")
+        return height
     }
     
     private func calculateNormalHeight(screenHeight: CGFloat, orientation: UIDeviceOrientation) -> CGFloat {
@@ -33,13 +44,10 @@ class KeyboardHeightManager {
     }
     
     private func calculateAgentHeight(screenHeight: CGFloat, orientation: UIDeviceOrientation) -> CGFloat {
-        let targetHeight = screenHeight * 0.80
-        
-        if orientation.isPortrait || orientation == .unknown {
-            return clamp(targetHeight, min: 420, max: 650)
-        } else {
-            return clamp(targetHeight, min: 300, max: 420)
-        }
+        // Use 80% of screen height for agent mode
+        let height = screenHeight * 0.80
+        print("📏 Agent height: \(height) (80% of \(screenHeight))")
+        return height
     }
     
     private func clamp(_ value: CGFloat, min: CGFloat, max: CGFloat) -> CGFloat {

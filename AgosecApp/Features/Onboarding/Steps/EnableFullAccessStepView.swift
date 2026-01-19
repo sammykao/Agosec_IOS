@@ -128,7 +128,7 @@ struct EnableFullAccessStepView: View {
                             action: onNext
                         )
                         
-                        Text("Full access enabled!")
+                        Text("Ready to continue!")
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.green)
                     } else {
@@ -139,26 +139,13 @@ struct EnableFullAccessStepView: View {
                             action: openSettings
                         )
                         
-                        // Show activation hint
-                        if permissionsService.needsKeyboardActivation {
-                            VStack(spacing: 6) {
-                                Text("After enabling full access:")
-                                    .font(.system(size: 13, weight: .medium, design: .default))
-                                    .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.75))
-                                
-                                Text("Open any app and type with Agosec keyboard to activate")
-                                    .font(.system(size: 12, weight: .regular, design: .default))
-                                    .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.65))
-                                    .multilineTextAlignment(.center)
-                            }
+                        Text(permissionsService.hasOpenedFullAccessSettings
+                            ? "Toggle on full access, then return here"
+                            : "Tap to open Settings and enable full access")
+                            .font(.system(size: 13, weight: .regular, design: .default))
+                            .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.65))
+                            .multilineTextAlignment(.center)
                             .padding(.horizontal, 24)
-                        } else {
-                            Text("Enable full access in Settings, then return here")
-                                .font(.system(size: 13, weight: .regular, design: .default))
-                                .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.65))
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 24)
-                        }
                     }
                 }
                 .padding(.horizontal, 28)
@@ -236,8 +223,7 @@ struct EnableFullAccessStepView: View {
         [
             "Open Settings → General → Keyboard",
             "Tap \"Keyboards\" → \"Agosec Keyboard\"",
-            "Toggle on \"Allow Full Access\"",
-            "Type something with Agosec to activate"
+            "Toggle on \"Allow Full Access\""
         ]
     }
     
@@ -265,6 +251,7 @@ struct EnableFullAccessStepView: View {
     }
     
     private func openSettings() {
+        permissionsService.markFullAccessSettingsOpened()
         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
         UIApplication.shared.open(url)
     }

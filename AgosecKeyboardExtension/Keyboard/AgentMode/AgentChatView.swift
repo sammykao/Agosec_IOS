@@ -31,8 +31,9 @@ struct AgentChatView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             
             inputView
-                .background(Color.gray.opacity(0.1))
+                .background(Color.clear)
         }
+        .background(Color.clear)
     }
     
     private var chatMessagesView: some View {

@@ -69,8 +69,8 @@ The project is structured as a modular iOS app with the following components:
 
 1. **Normal Mode**: Standard typing keyboard with:
    - QWERTY layout with shift and symbols
-   - Emoji access
-   - Globe key for keyboard switching
+   - iOS-native styling and behavior
+   - Arrow key for return/newline
    - Agent mode toggle button
 
 2. **Agent Mode**: Expanded interface (~80% screen height) with:

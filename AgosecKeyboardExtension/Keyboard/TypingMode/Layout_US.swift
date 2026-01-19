@@ -23,15 +23,17 @@ enum KeyType {
     case backspace
     case space
     case shift
-    case globe
     case symbol
     case `return`
+    case arrow
+    case emoji
 }
 
 enum KeySize {
-    case normal
-    case wide
-    case space
+    case normal      // Regular letter key
+    case wide        // Shift, backspace, 123, return
+    case space       // Spacebar
+    case functional  // Bottom row functional keys (123, emoji)
 }
 
 protocol KeyboardLayout {
@@ -43,19 +45,19 @@ struct QWERTYKeyboardLayout: KeyboardLayout {
     
     var rows: [[Key]] {
         return [
-            // Row 1: QWERTYUIOP
+            // Row 1: QWERTYUIOP (10 keys)
             ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"].map {
                 Key(value: caseValue($0))
             },
             
-            // Row 2: ASDFGHJKL
+            // Row 2: ASDFGHJKL (9 keys - centered)
             ["a", "s", "d", "f", "g", "h", "j", "k", "l"].map {
                 Key(value: caseValue($0))
             },
             
             // Row 3: Shift + ZXCVBNM + Backspace
             [
-                Key(value: "", type: .shift, imageName: "shift"),
+                Key(value: "", type: .shift, size: .wide, imageName: isShiftEnabled ? "shift.fill" : "shift"),
                 Key(value: caseValue("z")),
                 Key(value: caseValue("x")),
                 Key(value: caseValue("c")),
@@ -66,12 +68,12 @@ struct QWERTYKeyboardLayout: KeyboardLayout {
                 Key(value: "", type: .backspace, size: .wide, imageName: "delete.left")
             ],
             
-            // Row 4: 123, Globe, Space, Return
+            // Row 4: 123, Emoji, Space, Return
             [
-                Key(value: "123", type: .symbol, size: .wide),
-                Key(value: "", type: .globe, size: .normal, imageName: "globe"),
+                Key(value: "123", type: .symbol, size: .functional),
+                Key(value: "😀", type: .emoji, size: .functional, displayValue: "😀"),
                 Key(value: " ", type: .space, size: .space, displayValue: "space"),
-                Key(value: "New", type: .return, size: .wide, displayValue: "New")
+                Key(value: "", type: .arrow, size: .functional, imageName: "return")
             ]
         ]
     }
@@ -84,13 +86,13 @@ struct QWERTYKeyboardLayout: KeyboardLayout {
 struct SymbolKeyboardLayout: KeyboardLayout {
     var rows: [[Key]] {
         [
-            // Row 1
+            // Row 1: Numbers
             ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"].map {
                 Key(value: $0)
             },
             
-            // Row 2
-            ["-", "/", ":", ";", "(", ")", "$", "&", "@", "\""].map {
+            // Row 2: Symbols (9 keys - centered like letters)
+            ["-", "/", ":", ";", "(", ")", "$", "&", "@"].map {
                 Key(value: $0)
             },
             
@@ -102,15 +104,16 @@ struct SymbolKeyboardLayout: KeyboardLayout {
                 Key(value: "?"),
                 Key(value: "!"),
                 Key(value: "'"),
+                Key(value: "\""),
                 Key(value: "", type: .backspace, size: .wide, imageName: "delete.left")
             ],
             
             // Row 4
             [
-                Key(value: "ABC", type: .symbol, size: .wide),
-                Key(value: "", type: .globe, size: .normal, imageName: "globe"),
+                Key(value: "ABC", type: .symbol, size: .functional),
+                Key(value: "😀", type: .emoji, size: .functional, displayValue: "😀"),
                 Key(value: " ", type: .space, size: .space, displayValue: "space"),
-                Key(value: "New", type: .return, size: .wide, displayValue: "New")
+                Key(value: "", type: .arrow, size: .functional, imageName: "return")
             ]
         ]
     }

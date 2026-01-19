@@ -5,6 +5,7 @@ import UIComponents
 
 struct AgentIntroView: View {
     let onChoiceMade: (IntroChoice) -> Void
+    let onClose: () -> Void
     
     @State private var showingPhotoPicker = false
     @State private var selectedImages: [UIImage] = []
@@ -15,18 +16,18 @@ struct AgentIntroView: View {
     @EnvironmentObject var toastManager: ToastManager
     
     var body: some View {
-        VStack(spacing: 32) {
-            Spacer()
-            
-            headerSection
-            
-            choiceButtonsSection
-            
-            Spacer()
-            
-            tipsSection
+        ScrollView {
+            VStack(spacing: 24) {
+                headerSection
+                
+                choiceButtonsSection
+                
+                tipsSection
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            .padding(.bottom, 16)
         }
-        .padding()
         .sheet(isPresented: $showingPhotoPicker) {
             PhotoPicker(
                 selectedImages: $selectedImages,
@@ -101,89 +102,110 @@ struct AgentIntroView: View {
     }
     
     private var headerSection: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) {
             Image(systemName: "brain")
-                .font(.system(size: 60))
+                .font(.system(size: 48))
                 .foregroundColor(.purple)
             
             Text("How can I help?")
-                .font(.system(size: 24, weight: .bold))
+                .font(.system(size: 22, weight: .bold))
                 .multilineTextAlignment(.center)
             
             Text("Choose how to start your AI session")
-                .font(.system(size: 16))
+                .font(.system(size: 15))
                 .foregroundColor(.gray)
                 .multilineTextAlignment(.center)
         }
+        .padding(.top, 8)
     }
     
     private var choiceButtonsSection: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) {
             Button(action: { checkPhotoAccessAndShowPicker() }) {
-                VStack(spacing: 12) {
+                VStack(spacing: 10) {
                     Image(systemName: "photo.badge.plus")
-                        .font(.system(size: 32))
+                        .font(.system(size: 28))
                     
                     VStack(spacing: 4) {
                         Text("Use Screenshots")
-                            .font(.system(size: 18, weight: .semibold))
+                            .font(.system(size: 16, weight: .semibold))
                         Text("Import screenshots for context")
-                            .font(.system(size: 14))
+                            .font(.system(size: 13))
                             .foregroundColor(.gray)
                     }
                 }
-                .padding(20)
+                .padding(16)
                 .frame(maxWidth: .infinity)
                 .background(Color.blue.opacity(0.1))
-                .cornerRadius(12)
+                .cornerRadius(10)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.blue.opacity(0.3), lineWidth: 2)
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.blue.opacity(0.3), lineWidth: 1.5)
                 )
             }
             .foregroundColor(.primary)
             
             Button(action: { onChoiceMade(.continueWithoutContext) }) {
-                VStack(spacing: 12) {
+                VStack(spacing: 10) {
                     Image(systemName: "message.circle")
-                        .font(.system(size: 32))
+                        .font(.system(size: 28))
                     
                     VStack(spacing: 4) {
                         Text("Continue without Context")
-                            .font(.system(size: 18, weight: .semibold))
+                            .font(.system(size: 16, weight: .semibold))
                         Text("Start fresh conversation")
-                            .font(.system(size: 14))
+                            .font(.system(size: 13))
                             .foregroundColor(.gray)
                     }
                 }
-                .padding(20)
+                .padding(16)
                 .frame(maxWidth: .infinity)
                 .background(Color.gray.opacity(0.1))
-                .cornerRadius(12)
+                .cornerRadius(10)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.gray.opacity(0.3), lineWidth: 2)
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.gray.opacity(0.3), lineWidth: 1.5)
                 )
             }
             .foregroundColor(.primary)
+            
+            // Back button
+            Button(action: {
+                print("🔙 Back to keyboard button tapped in intro view")
+                onClose()
+            }) {
+                HStack(spacing: 6) {
+                    Image(systemName: "keyboard")
+                        .font(.system(size: 14, weight: .medium))
+                    Text("Back to Keyboard")
+                        .font(.system(size: 14, weight: .medium))
+                }
+                .foregroundColor(.primary)
+                .padding(.vertical, 10)
+                .padding(.horizontal, 16)
+                .frame(maxWidth: .infinity)
+                .background(Color.gray.opacity(0.15))
+                .cornerRadius(8)
+            }
+            .buttonStyle(PlainButtonStyle())
         }
     }
     
     private var tipsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 10) {
             Text("💡 Tips")
-                .font(.system(size: 16, weight: .semibold))
+                .font(.system(size: 15, weight: .semibold))
             
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text("• Screenshots are optional - skip if you prefer")
-                    .font(.system(size: 14))
+                    .font(.system(size: 13))
                 Text("• You can import 1-5 screenshots at once")
-                    .font(.system(size: 14))
+                    .font(.system(size: 13))
                 Text("• Context helps AI understand your situation")
-                    .font(.system(size: 14))
+                    .font(.system(size: 13))
             }
         }
-        .padding()
+        .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.yellow.opacity(0.1))
         .cornerRadius(8)

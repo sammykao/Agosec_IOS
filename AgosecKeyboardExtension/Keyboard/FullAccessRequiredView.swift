@@ -1,38 +1,24 @@
 import SwiftUI
-import SharedCore
 
-struct LockedView: View {
-    let onSubscribeTapped: () -> Void
+struct FullAccessRequiredView: View {
+    let onOpenSettings: () -> Void
     
-    @State private var isOnboardingComplete: Bool = false
     @Environment(\.colorScheme) var colorScheme
-    
-    init(onSubscribeTapped: @escaping () -> Void) {
-        self.onSubscribeTapped = onSubscribeTapped
-        if let complete: Bool = AppGroupStorage.shared.get(Bool.self, for: "onboarding_complete") {
-            _isOnboardingComplete = State(initialValue: complete)
-        }
-    }
     
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                // Content area - takes available space
+                // Content area
                 VStack(spacing: 12) {
-                    // Icon
-                    Image(systemName: "lock.fill")
+                    Image(systemName: "keyboard.badge.exclamationmark")
                         .font(.system(size: 36))
                         .foregroundColor(.orange)
                     
-                    // Title
-                    Text(isOnboardingComplete ? "Subscribe to Unlock" : "Finish Setup")
+                    Text("Full Access Required")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(primaryTextColor)
                     
-                    // Subtitle
-                    Text(isOnboardingComplete 
-                         ? "Subscribe to use AI features"
-                         : "Complete setup in the Agosec app")
+                    Text("Enable Full Access in Settings to use this keyboard")
                         .font(.system(size: 14))
                         .foregroundColor(secondaryTextColor)
                         .multilineTextAlignment(.center)
@@ -42,17 +28,17 @@ struct LockedView: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: geometry.size.height * 0.6)
                 
-                // Button area - fixed at bottom
+                // Button area
                 VStack(spacing: 8) {
                     Button(action: {
                         let impact = UIImpactFeedbackGenerator(style: .medium)
                         impact.impactOccurred()
-                        onSubscribeTapped()
+                        onOpenSettings()
                     }) {
                         HStack(spacing: 8) {
-                            Image(systemName: "arrow.up.forward.app")
+                            Image(systemName: "gear")
                                 .font(.system(size: 14, weight: .medium))
-                            Text("Open Agosec App")
+                            Text("Open Settings")
                                 .font(.system(size: 15, weight: .semibold))
                         }
                         .foregroundColor(.white)
@@ -70,7 +56,7 @@ struct LockedView: View {
                     .buttonStyle(PlainButtonStyle())
                     .padding(.horizontal, 16)
                     
-                    Text("Tap keyboard switcher to change keyboards")
+                    Text("Settings → Keyboards → Agosec → Full Access")
                         .font(.system(size: 11))
                         .foregroundColor(tertiaryTextColor)
                 }
@@ -88,7 +74,7 @@ struct LockedView: View {
     }
     
     private var secondaryTextColor: Color {
-        colorScheme == .dark 
+        colorScheme == .dark
             ? Color(white: 0.7)
             : Color(white: 0.4)
     }

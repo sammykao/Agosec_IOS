@@ -42,17 +42,32 @@ class PermissionsService: ObservableObject {
         return false
     }
     
-    var hasFullAccess: Bool {
+    /// Returns true if full access has been confirmed by the keyboard extension
+    var hasFullAccessConfirmed: Bool {
         // The keyboard extension writes this to App Group storage when it loads
-        // Returns false if:
-        // 1. Keyboard has never been used (nil -> false)
-        // 2. Keyboard was used but full access is disabled (false -> false)
         return AppGroupStorage.shared.get(Bool.self, for: "keyboard_has_full_access") ?? false
+    }
+    
+    /// Tracks if user has opened Settings for full access step
+    @Published var hasOpenedFullAccessSettings: Bool = false
+    
+    var hasFullAccess: Bool {
+        // If keyboard extension has confirmed full access, use that
+        if hasKeyboardBeenActivated {
+            return hasFullAccessConfirmed
+        }
+        // Allow progression only if keyboard is enabled AND user has gone through Settings
+        // Actual full access verification happens when keyboard is first used
+        return isKeyboardExtensionEnabled && hasOpenedFullAccessSettings
     }
     
     /// Indicates if the user needs to type with the keyboard to update status
     var needsKeyboardActivation: Bool {
         return !hasKeyboardBeenActivated
+    }
+    
+    func markFullAccessSettingsOpened() {
+        hasOpenedFullAccessSettings = true
     }
     
     func refreshStatus() {

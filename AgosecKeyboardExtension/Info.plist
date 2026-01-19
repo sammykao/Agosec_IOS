@@ -45,10 +45,10 @@
 			<key>RequestsOpenAccess</key>
 			<true/>
 		</dict>
-		<key>NSExtensionPrincipalClass</key>
-		<string>$(PRODUCT_MODULE_NAME).KeyboardViewController</string>
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.keyboard-service</string>
+		<key>NSExtensionPrincipalClass</key>
+		<string>$(PRODUCT_MODULE_NAME).KeyboardViewController</string>
 	</dict>
 	<key>SUBSCRIPTION_PRODUCT_ID</key>
 	<string>io.agosec.keyboard.pro</string>

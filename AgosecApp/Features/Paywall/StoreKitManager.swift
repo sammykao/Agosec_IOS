@@ -139,6 +139,40 @@ class StoreKitManager: ObservableObject {
             }
         }
     }
+    
+    /// Check Apple for current subscription status and update cache
+    /// Call this on app launch to keep entitlement fresh for keyboard
+    func checkEntitlementOnLaunch() async {
+        var foundActiveSubscription = false
+        
+        for await result in Transaction.currentEntitlements {
+            if case .verified(let transaction) = result {
+                if transaction.productID == productId {
+                    if let expirationDate = transaction.expirationDate, expirationDate > Date() {
+                        // Active subscription - save to cache
+                        let entitlement = EntitlementState(
+                            isActive: true,
+                            expiresAt: expirationDate,
+                            productId: transaction.productID
+                        )
+                        AppGroupStorage.shared.set(entitlement, for: "entitlement_state")
+                        AppGroupStorage.shared.synchronize()
+                        foundActiveSubscription = true
+                        
+                        // Also sync with backend for server-side validation
+                        try? await syncWithBackend(transaction: transaction)
+                    }
+                }
+            }
+        }
+        
+        // If no active subscription found, clear the entitlement
+        if !foundActiveSubscription {
+            let expiredEntitlement = EntitlementState(isActive: false)
+            AppGroupStorage.shared.set(expiredEntitlement, for: "entitlement_state")
+            AppGroupStorage.shared.synchronize()
+        }
+    }
 }
 
 enum StoreError: Error {

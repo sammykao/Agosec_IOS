@@ -59,8 +59,8 @@
 
 4. **Test**:
    - Open any app
-   - Long-press globe icon → Select Agosec Keyboard
-   - Tap brain icon for Agent Mode
+   - Long-press spacebar or use keyboard switcher → Select Agosec Keyboard
+   - Tap AI button for Agent Mode
 
 ---
 

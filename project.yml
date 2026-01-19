@@ -121,6 +121,7 @@ targets:
       - package: UIComponents
       - sdk: Vision.framework
       - sdk: PhotosUI.framework
+      - sdk: StoreKit.framework
   AgosecAppTests:
     type: bundle.unit-test
     platform: iOS

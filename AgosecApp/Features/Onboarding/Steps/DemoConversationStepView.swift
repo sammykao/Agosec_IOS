@@ -309,7 +309,7 @@ struct KeyboardDemoView: View {
                             .font(.system(size: 18, weight: .semibold, design: .default))
                             .foregroundColor(Color(red: 0.9, green: 0.9, blue: 0.95))
                         
-                        Text("Tap the globe icon on your keyboard to switch")
+                        Text("Long-press the spacebar or use the keyboard switcher to switch keyboards")
                             .font(.system(size: 15, weight: .regular, design: .default))
                             .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.65))
                             .multilineTextAlignment(.center)

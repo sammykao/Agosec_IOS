@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import SharedCore
 import UIComponents
 
 // MARK: - Welcome Step View
@@ -62,6 +63,11 @@ struct WelcomeStepView: View {
             }
         }
         .onAppear {
+            // Start demo period when onboarding begins
+            if AppGroupStorage.shared.get(Date.self, for: "demo_period_start_date") == nil {
+                AppGroupStorage.shared.set(Date(), for: "demo_period_start_date")
+                AppGroupStorage.shared.synchronize()
+            }
             startAnimations()
         }
     }
