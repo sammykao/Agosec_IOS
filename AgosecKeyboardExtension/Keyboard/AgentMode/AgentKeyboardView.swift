@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import Photos
 import SharedCore
 import Networking
 import OCR
@@ -31,43 +32,36 @@ struct AgentKeyboardView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .background(Color.clear)
+        .toastOverlay(toastManager: toastManager)
     }
     
     private var headerView: some View {
-        HStack(spacing: 0) {
-            Button(action: {
-                print("🔙 Back button tapped - closing agent mode")
-                onClose()
-            }) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(.primary)
-                    .frame(width: 44, height: 44)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(PlainButtonStyle())
-            
-            Spacer()
-            
+        ZStack {
+            // Centered title
             Text("Agosec Agent")
-                .font(.system(size: 16, weight: .semibold))
+                .font(.system(size: 18, weight: .semibold, design: .default))
+                .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
             
-            Spacer()
-            
-            Button(action: {
-                print("➕ New session button tapped")
-                currentStep = .introChoice
-            }) {
-                Image(systemName: "plus")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(.primary)
-                    .frame(width: 44, height: 44)
-                    .contentShape(Rectangle())
+            // Left button
+            HStack {
+                Button(action: {
+                    print("🔙 Back button tapped - closing agent mode")
+                    onClose()
+                }) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(Color(red: 0.3, green: 0.3, blue: 0.35))
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(PlainButtonStyle())
+                
+                Spacer()
             }
-            .buttonStyle(PlainButtonStyle())
         }
         .padding(.horizontal, 8)
         .frame(height: 44)
+        .frame(maxWidth: .infinity)
     }
     
     @ViewBuilder
@@ -90,6 +84,7 @@ struct AgentKeyboardView: View {
                         currentStep = .introChoice
                     }
                 )
+                .id(session.sessionId)
                 .environmentObject(toastManager)
             }
             
@@ -104,7 +99,7 @@ struct AgentKeyboardView: View {
         isLoading = true
         
         switch choice {
-        case .useAndDeleteScreenshots, .useScreenshots:
+        case .useAndDeleteScreenshots(_, _), .useScreenshots(_):
             loadingMessage = "Processing screenshots..."
         case .continueWithoutContext:
             loadingMessage = "Starting conversation..."
@@ -138,7 +133,7 @@ struct AgentKeyboardView: View {
 }
 
 enum IntroChoice {
-    case useAndDeleteScreenshots([UIImage])
+    case useAndDeleteScreenshots([UIImage], [String]) // images and asset identifiers
     case useScreenshots([UIImage])
     case continueWithoutContext
 }
@@ -179,8 +174,34 @@ class AgentSessionManager: ObservableObject {
         var session = ChatSession()
         
         switch choice {
-        case .useAndDeleteScreenshots(let images),
-             .useScreenshots(let images):
+        case .useAndDeleteScreenshots(let images, let assetIdentifiers):
+            let context = try await extractContext(from: images)
+            
+            // In mock backend mode, display the extracted OCR text directly
+            if BuildMode.isMockBackend {
+                // Show the raw extracted text so user can see what was extracted
+                let extractedText = context.rawText
+                let displayText = """
+                📸 **OCR Extracted Text:**
+                
+                \(extractedText)
+                
+                ---
+                *This is the text extracted from your screenshots. In production mode, this would be sent to the AI for context.*
+                """
+                let turn = ChatTurn(role: .assistant, text: displayText)
+                session.turns.append(turn)
+            } else {
+                // Real mode: send to API for summary
+                let summary = try await fetchSummary(session: session, context: context)
+                let turn = ChatTurn(role: .assistant, text: summary)
+                session.turns.append(turn)
+            }
+            
+            // Delete photos after processing
+            await deletePhotos(assetIdentifiers: assetIdentifiers)
+            
+        case .useScreenshots(let images):
             let context = try await extractContext(from: images)
             
             // In mock backend mode, display the extracted OCR text directly
@@ -205,9 +226,18 @@ class AgentSessionManager: ObservableObject {
             }
             
         case .continueWithoutContext:
-            let intro = try await fetchIntro(session: session)
-            let turn = ChatTurn(role: .assistant, text: intro)
-            session.turns.append(turn)
+            // In mock backend mode, display mock intro message directly
+            if BuildMode.isMockBackend {
+                // Show mock intro message without calling API
+                let mockIntro = "Hi! I'm your AI assistant. I can help you write messages, answer questions, and provide context-aware responses. What can I help you with today?"
+                let turn = ChatTurn(role: .assistant, text: mockIntro)
+                session.turns.append(turn)
+            } else {
+                // Real mode: call API for intro
+                let intro = try await fetchIntro(session: session)
+                let turn = ChatTurn(role: .assistant, text: intro)
+                session.turns.append(turn)
+            }
         }
         
         return session
@@ -248,9 +278,52 @@ class AgentSessionManager: ObservableObject {
         
         return response.reply
     }
+    
+    private func deletePhotos(assetIdentifiers: [String]) async {
+        guard !assetIdentifiers.isEmpty else { return }
+        
+        // Check authorization
+        let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        guard status == .authorized || status == .limited else {
+            print("⚠️ Cannot delete photos: insufficient authorization (status: \(status.rawValue))")
+            return
+        }
+        
+        // Fetch PHAsset objects from identifiers
+        let fetchResult = PHAsset.fetchAssets(withLocalIdentifiers: assetIdentifiers, options: nil)
+        guard fetchResult.count > 0 else {
+            print("⚠️ No assets found for deletion")
+            return
+        }
+        
+        var assetsToDelete: [PHAsset] = []
+        fetchResult.enumerateObjects { asset, _, _ in
+            assetsToDelete.append(asset)
+        }
+        
+        // Delete assets
+        do {
+            try await PHPhotoLibrary.shared().performChanges {
+                PHAssetChangeRequest.deleteAssets(assetsToDelete as NSArray)
+            }
+            print("✅ Successfully deleted \(assetsToDelete.count) photo(s)")
+        } catch {
+            print("❌ Failed to delete photos: \(error.localizedDescription)")
+            // Don't throw - deletion failure shouldn't block the session
+        }
+    }
 }
 
 enum AgentError: Error {
     case noAPIAccess
     case invalidContext
+    
+    var localizedDescription: String {
+        switch self {
+        case .noAPIAccess:
+            return "AgentError.noAPIAccess"
+        case .invalidContext:
+            return "AgentError.invalidContext"
+        }
+    }
 }

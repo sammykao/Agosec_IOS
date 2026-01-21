@@ -15,6 +15,15 @@ class StoreKitEntitlementChecker {
     /// Checks Apple for active subscription and updates local cache
     /// Call this on keyboard load (viewWillAppear)
     func refreshEntitlement() async {
+        // Check demo period first - if active, don't overwrite it with StoreKit check
+        if let demoEntitlement = checkDemoPeriod() {
+            // Demo period is active - save it to cache
+            AppGroupStorage.shared.set(demoEntitlement, for: "entitlement_state")
+            AppGroupStorage.shared.synchronize()
+            return
+        }
+        
+        // No demo period - check StoreKit for real subscription
         let entitlement = await checkSubscriptionStatus()
         
         // Save to AppGroupStorage so it's available immediately next time

@@ -185,9 +185,28 @@ struct MessageRowView: View {
             VStack(alignment: message.isUser ? .trailing : .leading, spacing: 4) {
                 HStack(alignment: .bottom, spacing: 8) {
                     if !message.isUser {
-                        Image(systemName: "brain")
-                            .font(.system(size: 16))
-                            .foregroundColor(.purple)
+                        Group {
+                            if let uiImage = UIImage(named: "agosec_logo") {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                            } else {
+                                Image(systemName: "sparkles")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            colors: [
+                                                Color(red: 0.0, green: 0.48, blue: 1.0),
+                                                Color(red: 0.58, green: 0.0, blue: 1.0)
+                                            ],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                            }
+                        }
+                        .frame(width: 20, height: 20)
                     }
                     
                     messageContent
@@ -271,14 +290,13 @@ class ChatManager: ObservableObject {
         }
         
         // Convert existing turns to messages
-        for turn in session.turns {
-            let message = ChatMessage(
+        messages = session.turns.map { turn in
+            ChatMessage(
                 id: UUID(),
                 content: turn.text,
                 isUser: turn.role == .user,
                 timestamp: turn.timestamp
             )
-            messages.append(message)
         }
     }
     
@@ -339,4 +357,13 @@ class ChatManager: ObservableObject {
 enum ChatError: Error {
     case noAPIAccess
     case networkError
+    
+    var localizedDescription: String {
+        switch self {
+        case .noAPIAccess:
+            return "ChatError.noAPIAccess"
+        case .networkError:
+            return "ChatError.networkError"
+        }
+    }
 }

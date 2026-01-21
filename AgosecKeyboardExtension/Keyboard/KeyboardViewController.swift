@@ -16,6 +16,10 @@ class KeyboardViewController: UIInputViewController {
     // Track desired height for the keyboard
     private var desiredHeight: CGFloat = 260
     
+    // Track if we're in the middle of a photo selection flow
+    // This prevents viewWillAppear from resetting the view during photo selection
+    private var isInPhotoSelectionFlow = false
+    
     // Custom resizable input view
     private var resizableInputView: ResizableInputView?
     
@@ -36,6 +40,34 @@ class KeyboardViewController: UIInputViewController {
         super.viewDidLoad()
         view.backgroundColor = .clear
         setupKeyboard()
+        
+        // Listen for photo selection flow notifications
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(photoSelectionStarted),
+            name: NSNotification.Name("PhotoSelectionStarted"),
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(photoSelectionEnded),
+            name: NSNotification.Name("PhotoSelectionEnded"),
+            object: nil
+        )
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    @objc private func photoSelectionStarted() {
+        print("📸 Photo selection started - setting flag to prevent reset")
+        isInPhotoSelectionFlow = true
+    }
+    
+    @objc private func photoSelectionEnded() {
+        print("📸 Photo selection ended - clearing flag")
+        isInPhotoSelectionFlow = false
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -47,8 +79,26 @@ class KeyboardViewController: UIInputViewController {
         
         // Refresh state each time keyboard appears
         keyboardState.hasFullAccess = hasFullAccess
-        setupInitialView()
-        updateHeight()
+        
+        // Always refresh entitlement state to catch demo period changes
+        // This ensures demo period is detected even if it was set after keyboard last loaded
+        loadEntitlementState()
+        
+        // Only setup initial view if we don't already have a view embedded
+        // AND we're not in the middle of a photo selection flow
+        // This prevents resetting when sheet dismisses and viewWillAppear is called
+        if currentHostingView == nil && !isInPhotoSelectionFlow {
+            print("🔄 viewWillAppear: No existing view, setting up initial view")
+            setupInitialView()
+        } else if isInPhotoSelectionFlow {
+            print("🔄 viewWillAppear: In photo selection flow, preserving current view (mode: \(keyboardState.currentMode))")
+            // Just update height to match current mode, don't reset
+            updateHeight()
+        } else {
+            print("🔄 viewWillAppear: View already exists (mode: \(keyboardState.currentMode)), skipping setup")
+            // Just update height to match current mode
+            updateHeight()
+        }
         
         if hasFullAccess {
             checkEntitlement()
@@ -120,6 +170,7 @@ class KeyboardViewController: UIInputViewController {
         }
         
         // Priority 2: Show typing keyboard (agent mode requires subscription)
+        // Agent mode will be entered via toggleAgentMode() when user taps the button
         showTypingKeyboard()
     }
     
@@ -176,7 +227,45 @@ class KeyboardViewController: UIInputViewController {
     private func showAgentKeyboard() {
         clearSubviews()
         
-        print("🔐 Checking subscription - isLocked: \(keyboardState.isLocked), entitlement: \(keyboardState.entitlementState)")
+        // Refresh entitlement state to catch demo period changes
+        // This ensures demo period is re-checked each time agent mode is toggled
+        loadEntitlementState()
+        
+        // Double-check demo period directly if still locked
+        // This handles cases where entitlement state might be stale
+        if keyboardState.isLocked {
+            print("🔍 User appears locked, checking demo period...")
+            // Check demo period directly as a fallback
+            let onboardingComplete: Bool = AppGroupStorage.shared.get(Bool.self, for: "onboarding_complete") ?? false
+            print("🔍 Onboarding complete: \(onboardingComplete)")
+            
+            if !onboardingComplete {
+                if let demoStartDate: Date = AppGroupStorage.shared.get(Date.self, for: "demo_period_start_date") {
+                    let demoDuration: TimeInterval = 48 * 60 * 60 // 48 hours
+                    let demoExpiration = demoStartDate.addingTimeInterval(demoDuration)
+                    let now = Date()
+                    print("🔍 Demo start: \(demoStartDate), expiration: \(demoExpiration), now: \(now), expired: \(now >= demoExpiration)")
+                    
+                    if now < demoExpiration {
+                        // Demo period is active - grant access
+                        print("✅ Demo period detected directly - granting access")
+                        keyboardState.entitlementState = EntitlementState(
+                            isActive: true,
+                            expiresAt: demoExpiration,
+                            productId: Config.shared.subscriptionProductId
+                        )
+                    } else {
+                        print("❌ Demo period expired")
+                    }
+                } else {
+                    print("❌ No demo period start date found")
+                }
+            } else {
+                print("❌ Onboarding complete - demo period not applicable")
+            }
+        }
+        
+        print("🔐 Final check - isLocked: \(keyboardState.isLocked), entitlement: \(keyboardState.entitlementState)")
         
         // Check if user is subscribed before showing agent mode
         if keyboardState.isLocked {
@@ -370,3 +459,4 @@ class KeyboardViewController: UIInputViewController {
         extensionContext?.open(url)
     }
 }
+

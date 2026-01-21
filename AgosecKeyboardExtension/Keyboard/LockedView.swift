@@ -1,10 +1,12 @@
 import SwiftUI
+import UIKit
 import SharedCore
 
 struct LockedView: View {
     let onSubscribeTapped: () -> Void
     
     @State private var isOnboardingComplete: Bool = false
+    @State private var hasDemoStarted: Bool = false
     @Environment(\.colorScheme) var colorScheme
     
     init(onSubscribeTapped: @escaping () -> Void) {
@@ -12,72 +14,83 @@ struct LockedView: View {
         if let complete: Bool = AppGroupStorage.shared.get(Bool.self, for: "onboarding_complete") {
             _isOnboardingComplete = State(initialValue: complete)
         }
+        if let _: Date = AppGroupStorage.shared.get(Date.self, for: "demo_period_start_date") {
+            _hasDemoStarted = State(initialValue: true)
+        }
+    }
+    
+    private var shouldShowSubscribeMessage: Bool {
+        // Show subscribe message if:
+        // 1. Onboarding is complete, OR
+        // 2. Demo period has started (user is in demo step)
+        return isOnboardingComplete || hasDemoStarted
     }
     
     var body: some View {
-        GeometryReader { geometry in
-            VStack(spacing: 0) {
-                // Content area - takes available space
-                VStack(spacing: 12) {
-                    // Icon
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: 36))
-                        .foregroundColor(.orange)
-                    
-                    // Title
-                    Text(isOnboardingComplete ? "Subscribe to Unlock" : "Finish Setup")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(primaryTextColor)
-                    
-                    // Subtitle
-                    Text(isOnboardingComplete 
-                         ? "Subscribe to use AI features"
-                         : "Complete setup in the Agosec app")
-                        .font(.system(size: 14))
-                        .foregroundColor(secondaryTextColor)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(2)
-                        .padding(.horizontal, 24)
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: geometry.size.height * 0.6)
+        VStack(spacing: 0) {
+            Spacer()
+            
+            // Content area - centered
+            VStack(spacing: 16) {
+                // Icon
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 48, weight: .medium))
+                    .foregroundColor(.orange)
+                    .padding(.bottom, 8)
                 
-                // Button area - fixed at bottom
-                VStack(spacing: 8) {
-                    Button(action: {
-                        let impact = UIImpactFeedbackGenerator(style: .medium)
-                        impact.impactOccurred()
-                        onSubscribeTapped()
-                    }) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "arrow.up.forward.app")
-                                .font(.system(size: 14, weight: .medium))
-                            Text("Open Agosec App")
-                                .font(.system(size: 15, weight: .semibold))
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 44)
-                        .background(
-                            LinearGradient(
-                                colors: [Color.orange, Color.orange.opacity(0.85)],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .cornerRadius(10)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    .padding(.horizontal, 16)
-                    
-                    Text("Tap keyboard switcher to change keyboards")
-                        .font(.system(size: 11))
-                        .foregroundColor(tertiaryTextColor)
-                }
-                .frame(height: geometry.size.height * 0.35)
+                // Title
+                Text(shouldShowSubscribeMessage ? "Subscribe to Unlock" : "Finish Setup")
+                    .font(.system(size: 20, weight: .semibold, design: .default))
+                    .foregroundColor(primaryTextColor)
+                
+                // Subtitle
+                Text(shouldShowSubscribeMessage
+                     ? "Subscribe to use AI features"
+                     : "Complete setup to continue")
+                    .font(.system(size: 15, weight: .regular, design: .default))
+                    .foregroundColor(secondaryTextColor)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(3)
+                    .padding(.horizontal, 32)
             }
-            .frame(width: geometry.size.width, height: geometry.size.height)
+            .frame(maxWidth: .infinity)
+            
+            Spacer()
+            
+            // Button area - fixed at bottom
+            VStack(spacing: 12) {
+                Button(action: {
+                    UIImpactFeedbackGenerator.safeImpact(.medium)
+                    onSubscribeTapped()
+                }) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "arrow.up.forward.app")
+                            .font(.system(size: 15, weight: .medium))
+                        Text("Open Agosec App")
+                            .font(.system(size: 16, weight: .semibold, design: .default))
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .background(
+                        LinearGradient(
+                            colors: [Color.orange, Color.orange.opacity(0.85)],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(12)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .padding(.horizontal, 24)
+                
+                Text("Tap keyboard switcher to change keyboards")
+                    .font(.system(size: 12, weight: .regular, design: .default))
+                    .foregroundColor(tertiaryTextColor)
+                    .padding(.bottom, 8)
+            }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.clear)
     }
     

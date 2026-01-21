@@ -35,6 +35,8 @@
 	<string>prod</string>
 	<key>FEATURE_AGENT_PHOTOS_ENABLED</key>
 	<true/>
+	<key>MOCK_BACKEND_ENABLED</key>
+	<true/>
 	<key>MAX_CONTEXT_CHARS</key>
 	<integer>20000</integer>
 	<key>MAX_SCREENSHOTS_PER_IMPORT</key>

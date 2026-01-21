@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 public struct ToastView: View {
     public let message: String
@@ -18,32 +19,61 @@ public struct ToastView: View {
     }
     
     public var body: some View {
-        HStack(spacing: 12) {
+        let displayMessage = truncateIfNeeded(message)
+        let lineLimit = type == .error ? 5 : 3
+        
+        HStack(alignment: .top, spacing: 12) {
             Image(systemName: iconName)
                 .foregroundColor(iconColor)
+                .font(.system(size: 18))
+                .padding(.top, 2)
             
-            Text(message)
-                .font(.system(size: 14))
-                .foregroundColor(.white)
-                .lineLimit(2)
-            
-            if let retryAction = retryAction {
-                Button(action: retryAction) {
-                    Text("Retry")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.white.opacity(0.2))
-                        .cornerRadius(4)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(displayMessage)
+                    .font(.system(size: 15))
+                    .foregroundColor(.white)
+                    .lineLimit(lineLimit)
+                    .fixedSize(horizontal: false, vertical: true)
+                
+                if let retryAction = retryAction {
+                    Button(action: retryAction) {
+                        Text("Retry")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(Color.white.opacity(0.25))
+                            .cornerRadius(6)
+                    }
+                    .padding(.top, 4)
                 }
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 14)
+        .frame(maxWidth: min(UIScreen.main.bounds.width - 32, 500))
         .background(backgroundColor)
-        .cornerRadius(8)
-        .shadow(radius: 4)
+        .cornerRadius(10)
+        .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
+    }
+    
+    private func truncateIfNeeded(_ message: String) -> String {
+        // Truncate extremely long messages (over 600 characters) but keep more context
+        let maxLength = 600
+        if message.count > maxLength {
+            let truncated = String(message.prefix(maxLength))
+            // Try to truncate at a sentence boundary if possible
+            if let lastPeriod = truncated.lastIndex(of: ".") {
+                let sentenceEnd = truncated.index(after: lastPeriod)
+                return String(truncated[..<sentenceEnd]) + "..."
+            }
+            // Otherwise truncate at word boundary
+            if let lastSpace = truncated.lastIndex(of: " ") {
+                return String(truncated[..<lastSpace]) + "..."
+            }
+            return truncated + "..."
+        }
+        return message
     }
     
     private var iconName: String {

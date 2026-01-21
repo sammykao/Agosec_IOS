@@ -1,6 +1,19 @@
 import SwiftUI
 import UIKit
 
+// MARK: - Haptic Feedback Helper
+
+extension UIImpactFeedbackGenerator {
+    static func safeImpact(_ style: UIImpactFeedbackGenerator.FeedbackStyle = .light) {
+        #if targetEnvironment(simulator)
+        // Haptic feedback not available in simulator - silently skip
+        #else
+        let generator = UIImpactFeedbackGenerator(style: style)
+        generator.impactOccurred()
+        #endif
+    }
+}
+
 struct TypingKeyboardView: View {
     let onAgentModeTapped: () -> Void
     let onKeyTapped: (Key) -> Void
@@ -18,9 +31,9 @@ struct TypingKeyboardView: View {
     private let autocompleteService = AutocompleteService()
     
     // iOS keyboard dimensions
-    private let keyHeight: CGFloat = 45  // Slightly taller
-    private let rowSpacing: CGFloat = 10
-    private let keySpacing: CGFloat = 5
+    private let keyHeight: CGFloat = 47.5  // 10% taller (45 * 1.1)
+    private let rowSpacing: CGFloat = 5  // Reduced to compensate for taller keys
+    private let keySpacing: CGFloat = 6  // Tiny spacing between keys
     
     var body: some View {
         VStack(spacing: 0) {
@@ -30,6 +43,7 @@ struct TypingKeyboardView: View {
                     .frame(height: 44)
                     .background(suggestionBarBackgroundColor)
                     .frame(maxWidth: .infinity)
+                    .padding(.top, -12)
                 
                 // Keyboard rows
                 VStack(spacing: rowSpacing) {
@@ -184,15 +198,15 @@ struct TypingKeyboardView: View {
     private var suggestionBar: some View {
         HStack(spacing: 12) {
             Button(action: onAgentModeTapped) {
-                HStack(spacing: 4) {
+                HStack(spacing: 6) {
                     Image(systemName: "sparkles")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(.system(size: 18, weight: .medium))
                     Text("AI")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: 17, weight: .semibold))
                 }
                 .foregroundColor(.white)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
                 .background(
                     LinearGradient(
                         colors: [Color.orange, Color.orange.opacity(0.8)],
@@ -200,7 +214,7 @@ struct TypingKeyboardView: View {
                         endPoint: .trailing
                     )
                 )
-                .cornerRadius(16)
+                .cornerRadius(20)
             }
             
             SuggestionBarView(
@@ -313,8 +327,7 @@ struct KeyButton: View {
     
     var body: some View {
         Button(action: {
-            let impact = UIImpactFeedbackGenerator(style: .light)
-            impact.impactOccurred()
+            UIImpactFeedbackGenerator.safeImpact(.light)
             action()
         }) {
             ZStack {
@@ -413,30 +426,16 @@ struct KeyButton: View {
         }
     }
     
-    // MARK: - Colors (Lighter, Glass-like)
+    // MARK: - Colors (White keys with black text)
     
     private var keyBackgroundColor: Color {
-        if isSpecial {
-            return colorScheme == .dark
-                ? Color(red: 0.30, green: 0.30, blue: 0.32)  // Lighter
-                : Color(red: 0.62, green: 0.64, blue: 0.67)  // Lighter gray
-        } else {
-            return colorScheme == .dark
-                ? Color(red: 0.40, green: 0.40, blue: 0.42)  // Lighter
-                : Color(red: 0.72, green: 0.74, blue: 0.77)  // Lighter gray (glass-like)
-        }
+        // Always white for all keys
+        return Color.white
     }
     
     private var keyPressedColor: Color {
-        if isSpecial {
-            return colorScheme == .dark
-                ? Color(red: 0.40, green: 0.40, blue: 0.42)  // Lighter
-                : Color(red: 0.55, green: 0.57, blue: 0.60)  // Lighter
-        } else {
-            return colorScheme == .dark
-                ? Color(red: 0.50, green: 0.50, blue: 0.52)  // Lighter
-                : Color(red: 0.78, green: 0.80, blue: 0.83)  // Lighter
-        }
+        // Slightly darker white/gray when pressed for feedback
+        return Color(red: 0.90, green: 0.90, blue: 0.92)
     }
     
     private var keyShadowColor: Color {
@@ -454,12 +453,8 @@ struct KeyButton: View {
     }
     
     private var keyTextColor: Color {
-        if colorScheme == .dark {
-            return Color.white
-        } else {
-            // Slightly lighter text since keys are lighter now
-            return Color(red: 0.20, green: 0.20, blue: 0.23)
-        }
+        // Black text on white keys for better contrast
+        return Color.black
     }
     
     private var fontSize: CGFloat {

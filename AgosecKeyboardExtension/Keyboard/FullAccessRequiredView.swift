@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct FullAccessRequiredView: View {
     let onOpenSettings: () -> Void
@@ -6,64 +7,65 @@ struct FullAccessRequiredView: View {
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        GeometryReader { geometry in
-            VStack(spacing: 0) {
-                // Content area
-                VStack(spacing: 12) {
-                    Image(systemName: "keyboard.badge.exclamationmark")
-                        .font(.system(size: 36))
-                        .foregroundColor(.orange)
-                    
-                    Text("Full Access Required")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(primaryTextColor)
-                    
-                    Text("Enable Full Access in Settings to use this keyboard")
-                        .font(.system(size: 14))
-                        .foregroundColor(secondaryTextColor)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(2)
-                        .padding(.horizontal, 24)
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: geometry.size.height * 0.6)
+        VStack(spacing: 0) {
+            Spacer()
+            
+            // Content area
+            VStack(spacing: 16) {
+                Image(systemName: "keyboard.badge.exclamationmark")
+                    .font(.system(size: 48, weight: .medium))
+                    .foregroundColor(.orange)
+                    .padding(.bottom, 8)
                 
-                // Button area
-                VStack(spacing: 8) {
-                    Button(action: {
-                        let impact = UIImpactFeedbackGenerator(style: .medium)
-                        impact.impactOccurred()
-                        onOpenSettings()
-                    }) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "gear")
-                                .font(.system(size: 14, weight: .medium))
-                            Text("Open Settings")
-                                .font(.system(size: 15, weight: .semibold))
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 44)
-                        .background(
-                            LinearGradient(
-                                colors: [Color.orange, Color.orange.opacity(0.85)],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .cornerRadius(10)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    .padding(.horizontal, 16)
-                    
-                    Text("Settings → Keyboards → Agosec → Full Access")
-                        .font(.system(size: 11))
-                        .foregroundColor(tertiaryTextColor)
-                }
-                .frame(height: geometry.size.height * 0.35)
+                Text("Full Access Required")
+                    .font(.system(size: 20, weight: .semibold, design: .default))
+                    .foregroundColor(primaryTextColor)
+                
+                Text("Enable Full Access in Settings to use this keyboard")
+                    .font(.system(size: 15, weight: .regular, design: .default))
+                    .foregroundColor(secondaryTextColor)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(3)
+                    .padding(.horizontal, 32)
             }
-            .frame(width: geometry.size.width, height: geometry.size.height)
+            .frame(maxWidth: .infinity)
+            
+            Spacer()
+            
+            // Button area
+            VStack(spacing: 12) {
+                Button(action: {
+                    UIImpactFeedbackGenerator.safeImpact(.medium)
+                    onOpenSettings()
+                }) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "gear")
+                            .font(.system(size: 15, weight: .medium))
+                        Text("Open Settings")
+                            .font(.system(size: 16, weight: .semibold, design: .default))
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .background(
+                        LinearGradient(
+                            colors: [Color.orange, Color.orange.opacity(0.85)],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(12)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .padding(.horizontal, 24)
+                
+                Text("Settings → Keyboards → Agosec → Full Access")
+                    .font(.system(size: 12, weight: .regular, design: .default))
+                    .foregroundColor(tertiaryTextColor)
+                    .padding(.bottom, 8)
+            }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.clear)
     }
     

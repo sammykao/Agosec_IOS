@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct SuggestionBarView: View {
     let suggestions: [String]
@@ -38,9 +39,7 @@ struct SuggestionButton: View {
     
     var body: some View {
         Button(action: {
-            // Haptic feedback
-            let impact = UIImpactFeedbackGenerator(style: .light)
-            impact.impactOccurred()
+            UIImpactFeedbackGenerator.safeImpact(.light)
             action()
         }) {
             Text(text)
