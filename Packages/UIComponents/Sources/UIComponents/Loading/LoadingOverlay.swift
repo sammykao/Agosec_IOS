@@ -75,6 +75,15 @@ public struct SkeletonView: View {
 }
 
 extension View {
+    /// Overlay a loading HUD on top of the current view.
+    public func loadingOverlay(isPresented: Bool, message: String = "Loading...") -> some View {
+        overlay {
+            if isPresented {
+                LoadingOverlay(message: message)
+            }
+        }
+    }
+
     func shimmer() -> some View {
         self.modifier(ShimmerModifier())
     }
@@ -107,4 +116,3 @@ struct ShimmerModifier: ViewModifier {
             }
     }
 }
-

@@ -18,12 +18,6 @@ public struct SplashScreenView: View {
     @State private var textOffset: CGFloat = 30
     @State private var textScale: CGFloat = 0.8
     
-    // Background gradient animation
-    @State private var gradientOffset: CGFloat = 0
-    @State private var orbPositions: [CGPoint] = []
-    
-    // Glassmorphic elements
-    @State private var glassOpacity: Double = 0.0
     
     public init(logoName: String = "agosec_logo", appName: String = "Agosec") {
         self.logoName = logoName
@@ -33,12 +27,8 @@ public struct SplashScreenView: View {
     public var body: some View {
         GeometryReader { geometry in
             ZStack {
-                // Modern glassmorphic background
-                modernBackground
+                GlassmorphicBackground()
                     .ignoresSafeArea(.all)
-                
-                // Floating glass orbs for depth
-                floatingGlassOrbs(in: geometry)
                 
                 // Main content in glassmorphic container
                 VStack(spacing: 0) {
@@ -115,71 +105,7 @@ public struct SplashScreenView: View {
         }
         .ignoresSafeArea(.all)
         .onAppear {
-            initializeOrbs()
             startAnimations()
-        }
-    }
-    
-    // MARK: - Background
-    
-    private var modernBackground: some View {
-        ZStack {
-            // Base dark gradient with animation
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color(red: 0.05, green: 0.05, blue: 0.08),
-                    Color(red: 0.08, green: 0.08, blue: 0.12),
-                    Color(red: 0.06, green: 0.06, blue: 0.1)
-                ]),
-                startPoint: UnitPoint(x: 0.5 + gradientOffset, y: 0),
-                endPoint: UnitPoint(x: 0.5 - gradientOffset, y: 1)
-            )
-            
-            // Radial accent gradients
-            RadialGradient(
-                gradient: Gradient(colors: [
-                    Color(red: 0.0, green: 0.48, blue: 1.0).opacity(0.2),
-                    Color(red: 0.58, green: 0.0, blue: 1.0).opacity(0.1),
-                    Color.clear
-                ]),
-                center: .center,
-                startRadius: 100,
-                endRadius: 600
-            )
-        }
-    }
-    
-    // MARK: - Floating Glass Orbs
-    
-    private func floatingGlassOrbs(in geometry: GeometryProxy) -> some View {
-        ZStack {
-            ForEach(0..<4) { index in
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            gradient: Gradient(colors: [
-                                Color(red: 0.0, green: 0.48, blue: 1.0).opacity(0.2 - Double(index) * 0.04),
-                                Color(red: 0.58, green: 0.0, blue: 1.0).opacity(0.15 - Double(index) * 0.03),
-                                Color.clear
-                            ]),
-                            center: .center,
-                            startRadius: 0,
-                            endRadius: 100 + CGFloat(index) * 50
-                        )
-                    )
-                    .frame(
-                        width: min(200 + CGFloat(index) * 80, geometry.size.width * 0.6),
-                        height: min(200 + CGFloat(index) * 80, geometry.size.width * 0.6)
-                    )
-                    .blur(radius: 40)
-                    .offset(
-                        x: orbPositions.indices.contains(index) ? 
-                            max(-geometry.size.width * 0.3, min(geometry.size.width * 0.3, orbPositions[index].x)) : 0,
-                        y: orbPositions.indices.contains(index) ? 
-                            max(-geometry.size.height * 0.3, min(geometry.size.height * 0.3, orbPositions[index].y)) : 0
-                    )
-                    .opacity(glassOpacity * (1.0 - Double(index) * 0.15))
-            }
         }
     }
     
@@ -306,27 +232,7 @@ public struct SplashScreenView: View {
     
     // MARK: - Animations
     
-    private func initializeOrbs() {
-        // Initialize with safe positions that will be constrained in the view
-        orbPositions = [
-            CGPoint(x: -100, y: -150),
-            CGPoint(x: 80, y: -120),
-            CGPoint(x: -60, y: 150),
-            CGPoint(x: 120, y: 140)
-        ]
-    }
-    
     private func startAnimations() {
-        // Background gradient subtle animation
-        withAnimation(.easeInOut(duration: 5).repeatForever(autoreverses: true)) {
-            gradientOffset = 0.15
-        }
-        
-        // Glass opacity fade in
-        withAnimation(.easeOut(duration: 1.0)) {
-            glassOpacity = 1.0
-        }
-        
         // Logo entrance with spring physics
         withAnimation(.spring(response: 0.6, dampingFraction: 0.65, blendDuration: 0)) {
             logoScale = 1.0
@@ -357,20 +263,6 @@ public struct SplashScreenView: View {
             }
         }
         
-        // Animate floating orbs
-        animateOrbs()
-    }
-    
-    private func animateOrbs() {
-        for index in orbPositions.indices {
-            withAnimation(
-                .easeInOut(duration: 4.0 + Double(index) * 0.5)
-                .repeatForever(autoreverses: true)
-                .delay(Double(index) * 0.3)
-            ) {
-                orbPositions[index].x += CGFloat.random(in: -30...30)
-                orbPositions[index].y += CGFloat.random(in: -30...30)
-            }
-        }
     }
 }
+

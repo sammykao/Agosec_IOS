@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import SharedCore
 
 struct SuggestionBarView: View {
     let suggestions: [String]

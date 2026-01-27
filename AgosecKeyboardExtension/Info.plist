@@ -24,9 +24,9 @@
 	<string>1</string>
 	<key>ENV</key>
 	<string>prod</string>
+	<key>APP_GROUP_ID</key>
+	<string>group.io.agosec.keyboard</string>
 	<key>FEATURE_AGENT_PHOTOS_ENABLED</key>
-	<true/>
-	<key>MOCK_BACKEND_ENABLED</key>
 	<true/>
 	<key>MAX_CONTEXT_CHARS</key>
 	<integer>20000</integer>
@@ -34,6 +34,8 @@
 	<integer>5</integer>
 	<key>MAX_TURNS_SENT</key>
 	<integer>12</integer>
+	<key>MOCK_BACKEND_ENABLED</key>
+	<true/>
 	<key>NSExtension</key>
 	<dict>
 		<key>NSExtensionAttributes</key>

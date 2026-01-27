@@ -3,8 +3,9 @@ import SwiftUI
 import StoreKit
 import SharedCore
 import UIComponents
+import KeyboardKit
 
-class KeyboardViewController: UIInputViewController {
+class KeyboardViewController: KeyboardInputViewController {
     
     private var keyboardState = KeyboardState()
     private var keyboardHeightManager: KeyboardHeightManager!
@@ -15,33 +16,107 @@ class KeyboardViewController: UIInputViewController {
     
     // Track desired height for the keyboard
     private var desiredHeight: CGFloat = 260
+    private var isUpdatingHeight = false
     
     // Track if we're in the middle of a photo selection flow
     // This prevents viewWillAppear from resetting the view during photo selection
     private var isInPhotoSelectionFlow = false
-    
-    // Custom resizable input view
-    private var resizableInputView: ResizableInputView?
-    
+
+    private var lastWrittenFullAccess: Bool?
+
+    private var isSafeMode: Bool {
+        if let flag = Bundle.main.object(forInfoDictionaryKey: "KEYBOARD_SAFE_MODE") as? Bool {
+            return flag
+        }
+        return ProcessInfo.processInfo.environment["AGOSEC_KEYBOARD_SAFE_MODE"] == "1"
+    }
+
     override func loadView() {
-        // Create custom resizable input view
-        let customInputView = ResizableInputView(frame: .zero, inputViewStyle: .keyboard)
-        customInputView.translatesAutoresizingMaskIntoConstraints = false
-        customInputView.allowsSelfSizing = true
-        self.resizableInputView = customInputView
-        
-        // Set inputView (inherited from UIInputViewController, type is UIInputView?)
-        self.inputView = customInputView
-        // Set view to the same custom view
-        self.view = customInputView
+        // Let KeyboardKit handle view setup completely
+        super.loadView()
+        configureInputAssistant()
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
         view.backgroundColor = .clear
-        setupKeyboard()
+
+        initializeState()
+        configureInputAssistant()
+        configureObservers()
+        writeFullAccessStatusIfNeeded()
+        setupKeyboardKit()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    @objc private func photoSelectionStarted() {
+        isInPhotoSelectionFlow = true
+    }
+    
+    @objc private func photoSelectionEnded() {
+        // Delay clearing the flag to ensure keyboard view is stable
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.isInPhotoSelectionFlow = false
+            // Ensure keyboard view is properly displayed
+            self.updateHeight()
+        }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         
-        // Listen for photo selection flow notifications
+        if isSafeMode {
+            keyboardState.hasFullAccess = hasFullAccess
+            loadEntitlementState()
+            updateHeight()
+            if hasFullAccess {
+                checkEntitlement()
+            }
+            return
+        }
+
+        configureInputAssistant()
+        writeFullAccessStatusIfNeeded()
+        
+        // Refresh state each time keyboard appears
+        keyboardState.hasFullAccess = hasFullAccess
+        
+        // Always refresh entitlement state to catch demo period changes
+        // This ensures demo period is detected even if it was set after keyboard last loaded
+        loadEntitlementState()
+        
+        // State should already be initialized in viewDidLoad
+        // Ensure state is properly initialized (currentMode is not optional, but we check if state needs reset)
+        // No need to check for nil since currentMode is not optional
+        
+        // KeyboardKit handles view setup via viewWillSetupKeyboardView
+        // Just ensure height is updated
+        updateHeight()
+        
+        if hasFullAccess {
+            checkEntitlement()
+        }
+    }
+
+    private func initializeState() {
+        keyboardState.currentMode = .normal
+        keyboardState.isExpanded = false
+        keyboardState.hasFullAccess = hasFullAccess
+    }
+
+    private func configureInputAssistant() {
+        if #available(iOS 13.0, *) {
+            inputAssistantItem.leadingBarButtonGroups = []
+            inputAssistantItem.trailingBarButtonGroups = []
+            inputAssistantItem.allowsHidingShortcuts = true
+        }
+    }
+
+    private func configureObservers() {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(photoSelectionStarted),
@@ -55,53 +130,29 @@ class KeyboardViewController: UIInputViewController {
             object: nil
         )
     }
-    
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-    }
-    
-    @objc private func photoSelectionStarted() {
-        print("📸 Photo selection started - setting flag to prevent reset")
-        isInPhotoSelectionFlow = true
-    }
-    
-    @objc private func photoSelectionEnded() {
-        print("📸 Photo selection ended - clearing flag")
-        isInPhotoSelectionFlow = false
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        // Save full access status to App Group for main app to read
-        AppGroupStorage.shared.set(hasFullAccess, for: "keyboard_has_full_access")
-        AppGroupStorage.shared.synchronize()
-        
-        // Refresh state each time keyboard appears
-        keyboardState.hasFullAccess = hasFullAccess
-        
-        // Always refresh entitlement state to catch demo period changes
-        // This ensures demo period is detected even if it was set after keyboard last loaded
-        loadEntitlementState()
-        
-        // Only setup initial view if we don't already have a view embedded
-        // AND we're not in the middle of a photo selection flow
-        // This prevents resetting when sheet dismisses and viewWillAppear is called
-        if currentHostingView == nil && !isInPhotoSelectionFlow {
-            print("🔄 viewWillAppear: No existing view, setting up initial view")
-            setupInitialView()
-        } else if isInPhotoSelectionFlow {
-            print("🔄 viewWillAppear: In photo selection flow, preserving current view (mode: \(keyboardState.currentMode))")
-            // Just update height to match current mode, don't reset
-            updateHeight()
-        } else {
-            print("🔄 viewWillAppear: View already exists (mode: \(keyboardState.currentMode)), skipping setup")
-            // Just update height to match current mode
-            updateHeight()
+
+    private func setupKeyboardKit() {
+        setup(for: .agosec) { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.setupKeyboard()
+            }
         }
-        
-        if hasFullAccess {
-            checkEntitlement()
+    }
+
+    private func writeFullAccessStatusIfNeeded() {
+        let value = hasFullAccess
+        guard lastWrittenFullAccess != value else { return }
+        lastWrittenFullAccess = value
+        AppGroupStorage.shared.set(value, for: AppGroupKeys.keyboardHasFullAccess)
+        AppGroupStorage.shared.synchronize()
+    }
+
+    private func ensureManagers() {
+        if keyboardHeightManager == nil {
+            keyboardHeightManager = KeyboardHeightManager(view: view)
+        }
+        if entitlementChecker == nil {
+            entitlementChecker = StoreKitEntitlementChecker()
         }
     }
     
@@ -121,6 +172,11 @@ class KeyboardViewController: UIInputViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        // Guard against accessing keyboardHeightManager before it's initialized
+        guard let keyboardHeightManager = keyboardHeightManager else {
+            return
+        }
+        
         // Only update if we're not in the middle of a height change
         // This prevents viewDidLayoutSubviews from overriding our intentional height changes
         let currentCalculatedHeight = keyboardHeightManager.calculateHeight(
@@ -130,10 +186,8 @@ class KeyboardViewController: UIInputViewController {
         
         // Only update if the constraint doesn't match what it should be
         if abs(heightConstraint?.constant ?? 0 - currentCalculatedHeight) > 5 {
-            print("📐 viewDidLayoutSubviews: correcting height from \(heightConstraint?.constant ?? 0) to \(currentCalculatedHeight)")
             heightConstraint?.constant = currentCalculatedHeight
             desiredHeight = currentCalculatedHeight
-            resizableInputView?.setHeight(currentCalculatedHeight, animated: false)
         }
     }
     
@@ -142,17 +196,52 @@ class KeyboardViewController: UIInputViewController {
     }
     
     override func textDidChange(_ textInput: UITextInput?) {
+        super.textDidChange(textInput)
         // Called after text changed - update suggestions
         // Notify the keyboard view to refresh suggestions
         NotificationCenter.default.post(name: NSNotification.Name("KeyboardTextDidChange"), object: nil)
     }
     
+    override func viewWillSetupKeyboardView() {
+        if isSafeMode {
+            ensureManagers()
+
+            if !hasFullAccess {
+                setupKeyboardView { [weak self] _ in
+                    guard let self = self else { return AnyView(EmptyView()) }
+                    return AnyView(FullAccessRequiredView {
+                        self.openKeyboardSettings()
+                    })
+                }
+                return
+            }
+
+            showKeyboardKitTypingView()
+            return
+        }
+        ensureManagers()
+
+        if !hasFullAccess {
+            setupKeyboardView { [weak self] _ in
+                guard let self = self else { return AnyView(EmptyView()) }
+                return AnyView(FullAccessRequiredView {
+                    self.openKeyboardSettings()
+                })
+            }
+            return
+        }
+
+        if keyboardState.currentMode == .agent {
+            showAgentKeyboard()
+            return
+        }
+
+        showKeyboardKitTypingView()
+    }
+    
     private func setupKeyboard() {
-        keyboardHeightManager = KeyboardHeightManager(view: view)
-        entitlementChecker = StoreKitEntitlementChecker()
-        
+        ensureManagers()
         loadEntitlementState()
-        setupInitialView()
         updateHeight()
     }
     
@@ -211,17 +300,22 @@ class KeyboardViewController: UIInputViewController {
     private func showTypingKeyboard() {
         clearSubviews()
         
-        let typingView = TypingKeyboardView(
-            onAgentModeTapped: { self.toggleAgentMode() },
-            onKeyTapped: { key in self.handleKeyPress(key) },
-            inputViewController: self,
-            textDocumentProxy: textDocumentProxy
-        )
-        
-        embedSwiftUIView(typingView)
+        // Update state
         keyboardState.currentMode = .normal
         keyboardState.isExpanded = false
+
+        if hasFullAccess {
+            showKeyboardKitTypingView()
+        } else {
+            showFullAccessRequiredView()
+        }
         updateHeight()
+    }
+
+    private func showKeyboardKitTypingView() {
+        setupKeyboardView { controller in
+            return AnyView(KeyboardKitTypingView(controller: controller))
+        }
     }
     
     private func showAgentKeyboard() {
@@ -231,45 +325,16 @@ class KeyboardViewController: UIInputViewController {
         // This ensures demo period is re-checked each time agent mode is toggled
         loadEntitlementState()
         
-        // Double-check demo period directly if still locked
-        // This handles cases where entitlement state might be stale
         if keyboardState.isLocked {
-            print("🔍 User appears locked, checking demo period...")
-            // Check demo period directly as a fallback
-            let onboardingComplete: Bool = AppGroupStorage.shared.get(Bool.self, for: "onboarding_complete") ?? false
-            print("🔍 Onboarding complete: \(onboardingComplete)")
-            
-            if !onboardingComplete {
-                if let demoStartDate: Date = AppGroupStorage.shared.get(Date.self, for: "demo_period_start_date") {
-                    let demoDuration: TimeInterval = 48 * 60 * 60 // 48 hours
-                    let demoExpiration = demoStartDate.addingTimeInterval(demoDuration)
-                    let now = Date()
-                    print("🔍 Demo start: \(demoStartDate), expiration: \(demoExpiration), now: \(now), expired: \(now >= demoExpiration)")
-                    
-                    if now < demoExpiration {
-                        // Demo period is active - grant access
-                        print("✅ Demo period detected directly - granting access")
-                        keyboardState.entitlementState = EntitlementState(
-                            isActive: true,
-                            expiresAt: demoExpiration,
-                            productId: Config.shared.subscriptionProductId
-                        )
-                    } else {
-                        print("❌ Demo period expired")
-                    }
-                } else {
-                    print("❌ No demo period start date found")
-                }
-            } else {
-                print("❌ Onboarding complete - demo period not applicable")
+            if let demoEntitlement = EntitlementEvaluator.demoEntitlement(
+                requiresOnboardingIncomplete: true
+            ) {
+                keyboardState.entitlementState = demoEntitlement
             }
         }
         
-        print("🔐 Final check - isLocked: \(keyboardState.isLocked), entitlement: \(keyboardState.entitlementState)")
-        
         // Check if user is subscribed before showing agent mode
         if keyboardState.isLocked {
-            print("⚠️ User is locked - showing LockedView instead of Agent")
             showLockedView()
             return
         }
@@ -278,51 +343,20 @@ class KeyboardViewController: UIInputViewController {
         keyboardState.currentMode = .agent
         keyboardState.isExpanded = true
         
-        print("🚀 Setting mode to .agent, isExpanded: true")
-        
         let agentView = AgentKeyboardView(
             onClose: { self.showTypingKeyboard() },
-            textDocumentProxy: textDocumentProxy
+            textDocumentProxy: textDocumentProxy,
+            keyboardState: state
         )
         .environmentObject(ToastManager.shared)
         
         embedSwiftUIView(agentView)
         
-        print("🚀 Agent keyboard shown - updating height to 80%")
-        print("📱 Screen height: \(UIScreen.main.bounds.height)")
-        print("📐 Expected agent height: \(UIScreen.main.bounds.height * 0.80)")
-        
         // Force immediate height update
         updateHeight()
-        
-        // Update multiple times to ensure it takes - keyboard extensions need multiple attempts
-        DispatchQueue.main.async {
-            print("📐 Update 1 (immediate async)")
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             self.updateHeight()
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-            print("📐 Update 2 (0.05s delay)")
-            self.updateHeight()
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-            print("📐 Update 3 (0.15s delay)")
-            self.updateHeight()
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            print("📐 Update 4 (0.3s delay)")
-            self.updateHeight()
-        }
-        
-        // Final update after view is fully laid out
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            print("📐 Update 5 (0.5s delay) - Final")
-            self.updateHeight()
-            print("📐 Final desired height: \(self.desiredHeight)")
-            print("📐 Final constraint height: \(self.heightConstraint?.constant ?? 0)")
-            print("📐 Final resizableInputView height: \(self.resizableInputView?.intrinsicContentSize.height ?? 0)")
         }
     }
     
@@ -346,69 +380,41 @@ class KeyboardViewController: UIInputViewController {
     }
     
     private func toggleAgentMode() {
-        print("🔄 toggleAgentMode called - current mode: \(keyboardState.currentMode)")
-        
         if keyboardState.currentMode == .normal {
-            print("📱 Switching to Agent mode")
             showAgentKeyboard()
         } else {
-            print("⌨️ Switching to Typing mode")
             showTypingKeyboard()
         }
     }
     
-    private func handleKeyPress(_ key: Key) {
-        switch key.type {
-        case .character:
-            textDocumentProxy.insertText(key.value)
-        case .backspace:
-            textDocumentProxy.deleteBackward()
-        case .space:
-            textDocumentProxy.insertText(" ")
-        case .return:
-            textDocumentProxy.insertText("\n")
-        case .arrow:
-            textDocumentProxy.insertText("\n")
-        case .shift:
-            break
-        case .symbol:
-            break
-        case .emoji:
-            break
-        }
-    }
-    
     private func updateHeight() {
+        // Guard against accessing keyboardHeightManager before it's initialized
+        guard let keyboardHeightManager = keyboardHeightManager else {
+            return
+        }
+
+        guard !isUpdatingHeight else { return }
+        isUpdatingHeight = true
+        defer { isUpdatingHeight = false }
+        
         let height = keyboardHeightManager.calculateHeight(
             mode: keyboardState.currentMode,
             isExpanded: keyboardState.isExpanded
         )
-        
-        print("📏 updateHeight called - calculated: \(height), mode: \(keyboardState.currentMode), expanded: \(keyboardState.isExpanded)")
-        
+
         // Store desired height
         desiredHeight = height
-        
-        // CRITICAL: Update the input view's intrinsic content size FIRST
-        // This is what iOS keyboard extensions use to determine height
-        if let resizableView = resizableInputView {
-            // Update the resizable input view's height - this is the primary method
-            resizableView.setHeight(height, animated: true)
-            
-            // Invalidate intrinsic content size - this tells iOS to resize the keyboard
-            resizableView.invalidateIntrinsicContentSize()
-        }
-        
-        // Update height constraint on main view as backup
+
+        // Update height constraint on main view
         if heightConstraint == nil {
             let constraint = view.heightAnchor.constraint(equalToConstant: height)
             constraint.priority = .init(999)
             constraint.isActive = true
             self.heightConstraint = constraint
-            print("📐 Created new height constraint: \(height)")
+        } else if let current = heightConstraint?.constant, abs(current - height) < 1 {
+            return
         } else {
             heightConstraint?.constant = height
-            print("📐 Updated height constraint to: \(height)")
         }
         
         // Force layout updates throughout the hierarchy
@@ -459,4 +465,3 @@ class KeyboardViewController: UIInputViewController {
         extensionContext?.open(url)
     }
 }
-

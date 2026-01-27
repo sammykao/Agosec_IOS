@@ -2,9 +2,9 @@ import Foundation
 import Combine
 import StoreKit
 import SharedCore
+import Networking
 
-/// Manages entitlement state by checking Apple StoreKit directly
-/// No backend dependency for subscription status - queries Apple's transaction history
+/// Manages entitlement state by checking demo period, mock backend, or Apple StoreKit
 class EntitlementService: ObservableObject {
     @Published var entitlementState: EntitlementState = EntitlementState(isActive: false)
     
@@ -14,7 +14,7 @@ class EntitlementService: ObservableObject {
     init() {
         loadEntitlement()
         
-        // Check Apple on init
+        // Check entitlement on init
         Task {
             await refreshEntitlement()
         }
@@ -24,43 +24,73 @@ class EntitlementService: ObservableObject {
     
     /// Load cached entitlement from AppGroupStorage (fast, synchronous)
     func loadEntitlement() {
-        if let stored: EntitlementState = AppGroupStorage.shared.get(EntitlementState.self, for: "entitlement_state") {
+        // Check demo period first (fast, synchronous check)
+        if let demoEntitlement = EntitlementEvaluator.demoEntitlement(
+            requiresOnboardingIncomplete: false
+        ) {
+            entitlementState = demoEntitlement
+            return
+        }
+        
+        // Fall back to cached entitlement
+        if let stored = EntitlementEvaluator.cachedEntitlement() {
             entitlementState = stored
         }
     }
     
-    /// Query Apple StoreKit directly for current subscription status
+    /// Refresh entitlement by checking demo period, mock backend, or StoreKit
     @MainActor
     func refreshEntitlement() async {
-        var foundActiveSubscription = false
+        // Priority 1: Check demo period first - if active, don't overwrite it
+        if let demoEntitlement = EntitlementEvaluator.demoEntitlement(
+            requiresOnboardingIncomplete: false
+        ) {
+            entitlementState = demoEntitlement
+            EntitlementEvaluator.saveEntitlement(demoEntitlement)
+            return
+        }
         
+        // Priority 2: In mock backend mode, use MockEntitlementAPI
+        if BuildMode.isMockBackend {
+            do {
+                let mockAPI = ServiceFactory.createEntitlementAPI(
+                    baseURL: Config.shared.backendBaseUrl,
+                    accessToken: nil
+                )
+                let mockEntitlement = try await mockAPI.fetchEntitlement()
+                entitlementState = mockEntitlement
+                EntitlementEvaluator.saveEntitlement(mockEntitlement)
+                return
+            } catch {
+                // Fall through to StoreKit check
+            }
+        }
+        
+        // Priority 3: Check StoreKit for real subscription
+        let storeKitEntitlement = await checkStoreKitSubscription()
+        entitlementState = storeKitEntitlement
+        EntitlementEvaluator.saveEntitlement(storeKitEntitlement)
+    }
+    
+    /// Queries Apple's StoreKit 2 for current subscription status
+    private func checkStoreKitSubscription() async -> EntitlementState {
         for await result in Transaction.currentEntitlements {
             if case .verified(let transaction) = result {
                 if transaction.productID == productId {
                     if let expirationDate = transaction.expirationDate, expirationDate > Date() {
                         // Active subscription found
-                        let entitlement = EntitlementState(
+                        return EntitlementState(
                             isActive: true,
                             expiresAt: expirationDate,
                             productId: transaction.productID
                         )
-                        entitlementState = entitlement
-                        AppGroupStorage.shared.set(entitlement, for: "entitlement_state")
-                        AppGroupStorage.shared.synchronize()
-                        foundActiveSubscription = true
-                        break
                     }
                 }
             }
         }
         
-        // No active subscription - update state
-        if !foundActiveSubscription {
-            let expiredEntitlement = EntitlementState(isActive: false)
-            entitlementState = expiredEntitlement
-            AppGroupStorage.shared.set(expiredEntitlement, for: "entitlement_state")
-            AppGroupStorage.shared.synchronize()
-        }
+        // No valid subscription found
+        return EntitlementState(isActive: false)
     }
     
     private func startPeriodicRefresh() {

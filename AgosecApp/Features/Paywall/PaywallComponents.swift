@@ -1,4 +1,5 @@
 import SwiftUI
+import UIComponents
 
 // MARK: - Paywall Feature Row
 
@@ -7,14 +8,12 @@ struct PaywallFeatureRow: View {
     let title: String
     let description: String
     let color: Color
-    let geometry: GeometryProxy
     
     var body: some View {
-        let isSmallScreen = geometry.size.width < 380
-        let iconContainerSize = min(geometry.size.width * 0.11, 44)
-        let iconSize = min(geometry.size.width * 0.055, 22)
+        let iconContainerSize: CGFloat = ResponsiveSystem.isSmallScreen ? 40 : 44
+        let iconSize: CGFloat = ResponsiveSystem.isSmallScreen ? 20 : 22
         
-        HStack(spacing: isSmallScreen ? 12 : 16) {
+        HStack(spacing: ResponsiveSystem.isSmallScreen ? 12 : 16) {
             // Icon with gradient background
             ZStack {
                 Circle()
@@ -44,7 +43,7 @@ struct PaywallFeatureRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.system(
-                        size: min(geometry.size.width * 0.04, 16),
+                        size: ResponsiveSystem.isSmallScreen ? 15 : 16,
                         weight: .semibold,
                         design: .default
                     ))
@@ -53,7 +52,7 @@ struct PaywallFeatureRow: View {
                 
                 Text(description)
                     .font(.system(
-                        size: min(geometry.size.width * 0.035, 14),
+                        size: 14,
                         weight: .regular,
                         design: .default
                     ))
@@ -66,7 +65,7 @@ struct PaywallFeatureRow: View {
             
             // Checkmark
             Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: isSmallScreen ? 18 : 20))
+                .font(.system(size: ResponsiveSystem.isSmallScreen ? 18 : 20))
                 .foregroundStyle(
                     LinearGradient(
                         colors: [Color.green, Color.green.opacity(0.8)],
@@ -97,8 +96,6 @@ struct PaywallBackground: View {
 // MARK: - Paywall Floating Orbs
 
 struct PaywallFloatingOrbs: View {
-    let geometry: GeometryProxy
-    
     var body: some View {
         ZStack {
             ForEach(0..<3) { index in
@@ -115,14 +112,11 @@ struct PaywallFloatingOrbs: View {
                             endRadius: 120 + CGFloat(index) * 60
                         )
                     )
-                    .frame(
-                        width: min(200 + CGFloat(index) * 80, geometry.size.width * 0.6),
-                        height: min(200 + CGFloat(index) * 80, geometry.size.width * 0.6)
-                    )
+                    .frame(width: 200 + CGFloat(index) * 80, height: 200 + CGFloat(index) * 80)
                     .blur(radius: 50)
                     .offset(
-                        x: max(-geometry.size.width * 0.3, min(geometry.size.width * 0.3, CGFloat(index) * 60 - 100)),
-                        y: max(-geometry.size.height * 0.2, min(geometry.size.height * 0.2, CGFloat(index) * 80 - 100))
+                        x: CGFloat(index) * 60 - 100,
+                        y: CGFloat(index) * 80 - 100
                     )
                     .opacity(0.7)
             }
@@ -133,7 +127,6 @@ struct PaywallFloatingOrbs: View {
 // MARK: - Paywall Header
 
 struct PaywallHeader: View {
-    let geometry: GeometryProxy
     let iconScale: CGFloat
     let iconOpacity: Double
     let glowOpacity: Double
@@ -141,11 +134,10 @@ struct PaywallHeader: View {
     let contentOffset: CGFloat
     
     var body: some View {
-        let isSmallScreen = geometry.size.width < 380
-        let iconSize = min(geometry.size.width * 0.18, 72)
+        let iconSize: CGFloat = ResponsiveSystem.isSmallScreen ? 64 : 72
         let containerSize = iconSize * 1.4
         
-        VStack(spacing: min(geometry.size.height * 0.02, 16)) {
+        VStack(alignment: .center, spacing: 16) {
             // Crown icon with glow
             ZStack {
                 // Glow rings
@@ -160,7 +152,7 @@ struct PaywallHeader: View {
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
-                            lineWidth: isSmallScreen ? 1.5 : 2
+                            lineWidth: ResponsiveSystem.isSmallScreen ? 1.5 : 2
                         )
                         .frame(
                             width: containerSize + CGFloat(index) * 20,
@@ -207,7 +199,7 @@ struct PaywallHeader: View {
             // Title
             Text("Unlock Agosec")
                 .font(.system(
-                    size: min(geometry.size.width * 0.09, 36),
+                    size: ResponsiveSystem.isSmallScreen ? 32 : 36,
                     weight: .bold,
                     design: .default
                 ))
@@ -227,7 +219,7 @@ struct PaywallHeader: View {
             // Subtitle
             Text("Get access to AI-powered typing assistance")
                 .font(.system(
-                    size: min(geometry.size.width * 0.043, 17),
+                    size: 17,
                     weight: .regular,
                     design: .default
                 ))
@@ -236,21 +228,19 @@ struct PaywallHeader: View {
                 .opacity(contentOpacity)
                 .offset(y: contentOffset)
         }
-        .padding(.horizontal, geometry.size.width * 0.08)
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 }
 
 // MARK: - Paywall Subscribe Button
 
 struct PaywallSubscribeButton: View {
-    let geometry: GeometryProxy
     let isLoading: Bool
     let shimmerOffset: CGFloat
     let action: () -> Void
     
     var body: some View {
-        let isSmallScreen = geometry.size.width < 380
-        let buttonHeight: CGFloat = isSmallScreen ? 54 : 60
+        let buttonHeight: CGFloat = ResponsiveSystem.isSmallScreen ? 54 : 60
         
         Button(action: {
             let impact = UIImpactFeedbackGenerator(style: .medium)
@@ -263,10 +253,10 @@ struct PaywallSubscribeButton: View {
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
                 } else {
                     Text("Subscribe Now")
-                        .font(.system(size: isSmallScreen ? 17 : 19, weight: .semibold, design: .default))
+                        .font(.system(size: ResponsiveSystem.isSmallScreen ? 17 : 19, weight: .semibold, design: .default))
                     
                     Image(systemName: "arrow.right")
-                        .font(.system(size: isSmallScreen ? 15 : 17, weight: .semibold))
+                        .font(.system(size: ResponsiveSystem.isSmallScreen ? 15 : 17, weight: .semibold))
                 }
             }
             .foregroundColor(.white)
@@ -301,9 +291,9 @@ struct PaywallSubscribeButton: View {
                     .offset(x: shimmerOffset)
                 }
             )
-            .cornerRadius(isSmallScreen ? 18 : 20)
+            .cornerRadius(ResponsiveSystem.isSmallScreen ? 18 : 20)
             .overlay(
-                RoundedRectangle(cornerRadius: isSmallScreen ? 18 : 20)
+                RoundedRectangle(cornerRadius: ResponsiveSystem.isSmallScreen ? 18 : 20)
                     .stroke(
                         LinearGradient(
                             colors: [
@@ -327,28 +317,25 @@ struct PaywallSubscribeButton: View {
 // MARK: - Paywall Terms Section
 
 struct PaywallTermsSection: View {
-    let geometry: GeometryProxy
     let openTerms: () -> Void
     let openPrivacyPolicy: () -> Void
     
     var body: some View {
-        let isSmallScreen = geometry.size.width < 380
-        
-        VStack(spacing: isSmallScreen ? 6 : 8) {
+        VStack(alignment: .center, spacing: ResponsiveSystem.isSmallScreen ? 6 : 8) {
             Text("Cancel anytime in Settings")
                 .font(.system(
-                    size: min(geometry.size.width * 0.03, 12),
+                    size: 12,
                     weight: .regular,
                     design: .default
                 ))
                 .foregroundColor(Color(red: 0.5, green: 0.5, blue: 0.55))
             
-            HStack(spacing: isSmallScreen ? 12 : 16) {
+            HStack(spacing: ResponsiveSystem.isSmallScreen ? 12 : 16) {
                 Button("Terms of Service") {
                     openTerms()
                 }
                 .font(.system(
-                    size: min(geometry.size.width * 0.03, 12),
+                    size: 12,
                     weight: .medium,
                     design: .default
                 ))
@@ -361,12 +348,13 @@ struct PaywallTermsSection: View {
                     openPrivacyPolicy()
                 }
                 .font(.system(
-                    size: min(geometry.size.width * 0.03, 12),
+                    size: 12,
                     weight: .medium,
                     design: .default
                 ))
                 .foregroundColor(Color(red: 0.0, green: 0.48, blue: 1.0).opacity(0.8))
             }
         }
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 }

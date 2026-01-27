@@ -19,59 +19,60 @@ struct PaywallView: View {
     @State private var shimmerOffset: CGFloat = -300
     
     var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                // Dark background
-                PaywallBackground()
-                    .ignoresSafeArea(.all)
-                
-                // Floating glass orbs
-                PaywallFloatingOrbs(geometry: geometry)
-                
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 0) {
-                        Spacer()
-                            .frame(height: max(geometry.size.height * 0.06, 40))
-                        
-                        // Header with crown icon
-                        PaywallHeader(
-                            geometry: geometry,
-                            iconScale: iconScale,
-                            iconOpacity: iconOpacity,
-                            glowOpacity: glowOpacity,
-                            contentOpacity: contentOpacity,
-                            contentOffset: contentOffset
-                        )
-                        
-                        // Features section
-                        featuresSection(in: geometry)
-                            .padding(.top, min(geometry.size.height * 0.03, 24))
-                        
-                        // Subscription section
-                        subscriptionSection(in: geometry)
-                            .padding(.top, min(geometry.size.height * 0.03, 24))
-                        
-                        // Terms section
-                        PaywallTermsSection(
-                            geometry: geometry,
-                            openTerms: openTerms,
-                            openPrivacyPolicy: openPrivacyPolicy
-                        )
-                        .padding(.top, min(geometry.size.height * 0.02, 16))
-                        .padding(.bottom, 40)
+        ZStack {
+            // Dark background
+            PaywallBackground()
+                .ignoresSafeArea(.all)
+            
+            // Floating glass orbs
+            PaywallFloatingOrbs()
+            
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .center, spacing: ResponsiveSystem.isShortScreen ? 24 : 32) {
+                    // Header with crown icon
+                    PaywallHeader(
+                        iconScale: iconScale,
+                        iconOpacity: iconOpacity,
+                        glowOpacity: glowOpacity,
+                        contentOpacity: contentOpacity,
+                        contentOffset: contentOffset
+                    )
+                    
+                    // Features section
+                    featuresSection
                         .opacity(contentOpacity)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(minHeight: geometry.size.height)
+                        .offset(y: contentOffset)
+                    
+                    // Subscription section
+                    subscriptionSection
+                        .opacity(contentOpacity)
+                        .offset(y: contentOffset)
+                    
+                    // Terms section
+                    PaywallTermsSection(
+                        openTerms: openTerms,
+                        openPrivacyPolicy: openPrivacyPolicy
+                    )
+                    .opacity(contentOpacity)
                 }
+                .padding(.horizontal, ResponsiveSystem.isSmallScreen ? 20 : 24)
+                .padding(.top, ResponsiveSystem.isShortScreen ? 12 : 16)
+                .padding(.bottom, ResponsiveSystem.isShortScreen ? 20 : 24)
+                .frame(maxWidth: .infinity)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea(.all)
         .navigationBarBackButtonHidden(true)
         .onAppear {
             storeKitManager.setToastManager(toastManager)
             startAnimations()
+            
+            // Immediately refresh entitlement to check if user should have access
+            Task { @MainActor in
+                await entitlementService.refreshEntitlement()
+            }
         }
         .onReceive(storeKitManager.$purchaseState) { state in
             handlePurchaseState(state)
@@ -80,29 +81,27 @@ struct PaywallView: View {
     
     // MARK: - Features Section
     
-    private func featuresSection(in geometry: GeometryProxy) -> some View {
-        let isSmallScreen = geometry.size.width < 380
-        
-        return VStack(spacing: 0) {
+    private var featuresSection: some View {
+        VStack(spacing: 0) {
             ForEach(Array(features.enumerated()), id: \.offset) { index, feature in
                 PaywallFeatureRow(
                     icon: feature.icon,
                     title: feature.title,
                     description: feature.description,
-                    color: feature.color,
-                    geometry: geometry
+                    color: feature.color
                 )
-                .padding(.vertical, isSmallScreen ? 12 : 14)
+                .padding(.vertical, ResponsiveSystem.isSmallScreen ? 12 : 14)
                 
                 if index < features.count - 1 {
                     Divider()
                         .background(Color.white.opacity(0.15))
-                        .padding(.leading, min(geometry.size.width * 0.15, 60))
+                        .padding(.leading, 60)
                 }
             }
         }
-        .padding(.horizontal, isSmallScreen ? 16 : 20)
-        .padding(.vertical, isSmallScreen ? 8 : 12)
+        .padding(.horizontal, ResponsiveSystem.isSmallScreen ? 16 : 20)
+        .padding(.vertical, ResponsiveSystem.isSmallScreen ? 8 : 12)
+        .frame(maxWidth: .infinity)
         .background(
             Color.white.opacity(0.08),
             in: RoundedRectangle(cornerRadius: 24)
@@ -123,9 +122,6 @@ struct PaywallView: View {
         )
         .shadow(color: Color.black.opacity(0.3), radius: 30, x: 0, y: 15)
         .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
-        .padding(.horizontal, geometry.size.width * 0.06)
-        .opacity(contentOpacity)
-        .offset(y: contentOffset)
     }
     
     private var features: [(icon: String, title: String, description: String, color: Color)] {
@@ -139,17 +135,14 @@ struct PaywallView: View {
     
     // MARK: - Subscription Section
     
-    private func subscriptionSection(in geometry: GeometryProxy) -> some View {
-        let isSmallScreen = geometry.size.width < 380
-        
-        return VStack(spacing: isSmallScreen ? 14 : 18) {
+    private var subscriptionSection: some View {
+        VStack(alignment: .center, spacing: ResponsiveSystem.isSmallScreen ? 14 : 18) {
             if let product = storeKitManager.product {
                 // Price card
-                priceCard(product: product, in: geometry)
+                priceCard(product: product)
                 
                 // Subscribe button
                 PaywallSubscribeButton(
-                    geometry: geometry,
                     isLoading: storeKitManager.isLoading,
                     shimmerOffset: shimmerOffset,
                     action: { Task { await storeKitManager.purchase() } }
@@ -161,20 +154,16 @@ struct PaywallView: View {
             }
             
             // Restore purchases button
-            restorePurchasesButton(in: geometry)
+            restorePurchasesButton
         }
-        .padding(.horizontal, geometry.size.width * 0.06)
-        .opacity(contentOpacity)
-        .offset(y: contentOffset)
+        .frame(maxWidth: .infinity)
     }
     
-    private func priceCard(product: Product, in geometry: GeometryProxy) -> some View {
-        let isSmallScreen = geometry.size.width < 380
-        
-        return VStack(spacing: 8) {
+    private func priceCard(product: Product) -> some View {
+        VStack(spacing: 8) {
             Text(product.displayName)
                 .font(.system(
-                    size: min(geometry.size.width * 0.05, 20),
+                    size: ResponsiveSystem.isSmallScreen ? 18 : 20,
                     weight: .semibold,
                     design: .default
                 ))
@@ -182,7 +171,7 @@ struct PaywallView: View {
             
             Text(product.displayPrice)
                 .font(.system(
-                    size: min(geometry.size.width * 0.1, 40),
+                    size: ResponsiveSystem.isSmallScreen ? 36 : 40,
                     weight: .bold,
                     design: .default
                 ))
@@ -196,14 +185,14 @@ struct PaywallView: View {
             
             Text(product.description)
                 .font(.system(
-                    size: min(geometry.size.width * 0.035, 14),
+                    size: 14,
                     weight: .regular,
                     design: .default
                 ))
                 .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.65))
         }
-        .padding(.vertical, isSmallScreen ? 16 : 20)
-        .padding(.horizontal, isSmallScreen ? 20 : 24)
+        .padding(.vertical, ResponsiveSystem.isSmallScreen ? 16 : 20)
+        .padding(.horizontal, ResponsiveSystem.isSmallScreen ? 20 : 24)
         .background(
             Color.white.opacity(0.06),
             in: RoundedRectangle(cornerRadius: 20)
@@ -242,13 +231,13 @@ struct PaywallView: View {
         }
     }
     
-    private func restorePurchasesButton(in geometry: GeometryProxy) -> some View {
+    private var restorePurchasesButton: some View {
         Button(action: {
             Task { await storeKitManager.restorePurchases() }
         }) {
             Text("Restore Purchases")
                 .font(.system(
-                    size: min(geometry.size.width * 0.035, 14),
+                    size: 14,
                     weight: .medium,
                     design: .default
                 ))

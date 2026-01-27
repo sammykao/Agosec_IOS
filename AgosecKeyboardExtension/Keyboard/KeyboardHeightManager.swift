@@ -17,8 +17,6 @@ class KeyboardHeightManager {
         // Don't use window or superview bounds as they may be the keyboard's current height
         let screenHeight = UIScreen.main.bounds.height
         
-        print("📏 Screen height: \(screenHeight) (from UIScreen.main.bounds)")
-        
         let orientation = UIDevice.current.orientation
         
         let height: CGFloat
@@ -29,11 +27,14 @@ class KeyboardHeightManager {
             height = calculateAgentHeight(screenHeight: screenHeight, orientation: orientation)
         }
         
-        print("📏 KeyboardHeightManager - mode: \(mode), screenHeight: \(screenHeight), calculated height: \(height), percentage: \(Int((height/screenHeight)*100))%")
         return height
     }
     
     private func calculateNormalHeight(screenHeight: CGFloat, orientation: UIDeviceOrientation) -> CGFloat {
+        // System assistant view is 45pt - this is managed by iOS separately
+        // Our suggestion bar is 44pt - this is part of our keyboard content
+        // The system assistant view sits above our keyboard, so we don't need to add it
+        // But we should ensure our keyboard height accounts for our suggestion bar
         let targetHeight = screenHeight * 0.32
         
         if orientation.isPortrait || orientation == .unknown {
@@ -46,7 +47,6 @@ class KeyboardHeightManager {
     private func calculateAgentHeight(screenHeight: CGFloat, orientation: UIDeviceOrientation) -> CGFloat {
         // Use 80% of screen height for agent mode
         let height = screenHeight * 0.80
-        print("📏 Agent height: \(height) (80% of \(screenHeight))")
         return height
     }
     

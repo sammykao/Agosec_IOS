@@ -12,7 +12,7 @@ class AppRouter: ObservableObject {
     
     init() {
         // Check if onboarding is already complete
-        if let isComplete: Bool = AppGroupStorage.shared.get(Bool.self, for: "onboarding_complete"), isComplete {
+        if let isComplete: Bool = AppGroupStorage.shared.get(Bool.self, for: AppGroupKeys.onboardingComplete), isComplete {
             currentRoute = .main
         }
     }
@@ -42,8 +42,16 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea(.all)
         .onReceive(entitlementService.$entitlementState) { state in
-            if state.isValid {
-                router.navigateTo(.main)
+            // Only auto-navigate to main if onboarding is complete
+            // This prevents skipping onboarding steps when entitlement becomes valid
+            let onboardingComplete = AppGroupStorage.shared.get(Bool.self, for: AppGroupKeys.onboardingComplete) ?? false
+            
+            if state.isValid && onboardingComplete {
+                // Only navigate to main if we're not already on onboarding
+                // This allows onboarding to complete naturally
+                if router.currentRoute != .onboarding {
+                    router.navigateTo(.main)
+                }
             }
         }
         .onReceive(DeepLinkService.shared.$navigationRequest) { navigation in

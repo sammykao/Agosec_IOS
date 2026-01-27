@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import SharedCore
 
 struct FullAccessRequiredView: View {
     let onOpenSettings: () -> Void
@@ -59,7 +60,7 @@ struct FullAccessRequiredView: View {
                 .buttonStyle(PlainButtonStyle())
                 .padding(.horizontal, 24)
                 
-                Text("Settings → Keyboards → Agosec → Full Access")
+                Text(AccessCopy.fullAccessFooter)
                     .font(.system(size: 12, weight: .regular, design: .default))
                     .foregroundColor(tertiaryTextColor)
                     .padding(.bottom, 8)

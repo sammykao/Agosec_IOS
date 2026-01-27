@@ -106,7 +106,7 @@ class StoreKitManager: ObservableObject {
             productId: transaction.productID
         )
         
-        AppGroupStorage.shared.set(entitlement, for: "entitlement_state")
+        EntitlementEvaluator.saveEntitlement(entitlement)
         
         do {
             try await syncWithBackend(transaction: transaction)
@@ -134,9 +134,7 @@ class StoreKitManager: ObservableObject {
                 let transaction = try checkVerified(result)
                 await updateEntitlement(with: transaction)
                 await transaction.finish()
-            } catch {
-                print("Failed to refresh entitlement: \(error)")
-            }
+            } catch {}
         }
     }
     
@@ -155,8 +153,7 @@ class StoreKitManager: ObservableObject {
                             expiresAt: expirationDate,
                             productId: transaction.productID
                         )
-                        AppGroupStorage.shared.set(entitlement, for: "entitlement_state")
-                        AppGroupStorage.shared.synchronize()
+                        EntitlementEvaluator.saveEntitlement(entitlement)
                         foundActiveSubscription = true
                         
                         // Also sync with backend for server-side validation
@@ -169,8 +166,7 @@ class StoreKitManager: ObservableObject {
         // If no active subscription found, clear the entitlement
         if !foundActiveSubscription {
             let expiredEntitlement = EntitlementState(isActive: false)
-            AppGroupStorage.shared.set(expiredEntitlement, for: "entitlement_state")
-            AppGroupStorage.shared.synchronize()
+            EntitlementEvaluator.saveEntitlement(expiredEntitlement)
         }
     }
 }

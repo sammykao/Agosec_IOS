@@ -141,9 +141,11 @@ public struct OnboardingStepTemplate<Content: View, BottomContent: View>: View {
 
 public struct ModernInstructionCard: View {
     let steps: [InstructionItem]
+    let style: InstructionCardStyle
     
-    public init(steps: [InstructionItem]) {
+    public init(steps: [InstructionItem], style: InstructionCardStyle = .light()) {
         self.steps = steps
+        self.style = style
     }
     
     public var body: some View {
@@ -162,7 +164,7 @@ public struct ModernInstructionCard: View {
                             Circle()
                                 .fill(
                                     LinearGradient(
-                                        colors: [Color.blue, Color.blue.opacity(0.7)],
+                                        colors: style.numberGradientColors,
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     )
@@ -176,7 +178,7 @@ public struct ModernInstructionCard: View {
                         
                         Text(step.text)
                             .font(.system(size: textFontSize, weight: .medium, design: .default))
-                            .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
+                            .foregroundColor(style.textColor)
                             .fixedSize(horizontal: false, vertical: true)
                         
                         Spacer()
@@ -185,6 +187,7 @@ public struct ModernInstructionCard: View {
                     
                     if index < steps.count - 1 {
                         Divider()
+                            .background(style.dividerColor)
                             .padding(.leading, circleSize + spacing)
                     }
                 }
@@ -193,12 +196,73 @@ public struct ModernInstructionCard: View {
             .padding(.vertical, 8)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.white)
-                    .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
+                    .fill(style.background)
+                    .shadow(color: style.shadowColor, radius: style.shadowRadius, x: 0, y: 4)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(style.borderColor, lineWidth: style.borderWidth)
             )
         }
         .frame(height: CGFloat(steps.count) * 56 + 16)
         .padding(.horizontal, 24)
+    }
+}
+
+public struct InstructionCardStyle {
+    public let background: Color
+    public let textColor: Color
+    public let numberGradientColors: [Color]
+    public let dividerColor: Color
+    public let borderColor: Color
+    public let borderWidth: CGFloat
+    public let shadowColor: Color
+    public let shadowRadius: CGFloat
+    
+    public init(
+        background: Color,
+        textColor: Color,
+        numberGradientColors: [Color],
+        dividerColor: Color,
+        borderColor: Color,
+        borderWidth: CGFloat,
+        shadowColor: Color,
+        shadowRadius: CGFloat
+    ) {
+        self.background = background
+        self.textColor = textColor
+        self.numberGradientColors = numberGradientColors
+        self.dividerColor = dividerColor
+        self.borderColor = borderColor
+        self.borderWidth = borderWidth
+        self.shadowColor = shadowColor
+        self.shadowRadius = shadowRadius
+    }
+    
+    public static func light(accentColors: [Color] = [Color.blue, Color.blue.opacity(0.7)]) -> InstructionCardStyle {
+        InstructionCardStyle(
+            background: Color.white,
+            textColor: Color(red: 0.2, green: 0.2, blue: 0.25),
+            numberGradientColors: accentColors,
+            dividerColor: Color.gray.opacity(0.2),
+            borderColor: Color.clear,
+            borderWidth: 0,
+            shadowColor: Color.black.opacity(0.06),
+            shadowRadius: 12
+        )
+    }
+    
+    public static func dark(accentColors: [Color]) -> InstructionCardStyle {
+        InstructionCardStyle(
+            background: Color.white.opacity(0.08),
+            textColor: Color(red: 0.85, green: 0.85, blue: 0.9),
+            numberGradientColors: accentColors,
+            dividerColor: Color.white.opacity(0.2),
+            borderColor: Color.white.opacity(0.15),
+            borderWidth: 1,
+            shadowColor: Color.clear,
+            shadowRadius: 0
+        )
     }
 }
 

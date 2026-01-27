@@ -33,16 +33,20 @@
 	<string>1</string>
 	<key>ENV</key>
 	<string>prod</string>
+	<key>APP_GROUP_ID</key>
+	<string>group.io.agosec.keyboard</string>
 	<key>FEATURE_AGENT_PHOTOS_ENABLED</key>
 	<true/>
-	<key>MOCK_BACKEND_ENABLED</key>
-	<true/>
+	<key>KEYBOARD_EXTENSION_BUNDLE_ID</key>
+	<string>io.agosec.keyboard.app.extension</string>
 	<key>MAX_CONTEXT_CHARS</key>
 	<integer>20000</integer>
 	<key>MAX_SCREENSHOTS_PER_IMPORT</key>
 	<integer>5</integer>
 	<key>MAX_TURNS_SENT</key>
 	<integer>12</integer>
+	<key>MOCK_BACKEND_ENABLED</key>
+	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Agosec needs access to your photos to import screenshots for AI context awareness.</string>
 	<key>SUBSCRIPTION_PRODUCT_ID</key>

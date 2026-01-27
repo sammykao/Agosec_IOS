@@ -1,6 +1,5 @@
 import SwiftUI
 import UIKit
-import SharedCore
 import UIComponents
 
 // MARK: - Welcome Step View
@@ -23,91 +22,41 @@ struct WelcomeStepView: View {
     
     var body: some View {
         GeometryReader { geometry in
-            ZStack {
-                // Dark background
-                LinearGradient(
-                    gradient: Gradient(colors: [
-                        Color(red: 0.05, green: 0.05, blue: 0.08),
-                        Color(red: 0.08, green: 0.08, blue: 0.12),
-                        Color(red: 0.06, green: 0.06, blue: 0.1)
-                    ]),
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
+            VStack(spacing: 0) {
+                // Push content down - weighted spacer (more on short screens)
+                Spacer()
+                    .frame(maxHeight: ResponsiveSystem.isShortScreen ? max(geometry.size.height * 0.12, 50) : max(geometry.size.height * 0.15, 60))
                 
-                // Floating glass orbs in background
-                floatingGlassOrbs(in: geometry)
+                // Glassmorphic logo container (responsive)
+                glassmorphicLogoSection(in: geometry)
+                    .padding(.bottom, ResponsiveSystem.isShortScreen ? 24 : 32)
                 
-                VStack(spacing: 0) {
-                    // Push content down - weighted spacer
-                    Spacer()
-                        .frame(maxHeight: geometry.size.height * 0.15)
-                    
-                    // Glassmorphic logo container (responsive)
-                    glassmorphicLogoSection(in: geometry)
-                        .padding(.bottom, 32)
-                    
-                    // Bold welcome text in glassmorphic panel (responsive)
-                    glassmorphicTextSection(in: geometry)
-                    
-                    // Flexible space between content and button
-                    Spacer()
-                        .frame(minHeight: 40)
-                    
-                    // Modern button with glassmorphic effects
-                    modernButtonSection(in: geometry)
-                        .padding(.bottom, 80) // Account for page indicator
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // Bold welcome text in glassmorphic panel (responsive)
+                glassmorphicTextSection(in: geometry)
+                
+                // Flexible space between content and button
+                Spacer()
+                    .frame(minHeight: ResponsiveSystem.isShortScreen ? 30 : 40)
+                
+                // Modern button with glassmorphic effects
+                modernButtonSection(in: geometry)
+                    .padding(.bottom, ResponsiveSystem.isShortScreen ? 60 : 80) // Account for page indicator
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .onAppear {
-            // Start demo period when onboarding begins
-            if AppGroupStorage.shared.get(Date.self, for: "demo_period_start_date") == nil {
-                AppGroupStorage.shared.set(Date(), for: "demo_period_start_date")
-                AppGroupStorage.shared.synchronize()
-            }
             startAnimations()
-        }
-    }
-    
-    // MARK: - Floating Glass Orbs
-    
-    private func floatingGlassOrbs(in geometry: GeometryProxy) -> some View {
-        ZStack {
-            ForEach(0..<3) { index in
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            gradient: Gradient(colors: [
-                                Color(red: 0.0, green: 0.48, blue: 1.0).opacity(0.15 - Double(index) * 0.04),
-                                Color(red: 0.58, green: 0.0, blue: 1.0).opacity(0.1 - Double(index) * 0.03),
-                                Color.clear
-                            ]),
-                            center: .center,
-                            startRadius: 0,
-                            endRadius: 120 + CGFloat(index) * 60
-                        )
-                    )
-                    .frame(
-                        width: min(240 + CGFloat(index) * 100, geometry.size.width * 0.7),
-                        height: min(240 + CGFloat(index) * 100, geometry.size.width * 0.7)
-                    )
-                    .blur(radius: 50)
-                    .offset(
-                        x: max(-geometry.size.width * 0.25, min(geometry.size.width * 0.25, CGFloat(index) * 80 - 120)),
-                        y: max(-geometry.size.height * 0.25, min(geometry.size.height * 0.25, CGFloat(index) * 100 - 150))
-                    )
-                    .opacity(0.7)
-            }
         }
     }
     
     // MARK: - Glassmorphic Logo Section
     
     private func glassmorphicLogoSection(in geometry: GeometryProxy) -> some View {
-        let logoSize = min(geometry.size.width * 0.35, 140)
+        let logoSize = ResponsiveSystem.value(
+            extraSmall: 110,
+            small: 120,
+            standard: min(geometry.size.width * 0.35, 140)
+        )
         let containerSize = logoSize * 1.3
         
         return ZStack {
@@ -184,15 +133,31 @@ struct WelcomeStepView: View {
     // MARK: - Glassmorphic Text Section
     
     private func glassmorphicTextSection(in geometry: GeometryProxy) -> some View {
-        VStack(spacing: min(geometry.size.height * 0.03, 24)) {
+        VStack(spacing: ResponsiveSystem.isShortScreen ? min(geometry.size.height * 0.025, 20) : min(geometry.size.height * 0.03, 24)) {
             Text("Welcome to")
-                .font(.system(size: min(geometry.size.width * 0.06, 24), weight: .medium, design: .default))
+                .font(.system(
+                    size: ResponsiveSystem.value(
+                        extraSmall: 20,
+                        small: 22,
+                        standard: min(geometry.size.width * 0.06, 24)
+                    ),
+                    weight: .medium,
+                    design: .default
+                ))
                 .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.75))
                 .opacity(textOpacity)
                 .offset(y: textOffset)
             
             Text("Agosec")
-                .font(.system(size: min(geometry.size.width * 0.18, 56), weight: .bold, design: .default))
+                .font(.system(
+                    size: ResponsiveSystem.value(
+                        extraSmall: 44,
+                        small: 50,
+                        standard: min(geometry.size.width * 0.18, 56)
+                    ),
+                    weight: .bold,
+                    design: .default
+                ))
                 .foregroundStyle(
                     LinearGradient(
                         colors: [
@@ -210,13 +175,21 @@ struct WelcomeStepView: View {
                 .shadow(color: Color.blue.opacity(0.3), radius: 20, x: 0, y: 10)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
-                .padding(.horizontal, 24)
+                .padding(.horizontal, ResponsiveSystem.value(extraSmall: 20, small: 24, standard: 24))
             
             Text("Let's get started.")
-                .font(.system(size: min(geometry.size.width * 0.05, 20), weight: .regular, design: .default))
+                .font(.system(
+                    size: ResponsiveSystem.value(
+                        extraSmall: 18,
+                        small: 19,
+                        standard: min(geometry.size.width * 0.05, 20)
+                    ),
+                    weight: .regular,
+                    design: .default
+                ))
                 .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.75))
-                .padding(.horizontal, min(geometry.size.width * 0.06, 24))
-                .padding(.vertical, 14)
+                .padding(.horizontal, ResponsiveSystem.value(extraSmall: 20, small: min(geometry.size.width * 0.06, 24), standard: min(geometry.size.width * 0.06, 24)))
+                .padding(.vertical, ResponsiveSystem.isShortScreen ? 12 : 14)
                 .background(
                     Color.white.opacity(0.1),
                     in: Capsule()
@@ -238,7 +211,7 @@ struct WelcomeStepView: View {
                 .opacity(textOpacity)
                 .offset(y: textOffset)
         }
-        .padding(.horizontal, min(geometry.size.width * 0.08, 32))
+        .padding(.horizontal, ResponsiveSystem.value(extraSmall: 24, small: min(geometry.size.width * 0.08, 32), standard: min(geometry.size.width * 0.08, 32)))
     }
     
     // MARK: - Modern Button Section
@@ -260,16 +233,27 @@ struct WelcomeStepView: View {
                 onNext()
             }
         }) {
-            HStack(spacing: 12) {
+            HStack(spacing: ResponsiveSystem.value(extraSmall: 10, small: 12, standard: 12)) {
                 Text("Get Started")
-                    .font(.system(size: 20, weight: .semibold, design: .default))
+                    .font(.system(
+                        size: ResponsiveSystem.value(extraSmall: 18, small: 19, standard: 20),
+                        weight: .semibold,
+                        design: .default
+                    ))
                 
                 Image(systemName: "arrow.right")
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.system(
+                        size: ResponsiveSystem.value(extraSmall: 16, small: 17, standard: 18),
+                        weight: .semibold
+                    ))
             }
             .foregroundColor(.white)
             .frame(maxWidth: .infinity)
-            .frame(height: min(geometry.size.height * 0.08, 64))
+            .frame(height: ResponsiveSystem.value(
+                extraSmall: 56,
+                small: ResponsiveSystem.isShortScreen ? 60 : min(geometry.size.height * 0.08, 64),
+                standard: ResponsiveSystem.isShortScreen ? 60 : min(geometry.size.height * 0.08, 64)
+            ))
             .background(
                 ZStack {
                     // Gradient base
@@ -320,7 +304,7 @@ struct WelcomeStepView: View {
         .buttonStyle(PlainButtonStyle())
         .scaleEffect(buttonScale)
         .opacity(buttonOpacity)
-        .padding(.horizontal, min(geometry.size.width * 0.08, 32))
+        .padding(.horizontal, ResponsiveSystem.value(extraSmall: 24, small: min(geometry.size.width * 0.08, 32), standard: min(geometry.size.width * 0.08, 32)))
         .onAppear {
             // Start shimmer animation
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {

@@ -2,7 +2,7 @@ name: AgosecKeyboard
 options:
   bundleIdPrefix: io.agosec
   deploymentTarget:
-    iOS: "15.0"
+    iOS: "16.0"
   groupSortPosition: top
   useBaseInternationalization: false
 settings:
@@ -20,11 +20,14 @@ packages:
     path: Packages/OCR
   UIComponents:
     path: Packages/UIComponents
+  KeyboardKit:
+    url: https://github.com/KeyboardKit/KeyboardKit.git
+    from: 10.0.0
 targets:
   AgosecApp:
     type: application
     platform: iOS
-    deploymentTarget: "15.0"
+    deploymentTarget: "16.0"
     sources:
       - AgosecApp
     info:
@@ -50,12 +53,15 @@ targets:
               - agosec
         NSPhotoLibraryUsageDescription: "Agosec needs access to your photos to import screenshots for AI context awareness."
         BACKEND_BASE_URL: "https://api.agosec.com"
+        MOCK_BACKEND_ENABLED: true
         SUBSCRIPTION_PRODUCT_ID: "io.agosec.keyboard.pro"
         ENV: "prod"
         FEATURE_AGENT_PHOTOS_ENABLED: true
         MAX_SCREENSHOTS_PER_IMPORT: 5
         MAX_CONTEXT_CHARS: 20000
         MAX_TURNS_SENT: 12
+        KEYBOARD_EXTENSION_BUNDLE_ID: "io.agosec.keyboard.app.extension"
+        APP_GROUP_ID: "group.io.agosec.keyboard"
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: io.agosec.keyboard.app
       PRODUCT_NAME: AgosecApp
@@ -72,6 +78,7 @@ targets:
       - package: Networking
       - package: OCR
       - package: UIComponents
+      - package: KeyboardKit
       - sdk: StoreKit.framework
       - sdk: PhotosUI.framework
       - target: AgosecKeyboardExtension
@@ -82,9 +89,11 @@ targets:
   AgosecKeyboardExtension:
     type: app-extension
     platform: iOS
-    deploymentTarget: "15.0"
+    deploymentTarget: "16.0"
     sources:
       - AgosecKeyboardExtension
+    resources:
+      - AgosecKeyboardExtension/Resources/Assets.xcassets
     info:
       path: AgosecKeyboardExtension/Info.plist
       properties:
@@ -100,25 +109,29 @@ targets:
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).KeyboardViewController
           NSExtensionPointIdentifier: com.apple.keyboard-service
         BACKEND_BASE_URL: "https://api.agosec.com"
+        MOCK_BACKEND_ENABLED: true
         SUBSCRIPTION_PRODUCT_ID: "io.agosec.keyboard.pro"
         ENV: "prod"
         FEATURE_AGENT_PHOTOS_ENABLED: true
         MAX_SCREENSHOTS_PER_IMPORT: 5
         MAX_CONTEXT_CHARS: 20000
         MAX_TURNS_SENT: 12
+        APP_GROUP_ID: "group.io.agosec.keyboard"
     settings:
-      PRODUCT_BUNDLE_IDENTIFIER: io.agosec.keyboard.app.keyboard
+      PRODUCT_BUNDLE_IDENTIFIER: io.agosec.keyboard.app.extension
       PRODUCT_NAME: AgosecKeyboardExtension
       CODE_SIGN_ENTITLEMENTS: AgosecKeyboardExtension/AgosecKeyboardExtension.entitlements
       CODE_SIGN_STYLE: Automatic
       DEVELOPMENT_TEAM: "V9CU7HF844"
       INFOPLIST_FILE: AgosecKeyboardExtension/Info.plist
       SWIFT_VERSION: "5.9"
+      ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: "YES"
     dependencies:
       - package: SharedCore
       - package: Networking
       - package: OCR
       - package: UIComponents
+      - package: KeyboardKit
       - sdk: Vision.framework
       - sdk: PhotosUI.framework
       - sdk: StoreKit.framework

@@ -19,19 +19,15 @@ class ResizableInputView: UIInputView {
     
     override var intrinsicContentSize: CGSize {
         let size = CGSize(width: UIView.noIntrinsicMetric, height: customHeight)
-        print("📐 ResizableInputView intrinsicContentSize called - returning: \(size)")
         return size
     }
     
     override func invalidateIntrinsicContentSize() {
         super.invalidateIntrinsicContentSize()
-        print("📐 ResizableInputView invalidateIntrinsicContentSize called")
     }
     
     func setHeight(_ height: CGFloat, animated: Bool = true) {
-        print("📐 ResizableInputView setHeight called - from \(customHeight) to \(height)")
         guard abs(customHeight - height) > 1.0 else { 
-            print("📐 Height unchanged (difference < 1pt), skipping")
             return 
         }
         

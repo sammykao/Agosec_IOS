@@ -7,22 +7,39 @@ public class AppGroupStorage {
     private let userDefaults: UserDefaults
     
     private init() {
-        self.appGroupId = "group.io.agosec.keyboard"
+        if let configuredId = Bundle.main.object(forInfoDictionaryKey: "APP_GROUP_ID") as? String,
+           !configuredId.isEmpty {
+            self.appGroupId = configuredId
+        } else {
+            self.appGroupId = "group.io.agosec.keyboard"
+        }
         guard let defaults = UserDefaults(suiteName: appGroupId) else {
-            fatalError("Failed to initialize App Group UserDefaults")
+            // Use standard UserDefaults as fallback instead of crashing
+            // This allows the app to continue functioning even if App Group isn't configured
+            self.userDefaults = UserDefaults.standard
+            return
         }
         self.userDefaults = defaults
     }
 
     public func set<T: Codable>(_ value: T, for key: String) {
-        if let data = try? JSONEncoder().encode(value) {
+        do {
+            let data = try JSONEncoder().encode(value)
             userDefaults.set(data, forKey: key)
-        }
+        } catch {}
     }
     
     public func get<T: Codable>(_ type: T.Type, for key: String) -> T? {
-        guard let data = userDefaults.data(forKey: key) else { return nil }
-        return try? JSONDecoder().decode(type, from: data)
+        guard let data = userDefaults.data(forKey: key) else {
+            return nil
+        }
+        
+        do {
+            let result = try JSONDecoder().decode(type, from: data)
+            return result
+        } catch {
+            return nil
+        }
     }
     
     public func remove(for key: String) {

@@ -16,82 +16,40 @@ class StoreKitEntitlementChecker {
     /// Call this on keyboard load (viewWillAppear)
     func refreshEntitlement() async {
         // Check demo period first - if active, don't overwrite it with StoreKit check
-        if let demoEntitlement = checkDemoPeriod() {
+        if let demoEntitlement = EntitlementEvaluator.demoEntitlement(
+            requiresOnboardingIncomplete: true
+        ) {
             // Demo period is active - save it to cache
-            AppGroupStorage.shared.set(demoEntitlement, for: "entitlement_state")
-            AppGroupStorage.shared.synchronize()
+            EntitlementEvaluator.saveEntitlement(demoEntitlement)
             return
         }
         
         // No demo period - check StoreKit for real subscription
         let entitlement = await checkSubscriptionStatus()
-        
+
         // Save to AppGroupStorage so it's available immediately next time
-        AppGroupStorage.shared.set(entitlement, for: "entitlement_state")
-        AppGroupStorage.shared.synchronize()
+        EntitlementEvaluator.saveEntitlement(entitlement)
     }
     
     /// Returns cached entitlement (fast, synchronous)
     /// Use this for immediate UI decisions
     func getCachedEntitlement() -> EntitlementState {
         // Check if user is in demo period (onboarding not complete + within time limit)
-        if let demoEntitlement = checkDemoPeriod() {
+        if let demoEntitlement = EntitlementEvaluator.demoEntitlement(
+            requiresOnboardingIncomplete: true
+        ) {
             return demoEntitlement
         }
-        
-        if let cached: EntitlementState = AppGroupStorage.shared.get(
-            EntitlementState.self,
-            for: "entitlement_state"
-        ) {
+
+        if let cached = EntitlementEvaluator.cachedEntitlement() {
             return cached
         }
         
         return EntitlementState(isActive: false)
     }
     
-    /// Checks if user is within demo period (48 hours from onboarding start)
-    /// Returns valid entitlement if in demo, nil otherwise
-    private func checkDemoPeriod() -> EntitlementState? {
-        // Check if onboarding is complete - if true, no demo access
-        let onboardingComplete: Bool = AppGroupStorage.shared.get(Bool.self, for: "onboarding_complete") ?? false
-        
-        if onboardingComplete {
-            // Onboarding complete - demo period no longer applies
-            return nil
-        }
-        
-        // Check if demo period has started
-        guard let demoStartDate: Date = AppGroupStorage.shared.get(Date.self, for: "demo_period_start_date") else {
-            // Demo hasn't started yet - don't grant access
-            return nil
-        }
-        
-        // Demo period: 48 hours from start
-        let demoDuration: TimeInterval = 48 * 60 * 60 // 48 hours
-        let demoExpiration = demoStartDate.addingTimeInterval(demoDuration)
-        
-        // Check if demo has expired
-        if Date() > demoExpiration {
-            // Demo expired - require subscription
-            return nil
-        }
-        
-        // Still in demo period
-        print("✅ Demo period active - expires: \(demoExpiration)")
-        return EntitlementState(
-            isActive: true,
-            expiresAt: demoExpiration,
-            productId: productId
-        )
-    }
-    
     /// Queries Apple's StoreKit 2 for current subscription status
     private func checkSubscriptionStatus() async -> EntitlementState {
-        // Check if user is in demo period first
-        if let demoEntitlement = checkDemoPeriod() {
-            return demoEntitlement
-        }
-        
         // Iterate through all current entitlements from Apple
         for await result in Transaction.currentEntitlements {
             switch result {
@@ -119,9 +77,8 @@ class StoreKitEntitlementChecker {
                     }
                 }
                 
-            case .unverified(_, let verificationError):
+            case .unverified:
                 // Transaction failed verification - don't trust it
-                print("⚠️ Unverified transaction: \(verificationError)")
                 continue
             }
         }

@@ -1,30 +1,33 @@
 import SwiftUI
+import UIKit
 import PhotosUI
 import UIComponents
 
 struct PhotosPermissionStepView: View {
     @State private var photosStatus: PHAuthorizationStatus = .notDetermined
-    @State private var iconScale: CGFloat = 0.5
-    @State private var iconOpacity: Double = 0
-    @State private var contentOpacity: Double = 0
-    @State private var contentOffset: CGFloat = 30
-    @State private var shimmerOffset: CGFloat = -200
     let onNext: () -> Void
     
     var body: some View {
-        GeometryReader { geometry in
-            let isSmallScreen = geometry.size.width < 380
-            let iconSize = min(geometry.size.width * 0.22, 90)
-            let ringBaseSize = min(geometry.size.width * 0.25, 100)
-            
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 0) {
-                    Spacer()
-                        .frame(height: max(geometry.size.height * 0.12, 60))
-                    
-                    // Animated icon with modern design (responsive)
-                    ZStack {
-                    // Animated glow rings (responsive)
+        OnboardingStepScaffold(
+            isScrollable: true,
+            topSpacing: { geometry in
+                ResponsiveSystem.isShortScreen
+                    ? max(geometry.size.height * 0.10, 50)
+                    : max(geometry.size.height * 0.12, 60)
+            },
+            header: { geometry, state in
+                let iconSize = ResponsiveSystem.value(
+                    extraSmall: 75,
+                    small: 82,
+                    standard: min(geometry.size.width * 0.22, 90)
+                )
+                let ringBaseSize = ResponsiveSystem.value(
+                    extraSmall: 85,
+                    small: 92,
+                    standard: min(geometry.size.width * 0.25, 100)
+                )
+                
+                return ZStack {
                     ForEach(0..<2) { index in
                         Circle()
                             .stroke(
@@ -36,25 +39,23 @@ struct PhotosPermissionStepView: View {
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 ),
-                                lineWidth: isSmallScreen ? 1.5 : 2
+                                lineWidth: ResponsiveSystem.value(extraSmall: 1.5, small: 1.5, standard: 2)
                             )
                             .frame(width: ringBaseSize + CGFloat(index) * 16, height: ringBaseSize + CGFloat(index) * 16)
                             .scaleEffect(1.0 + CGFloat(index) * 0.1)
-                            .opacity(iconOpacity * (1.0 - Double(index) * 0.3))
+                            .opacity(state.headerOpacity * (1.0 - Double(index) * 0.3))
                     }
                     
-                    // Background photos stack (subtle, responsive)
                     let photoStackSize = min(geometry.size.width * 0.18, 75)
                     ForEach(0..<2) { index in
-                        RoundedRectangle(cornerRadius: isSmallScreen ? 10 : 12)
+                        RoundedRectangle(cornerRadius: ResponsiveSystem.isSmallScreen ? 10 : 12)
                             .fill(Color.green.opacity(0.12 - Double(index) * 0.04))
                             .frame(width: photoStackSize - CGFloat(index) * 10, height: photoStackSize - CGFloat(index) * 10)
                             .offset(x: CGFloat(index) * 6, y: CGFloat(index) * -6)
                             .rotationEffect(.degrees(Double(index) * -4))
-                            .opacity(iconOpacity * 0.6)
+                            .opacity(state.headerOpacity * 0.6)
                     }
                     
-                    // Main icon container with glassmorphism (responsive)
                     ZStack {
                         Circle()
                             .fill(
@@ -94,59 +95,43 @@ struct PhotosPermissionStepView: View {
                             )
                     }
                 }
-                .scaleEffect(iconScale)
-                .opacity(iconOpacity)
+                .scaleEffect(state.headerScale)
+                .opacity(state.headerOpacity)
                 .padding(.bottom, min(geometry.size.height * 0.03, 24))
-                
-                // Title (responsive)
-                Text("Photo Access")
-                    .font(.system(size: min(geometry.size.width * 0.07, 28), weight: .bold, design: .default))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [Color.white, Color.green],
-                            startPoint: .leading,
-                            endPoint: .trailing
+            },
+            bodyContent: { geometry, _ in
+                VStack(spacing: 0) {
+                    Text("Photo Access")
+                        .font(.system(size: min(geometry.size.width * 0.07, 28), weight: .bold, design: .default))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [Color.white, Color.green],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
                         )
-                    )
-                    .opacity(contentOpacity)
-                    .offset(y: contentOffset)
-                
-                // Subtitle (responsive)
-                Text("Allow access to screenshots for AI context awareness")
-                    .font(.system(size: min(geometry.size.width * 0.043, 17), weight: .regular, design: .default))
-                    .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.75))
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
-                    .padding(.horizontal, geometry.size.width * 0.1)
-                    .padding(.top, min(geometry.size.height * 0.015, 12))
-                    .opacity(contentOpacity)
-                    .offset(y: contentOffset)
-                
-                // Info card (responsive)
-                infoCard(in: geometry)
-                    .padding(.top, min(geometry.size.height * 0.03, 24))
-                    .opacity(contentOpacity)
-                    .offset(y: contentOffset)
-                
-                    Spacer(minLength: 16)
                     
-                    // Buttons based on status (responsive)
-                    buttonsForStatus(in: geometry)
-                        .padding(.horizontal, geometry.size.width * 0.07)
-                        .padding(.bottom, 80) // Account for page indicator
-                        .opacity(contentOpacity)
-                        .offset(y: contentOffset)
+                    Text("Allow access to screenshots for AI context awareness")
+                        .font(.system(size: min(geometry.size.width * 0.043, 17), weight: .regular, design: .default))
+                        .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.75))
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(4)
+                        .padding(.horizontal, geometry.size.width * 0.1)
+                        .padding(.top, min(geometry.size.height * 0.015, 12))
+                    
+                    infoCard(in: geometry)
+                        .padding(.top, min(geometry.size.height * 0.03, 24))
                 }
-                .frame(maxWidth: .infinity)
-                .frame(minHeight: geometry.size.height)
+            },
+            footer: { geometry, _ in
+                buttonsForStatus(in: geometry)
+                    .padding(.horizontal, geometry.size.width * 0.07)
+            },
+            onAppear: {
+                checkPhotoStatus()
             }
-        }
-        .onAppear {
-            startAnimations()
-            checkPhotoStatus()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
-            // Recheck status when returning from Settings
+        )
+        .onAppBecameActive {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                 checkPhotoStatus()
             }
@@ -154,13 +139,12 @@ struct PhotosPermissionStepView: View {
     }
     
     private func infoCard(in geometry: GeometryProxy) -> some View {
-        let isSmallScreen = geometry.size.width < 380
-        let iconSize: CGFloat = isSmallScreen ? 18 : 20
-        let titleSize: CGFloat = isSmallScreen ? 14 : 16
-        let descSize: CGFloat = isSmallScreen ? 12 : 14
-        let spacing: CGFloat = isSmallScreen ? 10 : 14
+        let iconSize: CGFloat = ResponsiveSystem.value(extraSmall: 17, small: 18, standard: 20)
+        let titleSize: CGFloat = ResponsiveSystem.value(extraSmall: 13, small: 14, standard: 16)
+        let descSize: CGFloat = ResponsiveSystem.value(extraSmall: 11, small: 12, standard: 14)
+        let spacing: CGFloat = ResponsiveSystem.value(extraSmall: 9, small: 10, standard: 14)
         
-        return VStack(spacing: isSmallScreen ? 12 : 16) {
+        return VStack(spacing: ResponsiveSystem.value(extraSmall: 10, small: 12, standard: 16)) {
             HStack(spacing: spacing) {
                 Image(systemName: "sparkles")
                     .font(.system(size: iconSize, weight: .medium))
@@ -193,7 +177,7 @@ struct PhotosPermissionStepView: View {
                         .font(.system(size: titleSize, weight: .semibold, design: .default))
                         .foregroundColor(Color(red: 0.9, green: 0.9, blue: 0.95))
                     
-                    Text("Photo access is needed for AI context awareness")
+                    Text("Screenshots are processed locally and deleted immediately")
                         .font(.system(size: descSize, weight: .regular, design: .default))
                         .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.65))
                         .fixedSize(horizontal: false, vertical: true)
@@ -202,7 +186,8 @@ struct PhotosPermissionStepView: View {
                 Spacer()
             }
         }
-        .padding(isSmallScreen ? 16 : 20)
+        .padding(.horizontal, ResponsiveSystem.isSmallScreen ? 16 : 20)
+        .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color.white.opacity(0.08))
@@ -216,77 +201,44 @@ struct PhotosPermissionStepView: View {
     
     @ViewBuilder
     private func buttonsForStatus(in geometry: GeometryProxy) -> some View {
-        let isSmallScreen = geometry.size.width < 380
-        
-        VStack(spacing: isSmallScreen ? 10 : 14) {
-            switch photosStatus {
-            case .notDetermined:
-                ModernActionButton(
-                    title: "Allow Photo Access",
-                    icon: "photo.fill",
-                    action: requestPhotoAccess
-                )
-                
-                Text("Photo access is required to continue")
-                    .font(.system(size: isSmallScreen ? 12 : 13, weight: .regular))
-                    .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.65))
-                
-            case .authorized, .limited:
-                HStack(spacing: 12) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: isSmallScreen ? 18 : 20))
-                        .foregroundColor(.green)
-                    
-                    Text("Photo access granted")
-                        .font(.system(size: isSmallScreen ? 14 : 16, weight: .medium, design: .default))
-                        .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.75))
-                }
-                .padding(.bottom, 8)
-                
+        switch photosStatus {
+        case .authorized, .limited:
+            VStack(spacing: 12) {
                 ModernActionButton(
                     title: "Continue",
                     icon: "arrow.right",
                     action: onNext
                 )
                 
-            case .denied, .restricted:
-                Text("Photo access was denied")
-                    .font(.system(size: isSmallScreen ? 13 : 14, weight: .medium))
-                    .foregroundColor(.orange)
-                    .padding(.bottom, 4)
-                
+                Text("Photo access enabled!")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.green)
+            }
+        case .denied, .restricted:
+            VStack(spacing: 12) {
                 ModernActionButton(
-                    title: "Open Settings to Enable",
+                    title: "Open Settings",
                     icon: "gear",
                     action: openSettings
                 )
                 
-                Text("Enable photo access in Settings, then return here")
-                    .font(.system(size: isSmallScreen ? 12 : 13, weight: .regular))
+                Text("Please enable photo access to continue")
+                    .font(.system(size: 12, weight: .regular))
                     .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.65))
                     .multilineTextAlignment(.center)
-                
-            @unknown default:
-                ModernActionButton(
-                    title: "Allow Photo Access",
-                    icon: "photo.fill",
-                    action: requestPhotoAccess
-                )
             }
-        }
-    }
-    
-    private func startAnimations() {
-        withAnimation(.spring(response: 0.7, dampingFraction: 0.6)) {
-            iconScale = 1.0
-            iconOpacity = 1.0
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                contentOpacity = 1.0
-                contentOffset = 0
-            }
+        case .notDetermined:
+            ModernActionButton(
+                title: "Allow Photo Access",
+                icon: "photo.fill",
+                action: requestPhotoAccess
+            )
+        @unknown default:
+            ModernActionButton(
+                title: "Allow Photo Access",
+                icon: "photo.fill",
+                action: requestPhotoAccess
+            )
         }
     }
     

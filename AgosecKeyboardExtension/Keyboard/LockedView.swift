@@ -11,10 +11,10 @@ struct LockedView: View {
     
     init(onSubscribeTapped: @escaping () -> Void) {
         self.onSubscribeTapped = onSubscribeTapped
-        if let complete: Bool = AppGroupStorage.shared.get(Bool.self, for: "onboarding_complete") {
+        if let complete: Bool = AppGroupStorage.shared.get(Bool.self, for: AppGroupKeys.onboardingComplete) {
             _isOnboardingComplete = State(initialValue: complete)
         }
-        if let _: Date = AppGroupStorage.shared.get(Date.self, for: "demo_period_start_date") {
+        if let _: Date = AppGroupStorage.shared.get(Date.self, for: AppGroupKeys.demoPeriodStartDate) {
             _hasDemoStarted = State(initialValue: true)
         }
     }
@@ -84,7 +84,7 @@ struct LockedView: View {
                 .buttonStyle(PlainButtonStyle())
                 .padding(.horizontal, 24)
                 
-                Text("Tap keyboard switcher to change keyboards")
+                Text(AccessCopy.lockedViewFooter)
                     .font(.system(size: 12, weight: .regular, design: .default))
                     .foregroundColor(tertiaryTextColor)
                     .padding(.bottom, 8)

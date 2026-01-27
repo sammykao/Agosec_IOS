@@ -12,19 +12,12 @@ public class OCRService: OCRServiceProtocol {
     public init() {}
     
     public func extractText(from images: [UIImage]) async throws -> ContextDoc {
-        let extractedTexts = try await withThrowingTaskGroup(of: String.self) { group in
-            for (index, image) in images.enumerated() {
-                group.addTask {
-                    let text = try await self.performOCR(on: image)
-                    return "\n--- Screenshot \(index + 1) ---\n\(text)"
-                }
-            }
-            
-            var results: [String] = []
-            for try await result in group {
-                results.append(result)
-            }
-            return results
+        var extractedTexts: [String] = []
+        extractedTexts.reserveCapacity(images.count)
+        
+        for (index, image) in images.enumerated() {
+            let text = try await performOCR(on: image)
+            extractedTexts.append("\n--- Screenshot \(index + 1) ---\n\(text)")
         }
         
         let combinedText = extractedTexts.joined(separator: "\n")

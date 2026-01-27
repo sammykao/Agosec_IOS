@@ -1,6 +1,7 @@
 import SwiftUI
 import UIKit
 import Photos
+import KeyboardKit
 import SharedCore
 import Networking
 import OCR
@@ -9,12 +10,12 @@ import UIComponents
 struct AgentKeyboardView: View {
     let onClose: () -> Void
     let textDocumentProxy: UITextDocumentProxy
+    let keyboardState: Keyboard.State?
     
     @StateObject private var sessionManager = AgentSessionManager()
     @State private var currentStep: AgentStep = .introChoice
     @State private var isLoading = false
     @State private var loadingMessage = ""
-    @State private var error: Error?
     @EnvironmentObject var toastManager: ToastManager
     
     enum AgentStep {
@@ -31,8 +32,19 @@ struct AgentKeyboardView: View {
             mainContent
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .background(Color.clear)
+        .background(agentBackground)
+        .loadingOverlay(isPresented: isLoading, message: loadingMessage)
         .toastOverlay(toastManager: toastManager)
+    }
+
+    @ViewBuilder
+    private var agentBackground: some View {
+        switch currentStep {
+        case .introChoice:
+            Color.clear
+        case .chat:
+            Color.clear.lightGradientBackground()
+        }
     }
     
     private var headerView: some View {
@@ -45,7 +57,6 @@ struct AgentKeyboardView: View {
             // Left button
             HStack {
                 Button(action: {
-                    print("🔙 Back button tapped - closing agent mode")
                     onClose()
                 }) {
                     Image(systemName: "xmark")
@@ -72,25 +83,20 @@ struct AgentKeyboardView: View {
             AgentIntroView(
                 onChoiceMade: { choice in
                     handleIntroChoice(choice)
-                },
-                onClose: onClose
+                }
             )
             .environmentObject(toastManager)
             case .chat(let session):
                 AgentChatView(
                     session: session,
                     textDocumentProxy: textDocumentProxy,
+                    keyboardState: keyboardState,
                     onNewSession: {
                         currentStep = .introChoice
                     }
                 )
                 .id(session.sessionId)
                 .environmentObject(toastManager)
-            }
-            
-            // Loading overlay
-            if isLoading {
-                LoadingOverlay(message: loadingMessage)
             }
         }
     }
@@ -99,7 +105,9 @@ struct AgentKeyboardView: View {
         isLoading = true
         
         switch choice {
-        case .useAndDeleteScreenshots(_, _), .useScreenshots(_):
+        case .useAndDeleteScreenshots(_, _):
+            loadingMessage = "Processing screenshots..."
+        case .useScreenshots(_):
             loadingMessage = "Processing screenshots..."
         case .continueWithoutContext:
             loadingMessage = "Starting conversation..."
@@ -108,16 +116,17 @@ struct AgentKeyboardView: View {
         Task {
             do {
                 let session = try await sessionManager.initializeSession(choice: choice)
+
                 await MainActor.run {
                     isLoading = false
                     currentStep = .chat(session: session)
                 }
             } catch {
+                let message = ErrorMapper.userFriendlyMessage(from: error)
+                let shouldRetry = ErrorMapper.shouldShowRetry(for: error)
+                
                 await MainActor.run {
                     isLoading = false
-                    let message = ErrorMapper.userFriendlyMessage(from: error)
-                    let shouldRetry = ErrorMapper.shouldShowRetry(for: error)
-                    
                     toastManager.show(
                         message,
                         type: .error,
@@ -143,31 +152,10 @@ class AgentSessionManager: ObservableObject {
     private let ocrService: OCRServiceProtocol
     
     init() {
-        // Use ServiceFactory to get appropriate service (mock or real)
-        let accessToken: String? = AppGroupStorage.shared.get(String.self, for: "access_token")
-        
-        // In mock mode, we can create ChatAPI even without access token
-        if BuildMode.isMockBackend {
-            self.chatAPI = ServiceFactory.createChatAPI(
-                baseURL: Config.shared.backendBaseUrl,
-                accessToken: accessToken,
-                sessionId: nil
-            )
-            // Use REAL OCR service in mock mode so user can see actual extracted text
-            self.ocrService = OCRService()
-        } else {
-            // Real mode requires access token
-            if let accessToken = accessToken {
-                self.chatAPI = ServiceFactory.createChatAPI(
-                    baseURL: Config.shared.backendBaseUrl,
-                    accessToken: accessToken,
-                    sessionId: nil
-                )
-            } else {
-                self.chatAPI = nil
-            }
-            self.ocrService = OCRService()
-        }
+        // Use shared provider to get appropriate service (mock or real)
+        self.chatAPI = ChatAPIProvider.makeChatAPI(sessionId: nil)
+        // Use REAL OCR service in mock mode so user can see actual extracted text
+        self.ocrService = OCRService()
     }
     
     func initializeSession(choice: IntroChoice) async throws -> ChatSession {
@@ -175,8 +163,14 @@ class AgentSessionManager: ObservableObject {
         
         switch choice {
         case .useAndDeleteScreenshots(let images, let assetIdentifiers):
+            // Validate images before processing
+            guard !images.isEmpty else {
+                throw AgentError.invalidContext
+            }
+
             let context = try await extractContext(from: images)
-            
+            session.context = context
+
             // In mock backend mode, display the extracted OCR text directly
             if BuildMode.isMockBackend {
                 // Show the raw extracted text so user can see what was extracted
@@ -198,12 +192,22 @@ class AgentSessionManager: ObservableObject {
                 session.turns.append(turn)
             }
             
-            // Delete photos after processing
-            await deletePhotos(assetIdentifiers: assetIdentifiers)
+            // Delete photos after processing (don't block on errors, run in background)
+            if !assetIdentifiers.isEmpty {
+                Task.detached(priority: .background) { [weak self] in
+                    await self?.deletePhotos(assetIdentifiers: assetIdentifiers)
+                }
+            }
             
         case .useScreenshots(let images):
+            // Validate images before processing
+            guard !images.isEmpty else {
+                throw AgentError.invalidContext
+            }
+
             let context = try await extractContext(from: images)
-            
+            session.context = context
+
             // In mock backend mode, display the extracted OCR text directly
             if BuildMode.isMockBackend {
                 // Show the raw extracted text so user can see what was extracted
@@ -244,7 +248,12 @@ class AgentSessionManager: ObservableObject {
     }
     
     private func extractContext(from images: [UIImage]) async throws -> ContextDoc {
-        return try await ocrService.extractText(from: images)
+        do {
+            let context = try await ocrService.extractText(from: images)
+            return context
+        } catch {
+            throw error
+        }
     }
     
     private func fetchSummary(session: ChatSession, context: ContextDoc) async throws -> String {
@@ -285,14 +294,12 @@ class AgentSessionManager: ObservableObject {
         // Check authorization
         let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
         guard status == .authorized || status == .limited else {
-            print("⚠️ Cannot delete photos: insufficient authorization (status: \(status.rawValue))")
             return
         }
         
         // Fetch PHAsset objects from identifiers
         let fetchResult = PHAsset.fetchAssets(withLocalIdentifiers: assetIdentifiers, options: nil)
         guard fetchResult.count > 0 else {
-            print("⚠️ No assets found for deletion")
             return
         }
         
@@ -306,9 +313,7 @@ class AgentSessionManager: ObservableObject {
             try await PHPhotoLibrary.shared().performChanges {
                 PHAssetChangeRequest.deleteAssets(assetsToDelete as NSArray)
             }
-            print("✅ Successfully deleted \(assetsToDelete.count) photo(s)")
         } catch {
-            print("❌ Failed to delete photos: \(error.localizedDescription)")
             // Don't throw - deletion failure shouldn't block the session
         }
     }

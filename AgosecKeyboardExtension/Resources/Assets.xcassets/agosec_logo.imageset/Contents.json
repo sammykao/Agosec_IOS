@@ -1,14 +1,17 @@
 {
   "images" : [
     {
+      "filename" : "agosec_logo.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "agosec_logo 1.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "agosec_logo 2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
