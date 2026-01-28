@@ -5,7 +5,6 @@ import UIComponents
 
 struct EnableKeyboardStepView: View {
     @EnvironmentObject var permissionsService: PermissionsService
-    @State private var isKeyboardEnabled = false
     @State private var pulseScale: CGFloat = 1.0
     let onNext: () -> Void
 
@@ -158,7 +157,7 @@ struct EnableKeyboardStepView: View {
             },
             footer: { geometry, _ in
                 VStack(spacing: 12) {
-                    if isKeyboardEnabled {
+                    if permissionsService.isKeyboardEnabled {
                         ModernActionButton(
                             title: "Continue",
                             icon: "arrow.right",
@@ -219,6 +218,5 @@ struct EnableKeyboardStepView: View {
 
     private func checkKeyboardStatus() {
         permissionsService.refreshStatus()
-        isKeyboardEnabled = permissionsService.isKeyboardExtensionEnabled
     }
 }

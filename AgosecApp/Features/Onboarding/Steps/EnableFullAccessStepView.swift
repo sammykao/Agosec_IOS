@@ -5,7 +5,6 @@ import UIComponents
 
 struct EnableFullAccessStepView: View {
     @EnvironmentObject var permissionsService: PermissionsService
-    @State private var hasFullAccess = false
     @State private var glowOpacity: Double = 0.3
     let onNext: () -> Void
 
@@ -120,7 +119,7 @@ struct EnableFullAccessStepView: View {
             },
             footer: { _, _ in
                 VStack(spacing: 12) {
-                    if hasFullAccess {
+                    if permissionsService.hasFullAccessState {
                         ModernActionButton(
                             title: "Continue",
                             icon: "arrow.right",
@@ -182,21 +181,6 @@ struct EnableFullAccessStepView: View {
     }
 
     private func checkFullAccessStatus() {
-        guard Thread.isMainThread else {
-            DispatchQueue.main.async {
-                self.checkFullAccessStatus()
-            }
-            return
-        }
-
         permissionsService.refreshStatus()
-
-        let newHasFullAccess = permissionsService.hasFullAccess
-
-        DispatchQueue.main.async {
-            if self.hasFullAccess != newHasFullAccess {
-                self.hasFullAccess = newHasFullAccess
-            }
-        }
     }
 }

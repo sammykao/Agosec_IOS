@@ -12,6 +12,9 @@ class KeyboardViewController: KeyboardInputViewController {
     private let entitlementCoordinator = KeyboardEntitlementCoordinator()
 
     private var currentHostingView: UIView?
+    private var entitlementTask: Task<Void, Never>?
+    private var heightUpdateWorkItem: DispatchWorkItem?
+    private var delayedHeightUpdateWorkItem: DispatchWorkItem?
 
     // Track if we're in the middle of a photo selection flow
     // This prevents viewWillAppear from resetting the view during photo selection
@@ -45,6 +48,9 @@ class KeyboardViewController: KeyboardInputViewController {
     }
 
     deinit {
+        entitlementTask?.cancel()
+        heightUpdateWorkItem?.cancel()
+        delayedHeightUpdateWorkItem?.cancel()
         NotificationCenter.default.removeObserver(self)
     }
 
@@ -57,7 +63,7 @@ class KeyboardViewController: KeyboardInputViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.isInPhotoSelectionFlow = false
             // Ensure keyboard view is properly displayed
-            self.updateHeight()
+            self.scheduleHeightUpdate()
         }
     }
 
@@ -146,14 +152,8 @@ class KeyboardViewController: KeyboardInputViewController {
         super.viewDidAppear(animated)
 
         // Update height again after view appears - ensures correct sizing
-        DispatchQueue.main.async {
-            self.updateHeight()
-        }
-
-        // Also update after a longer delay to catch any layout changes
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            self.updateHeight()
-        }
+        scheduleHeightUpdate()
+        scheduleHeightUpdate(delay: 0.2)
     }
 
     override func viewDidLayoutSubviews() {
@@ -232,12 +232,14 @@ class KeyboardViewController: KeyboardInputViewController {
     }
 
     private func checkEntitlement() {
-        Task {
+        entitlementTask?.cancel()
+        entitlementTask = Task { [weak self] in
             // Query Apple StoreKit directly for subscription status
-            let entitlement = await entitlementCoordinator.refreshEntitlement()
+            let entitlement = await self?.entitlementCoordinator.refreshEntitlement()
             await MainActor.run {
-                keyboardState.entitlementState = entitlement
-                keyboardState.hasFullAccess = hasFullAccess
+                guard let self = self, let entitlement = entitlement else { return }
+                self.keyboardState.entitlementState = entitlement
+                self.keyboardState.hasFullAccess = self.hasFullAccess
             }
         }
     }
@@ -324,11 +326,8 @@ extension KeyboardViewController {
         embedSwiftUIView(agentView)
 
         // Force immediate height update
-        updateHeight()
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            self.updateHeight()
-        }
+        scheduleHeightUpdate()
+        scheduleHeightUpdate(delay: 0.1)
     }
 
     private func embedSwiftUIView<V: View>(_ swiftUIView: V) {
@@ -364,6 +363,25 @@ extension KeyboardViewController {
             isExpanded: keyboardState.isExpanded,
             inputView: inputView
         )
+    }
+
+    private func scheduleHeightUpdate(delay: TimeInterval? = nil) {
+        if let delay = delay {
+            delayedHeightUpdateWorkItem?.cancel()
+            let workItem = DispatchWorkItem { [weak self] in
+                self?.updateHeight()
+            }
+            delayedHeightUpdateWorkItem = workItem
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: workItem)
+            return
+        }
+
+        heightUpdateWorkItem?.cancel()
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.updateHeight()
+        }
+        heightUpdateWorkItem = workItem
+        DispatchQueue.main.async(execute: workItem)
     }
 
     private func clearSubviews() {

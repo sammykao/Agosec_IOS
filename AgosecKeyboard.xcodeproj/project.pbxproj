@@ -1257,6 +1257,11 @@
 				DEVELOPMENT_TEAM = V9CU7HF844;
 				INFOPLIST_FILE = AgosecApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.agosec.keyboard.app;
 				PRODUCT_NAME = AgosecApp;
 				SWIFT_VERSION = 5.9;
@@ -1281,6 +1286,11 @@
 				DEVELOPMENT_TEAM = V9CU7HF844;
 				INFOPLIST_FILE = AgosecKeyboardExtension/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.agosec.keyboard.app.extension;
 				PRODUCT_NAME = AgosecKeyboardExtension;
 				SWIFT_VERSION = 5.9;
@@ -1296,6 +1306,11 @@
 				DEVELOPMENT_TEAM = V9CU7HF844;
 				INFOPLIST_FILE = AgosecKeyboardExtension/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.agosec.keyboard.app.extension;
 				PRODUCT_NAME = AgosecKeyboardExtension;
 				SWIFT_VERSION = 5.9;
@@ -1313,6 +1328,11 @@
 				DEVELOPMENT_TEAM = V9CU7HF844;
 				INFOPLIST_FILE = AgosecApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.agosec.keyboard.app;
 				PRODUCT_NAME = AgosecApp;
 				SWIFT_VERSION = 5.9;

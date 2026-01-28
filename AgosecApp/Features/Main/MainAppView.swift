@@ -30,6 +30,14 @@ struct MainAppView: View {
                 SettingsView()
             }
         }
+        .onAppear {
+            permissionsService.refreshStatus()
+        }
+        .onAppBecameActive {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                permissionsService.refreshStatus()
+            }
+        }
     }
 
     private var headerSection: some View {
@@ -74,15 +82,15 @@ struct MainAppView: View {
                 StatusRow(
                     icon: "keyboard",
                     title: "Keyboard",
-                    status: permissionsService.isKeyboardExtensionEnabled ? "Enabled" : "Not Enabled",
-                    isActive: permissionsService.isKeyboardExtensionEnabled
+                    status: permissionsService.isKeyboardEnabled ? "Enabled" : "Not Enabled",
+                    isActive: permissionsService.isKeyboardEnabled
                 )
 
                 StatusRow(
                     icon: "lock.fill",
                     title: "Full Access",
-                    status: permissionsService.hasFullAccess ? "Granted" : "Not Granted",
-                    isActive: permissionsService.hasFullAccess
+                    status: permissionsService.hasFullAccessState ? "Granted" : "Not Granted",
+                    isActive: permissionsService.hasFullAccessState
                 )
 
                 StatusRow(
