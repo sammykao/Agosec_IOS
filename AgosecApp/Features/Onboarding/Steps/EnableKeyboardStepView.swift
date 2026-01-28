@@ -8,7 +8,7 @@ struct EnableKeyboardStepView: View {
     @State private var isKeyboardEnabled = false
     @State private var pulseScale: CGFloat = 1.0
     let onNext: () -> Void
-    
+
     var body: some View {
         OnboardingStepScaffold(
             topSpacing: { geometry in
@@ -20,7 +20,7 @@ struct EnableKeyboardStepView: View {
                 let ringBaseSize = ResponsiveSystem.isSmallScreen
                     ? 90
                     : min(geometry.size.width * 0.28, 100)
-                
+
                 return ZStack {
                     // Animated pulse rings (responsive)
                     ForEach(0..<2) { index in
@@ -36,11 +36,14 @@ struct EnableKeyboardStepView: View {
                                 ),
                                 lineWidth: ResponsiveSystem.isSmallScreen ? 1.5 : 2
                             )
-                            .frame(width: ringBaseSize + CGFloat(index) * 16, height: ringBaseSize + CGFloat(index) * 16)
+                            .frame(
+                                width: ringBaseSize + CGFloat(index) * 16,
+                                height: ringBaseSize + CGFloat(index) * 16
+                            )
                             .scaleEffect(pulseScale + CGFloat(index) * 0.1)
                             .opacity(state.headerOpacity * (1.0 - Double(index) * 0.3))
                     }
-                    
+
                     // Icon background with glassmorphism (responsive)
                     Circle()
                         .fill(Color(red: 0.12, green: 0.12, blue: 0.18))
@@ -64,7 +67,7 @@ struct EnableKeyboardStepView: View {
                         )
                         .shadow(color: Color.blue.opacity(0.3), radius: 40, x: 0, y: 20)
                         .shadow(color: Color.black.opacity(0.4), radius: 20, x: 0, y: 10)
-                    
+
                     Image(systemName: "keyboard.badge.ellipsis")
                         .font(.system(
                             size: ResponsiveSystem.isSmallScreen ? 42 : min(geometry.size.width * 0.12, 48),
@@ -80,7 +83,10 @@ struct EnableKeyboardStepView: View {
                 }
                 .scaleEffect(state.headerScale)
                 .opacity(state.headerOpacity)
-                .padding(.bottom, ResponsiveSystem.isShortScreen ? min(geometry.size.height * 0.05, 40) : min(geometry.size.height * 0.04, 32))
+                .padding(.bottom, ResponsiveSystem.isShortScreen
+                    ? min(geometry.size.height * 0.05, 40)
+                    : min(geometry.size.height * 0.04, 32)
+                )
             },
             bodyContent: { geometry, _ in
                 VStack(spacing: 0) {
@@ -106,7 +112,7 @@ struct EnableKeyboardStepView: View {
                         .lineLimit(2)
                         .minimumScaleFactor(0.7)
                         .multilineTextAlignment(.center)
-                    
+
                     // Subtitle in glassmorphic container (Responsive)
                     Text("Add Agosec to your keyboards to start using AI-powered typing")
                         .font(.system(
@@ -138,13 +144,16 @@ struct EnableKeyboardStepView: View {
                                 )
                         )
                         .padding(.horizontal, ResponsiveSystem.isSmallScreen ? 20 : min(geometry.size.width * 0.06, 24))
-                    
+
                     // Instructions card (Glassmorphic - Responsive)
                     ModernInstructionCard(
                         steps: instructionItems,
                         style: .dark(accentColors: [Color.blue, Color.blue.opacity(0.8)])
                     )
-                    .padding(.top, ResponsiveSystem.isShortScreen ? min(geometry.size.height * 0.03, 24) : min(geometry.size.height * 0.04, 32))
+                    .padding(.top, ResponsiveSystem.isShortScreen
+                        ? min(geometry.size.height * 0.03, 24)
+                        : min(geometry.size.height * 0.04, 32)
+                    )
                 }
             },
             footer: { geometry, _ in
@@ -155,7 +164,7 @@ struct EnableKeyboardStepView: View {
                             icon: "arrow.right",
                             action: onNext
                         )
-                        
+
                         Text("Keyboard enabled!")
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.green)
@@ -165,9 +174,13 @@ struct EnableKeyboardStepView: View {
                             icon: "gear",
                             action: openSettings
                         )
-                        
+
                         Text("Go to General → Keyboard → Keyboards")
-                            .font(.system(size: min(geometry.size.width * 0.033, 13), weight: .regular, design: .default))
+                            .font(.system(
+                                size: min(geometry.size.width * 0.033, 13),
+                                weight: .regular,
+                                design: .default
+                            ))
                             .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.65))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 24)
@@ -186,11 +199,11 @@ struct EnableKeyboardStepView: View {
             }
         }
     }
-    
+
     private var instructionItems: [InstructionItem] {
         AccessCopy.enableKeyboardSteps.map { InstructionItem(text: $0) }
     }
-    
+
     private func startPulseAnimation() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             withAnimation(.easeInOut(duration: 2.5).repeatForever(autoreverses: true)) {
@@ -198,12 +211,12 @@ struct EnableKeyboardStepView: View {
             }
         }
     }
-    
+
     private func openSettings() {
         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
         UIApplication.shared.open(url)
     }
-    
+
     private func checkKeyboardStatus() {
         permissionsService.refreshStatus()
         isKeyboardEnabled = permissionsService.isKeyboardExtensionEnabled

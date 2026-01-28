@@ -6,14 +6,14 @@ struct DebugStatusView: View {
     @State private var lastStep: String = "Unknown"
     @State private var lastLog: String = "No logs"
     @State private var last5Logs: String = "No logs"
-    
+
     var body: some View {
         NavigationView {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Debug Status")
                     .font(.title)
                     .padding()
-                
+
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Last Step:")
                         .font(.headline)
@@ -24,7 +24,7 @@ struct DebugStatusView: View {
                         .cornerRadius(8)
                 }
                 .padding()
-                
+
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Last Log:")
                         .font(.headline)
@@ -35,7 +35,7 @@ struct DebugStatusView: View {
                         .cornerRadius(8)
                 }
                 .padding()
-                
+
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Last 5 Logs:")
                         .font(.headline)
@@ -50,13 +50,13 @@ struct DebugStatusView: View {
                     .cornerRadius(8)
                 }
                 .padding()
-                
+
                 Button("Refresh") {
                     loadStatus()
                 }
                 .buttonStyle(.borderedProminent)
                 .padding()
-                
+
                 Spacer()
             }
             .navigationTitle("Debug Status")
@@ -65,7 +65,7 @@ struct DebugStatusView: View {
             }
         }
     }
-    
+
     private func loadStatus() {
         if let defaults = UserDefaults(suiteName: "group.io.agosec.keyboard") {
             lastStep = defaults.string(forKey: "debug_step") ?? "Unknown"

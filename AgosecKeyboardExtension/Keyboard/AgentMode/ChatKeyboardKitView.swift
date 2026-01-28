@@ -92,21 +92,50 @@ final class ChatKeyboardController: KeyboardController, ObservableObject {
     }
 }
 
-final class ChatKeyboardActionHandler: KeyboardAction.StandardActionHandler {
+final class ChatKeyboardActionHandler: KeyboardActionHandler {
     private let onReturn: () -> Void
+    private let standard: KeyboardAction.StandardActionHandler
 
     init(controller: KeyboardController, onReturn: @escaping () -> Void) {
         self.onReturn = onReturn
-        super.init(controller: controller)
+        self.standard = KeyboardAction.StandardActionHandler.standard(for: controller)
     }
 
-    override func handle(_ action: KeyboardAction) {
+    func canHandle(_ gesture: Keyboard.Gesture, on action: KeyboardAction) -> Bool {
+        standard.canHandle(gesture, on: action)
+    }
+
+    func handle(_ action: KeyboardAction) {
         switch action {
         case .primary:
             onReturn()
         default:
-            super.handle(action)
+            standard.handle(action)
         }
+    }
+
+    func handle(_ gesture: Keyboard.Gesture, on action: KeyboardAction) {
+        standard.handle(gesture, on: action)
+    }
+
+    func handle(_ suggestion: Autocomplete.Suggestion) {
+        standard.handle(suggestion)
+    }
+
+    func handleDrag(on action: KeyboardAction, from startLocation: CGPoint, to currentLocation: CGPoint) {
+        standard.handleDrag(on: action, from: startLocation, to: currentLocation)
+    }
+
+    func triggerFeedback(for gesture: Keyboard.Gesture, on action: KeyboardAction) {
+        standard.triggerFeedback(for: gesture, on: action)
+    }
+
+    func triggerAudioFeedback(_ feedback: Feedback.Audio) {
+        standard.triggerAudioFeedback(feedback)
+    }
+
+    func triggerHapticFeedback(_ feedback: Feedback.Haptic) {
+        standard.triggerHapticFeedback(feedback)
     }
 }
 

@@ -4,12 +4,12 @@ import SwiftUI
 public struct PageIndicator: View {
     let currentPage: Int
     let totalPages: Int
-    
+
     public init(currentPage: Int, totalPages: Int) {
         self.currentPage = currentPage
         self.totalPages = totalPages
     }
-    
+
     public var body: some View {
         HStack(spacing: 8) {
             ForEach(0..<totalPages, id: \.self) { index in

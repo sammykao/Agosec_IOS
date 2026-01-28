@@ -6,7 +6,7 @@ import UIComponents
 struct PhotosPermissionStepView: View {
     @State private var photosStatus: PHAuthorizationStatus = .notDetermined
     let onNext: () -> Void
-    
+
     var body: some View {
         OnboardingStepScaffold(
             isScrollable: true,
@@ -26,7 +26,7 @@ struct PhotosPermissionStepView: View {
                     small: 92,
                     standard: min(geometry.size.width * 0.25, 100)
                 )
-                
+
                 return ZStack {
                     ForEach(0..<2) { index in
                         Circle()
@@ -41,21 +41,27 @@ struct PhotosPermissionStepView: View {
                                 ),
                                 lineWidth: ResponsiveSystem.value(extraSmall: 1.5, small: 1.5, standard: 2)
                             )
-                            .frame(width: ringBaseSize + CGFloat(index) * 16, height: ringBaseSize + CGFloat(index) * 16)
+                            .frame(
+                                width: ringBaseSize + CGFloat(index) * 16,
+                                height: ringBaseSize + CGFloat(index) * 16
+                            )
                             .scaleEffect(1.0 + CGFloat(index) * 0.1)
                             .opacity(state.headerOpacity * (1.0 - Double(index) * 0.3))
                     }
-                    
+
                     let photoStackSize = min(geometry.size.width * 0.18, 75)
                     ForEach(0..<2) { index in
                         RoundedRectangle(cornerRadius: ResponsiveSystem.isSmallScreen ? 10 : 12)
                             .fill(Color.green.opacity(0.12 - Double(index) * 0.04))
-                            .frame(width: photoStackSize - CGFloat(index) * 10, height: photoStackSize - CGFloat(index) * 10)
+                            .frame(
+                                width: photoStackSize - CGFloat(index) * 10,
+                                height: photoStackSize - CGFloat(index) * 10
+                            )
                             .offset(x: CGFloat(index) * 6, y: CGFloat(index) * -6)
                             .rotationEffect(.degrees(Double(index) * -4))
                             .opacity(state.headerOpacity * 0.6)
                     }
-                    
+
                     ZStack {
                         Circle()
                             .fill(
@@ -69,7 +75,7 @@ struct PhotosPermissionStepView: View {
                                 )
                             )
                             .frame(width: iconSize, height: iconSize)
-                        
+
                         Circle()
                             .stroke(
                                 LinearGradient(
@@ -83,7 +89,7 @@ struct PhotosPermissionStepView: View {
                                 lineWidth: 1
                             )
                             .frame(width: iconSize, height: iconSize)
-                        
+
                         Image(systemName: "photo.stack.fill")
                             .font(.system(size: min(geometry.size.width * 0.1, 40), weight: .medium))
                             .foregroundStyle(
@@ -110,7 +116,7 @@ struct PhotosPermissionStepView: View {
                                 endPoint: .trailing
                             )
                         )
-                    
+
                     Text("Allow access to screenshots for AI context awareness")
                         .font(.system(size: min(geometry.size.width * 0.043, 17), weight: .regular, design: .default))
                         .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.75))
@@ -118,7 +124,7 @@ struct PhotosPermissionStepView: View {
                         .lineSpacing(4)
                         .padding(.horizontal, geometry.size.width * 0.1)
                         .padding(.top, min(geometry.size.height * 0.015, 12))
-                    
+
                     infoCard(in: geometry)
                         .padding(.top, min(geometry.size.height * 0.03, 24))
                 }
@@ -137,52 +143,52 @@ struct PhotosPermissionStepView: View {
             }
         }
     }
-    
+
     private func infoCard(in geometry: GeometryProxy) -> some View {
         let iconSize: CGFloat = ResponsiveSystem.value(extraSmall: 17, small: 18, standard: 20)
         let titleSize: CGFloat = ResponsiveSystem.value(extraSmall: 13, small: 14, standard: 16)
         let descSize: CGFloat = ResponsiveSystem.value(extraSmall: 11, small: 12, standard: 14)
         let spacing: CGFloat = ResponsiveSystem.value(extraSmall: 9, small: 10, standard: 14)
-        
+
         return VStack(spacing: ResponsiveSystem.value(extraSmall: 10, small: 12, standard: 16)) {
             HStack(spacing: spacing) {
                 Image(systemName: "sparkles")
                     .font(.system(size: iconSize, weight: .medium))
                     .foregroundColor(.purple)
-                
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Smart Context")
                         .font(.system(size: titleSize, weight: .semibold, design: .default))
                         .foregroundColor(Color(red: 0.9, green: 0.9, blue: 0.95))
-                    
+
                     Text("AI can understand screenshots to help you respond")
                         .font(.system(size: descSize, weight: .regular, design: .default))
                         .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.65))
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                
+
                 Spacer()
             }
-            
+
             Divider()
                 .background(Color.white.opacity(0.2))
-            
+
             HStack(spacing: spacing) {
                 Image(systemName: "lock.shield.fill")
                     .font(.system(size: iconSize, weight: .medium))
                     .foregroundColor(.blue)
-                
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Required for Full Features")
                         .font(.system(size: titleSize, weight: .semibold, design: .default))
                         .foregroundColor(Color(red: 0.9, green: 0.9, blue: 0.95))
-                    
+
                     Text("Screenshots are processed locally and deleted immediately")
                         .font(.system(size: descSize, weight: .regular, design: .default))
                         .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.65))
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                
+
                 Spacer()
             }
         }
@@ -198,7 +204,7 @@ struct PhotosPermissionStepView: View {
         )
         .padding(.horizontal, geometry.size.width * 0.06)
     }
-    
+
     @ViewBuilder
     private func buttonsForStatus(in geometry: GeometryProxy) -> some View {
         switch photosStatus {
@@ -209,7 +215,7 @@ struct PhotosPermissionStepView: View {
                     icon: "arrow.right",
                     action: onNext
                 )
-                
+
                 Text("Photo access enabled!")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.green)
@@ -221,7 +227,7 @@ struct PhotosPermissionStepView: View {
                     icon: "gear",
                     action: openSettings
                 )
-                
+
                 Text("Please enable photo access to continue")
                     .font(.system(size: 12, weight: .regular))
                     .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.65))
@@ -241,7 +247,7 @@ struct PhotosPermissionStepView: View {
             )
         }
     }
-    
+
     private func requestPhotoAccess() {
         PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
             DispatchQueue.main.async {
@@ -251,11 +257,11 @@ struct PhotosPermissionStepView: View {
             }
         }
     }
-    
+
     private func checkPhotoStatus() {
         photosStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
     }
-    
+
     private func openSettings() {
         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
         UIApplication.shared.open(url)

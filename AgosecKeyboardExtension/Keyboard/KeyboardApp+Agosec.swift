@@ -1,7 +1,7 @@
 import KeyboardKit
 
 extension KeyboardApp {
-    
+
     static var agosec: KeyboardApp {
         .init(
             name: "Agosec",

@@ -8,13 +8,13 @@ let package = Package(
         .library(
             name: "SharedCore",
             targets: ["SharedCore"]
-        ),
+        )
     ],
     dependencies: [],
     targets: [
         .target(
             name: "SharedCore",
             path: "Sources"
-        ),
+        )
     ]
 )

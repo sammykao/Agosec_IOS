@@ -8,7 +8,7 @@ let package = Package(
         .library(
             name: "UIComponents",
             targets: ["UIComponents"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../SharedCore")
@@ -18,6 +18,6 @@ let package = Package(
             name: "UIComponents",
             dependencies: ["SharedCore"],
             path: "Sources"
-        ),
+        )
     ]
 )

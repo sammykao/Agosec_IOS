@@ -5,17 +5,17 @@ public struct GlassmorphicBackground: View {
     private let orbCount: Int
     private let showOrbs: Bool
     private let animate: Bool
-    
+
     @State private var gradientOffset: CGFloat = 0
     @State private var orbPositions: [CGPoint] = []
     @State private var orbOpacity: Double = 0
-    
+
     public init(orbCount: Int = 4, showOrbs: Bool = true, animate: Bool = true) {
         self.orbCount = max(0, orbCount)
         self.showOrbs = showOrbs
         self.animate = animate
     }
-    
+
     public var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -28,7 +28,7 @@ public struct GlassmorphicBackground: View {
                     startPoint: UnitPoint(x: 0.5 + gradientOffset, y: 0),
                     endPoint: UnitPoint(x: 0.5 - gradientOffset, y: 1)
                 )
-                
+
                 RadialGradient(
                     gradient: Gradient(colors: [
                         Color(red: 0.0, green: 0.48, blue: 1.0).opacity(0.2),
@@ -39,7 +39,7 @@ public struct GlassmorphicBackground: View {
                     startRadius: 100,
                     endRadius: 600
                 )
-                
+
                 if showOrbs {
                     floatingOrbs(in: geometry)
                 }
@@ -52,7 +52,7 @@ public struct GlassmorphicBackground: View {
             }
         }
     }
-    
+
     private func floatingOrbs(in geometry: GeometryProxy) -> some View {
         ZStack {
             ForEach(0..<orbCount, id: \.self) { index in
@@ -76,31 +76,39 @@ public struct GlassmorphicBackground: View {
                     .blur(radius: 40)
                     .offset(
                         x: orbPositions.indices.contains(index)
-                            ? clamp(orbPositions[index].x, min: -geometry.size.width * 0.3, max: geometry.size.width * 0.3)
+                            ? clamp(
+                                orbPositions[index].x,
+                                min: -geometry.size.width * 0.3,
+                                max: geometry.size.width * 0.3
+                            )
                             : 0,
                         y: orbPositions.indices.contains(index)
-                            ? clamp(orbPositions[index].y, min: -geometry.size.height * 0.3, max: geometry.size.height * 0.3)
+                            ? clamp(
+                                orbPositions[index].y,
+                                min: -geometry.size.height * 0.3,
+                                max: geometry.size.height * 0.3
+                            )
                             : 0
                     )
                     .opacity(orbOpacity * (1.0 - Double(index) * 0.15))
             }
         }
     }
-    
+
     private func initializeOrbs() {
         orbPositions = initialOrbPositions(count: orbCount)
         withAnimation(.easeOut(duration: 1.0)) {
             orbOpacity = 1.0
         }
     }
-    
+
     private func startAnimations() {
         withAnimation(.easeInOut(duration: 5).repeatForever(autoreverses: true)) {
             gradientOffset = 0.15
         }
         animateOrbs()
     }
-    
+
     private func animateOrbs() {
         for index in orbPositions.indices {
             withAnimation(
@@ -113,7 +121,7 @@ public struct GlassmorphicBackground: View {
             }
         }
     }
-    
+
     private func initialOrbPositions(count: Int) -> [CGPoint] {
         guard count > 0 else { return [] }
         let base: [CGPoint] = [
@@ -131,7 +139,7 @@ public struct GlassmorphicBackground: View {
         }
         return positions
     }
-    
+
     private func clamp(_ value: CGFloat, min: CGFloat, max: CGFloat) -> CGFloat {
         Swift.max(min, Swift.min(max, value))
     }

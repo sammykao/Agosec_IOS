@@ -5,7 +5,7 @@ public struct OnboardingEntranceState {
     public let headerOpacity: Double
     public let contentOpacity: Double
     public let contentOffset: CGFloat
-    
+
     public init(
         headerScale: CGFloat,
         headerOpacity: Double,
@@ -28,12 +28,12 @@ public struct OnboardingStepScaffold<Header: View, BodyContent: View, Footer: Vi
     private let bodyContent: (GeometryProxy, OnboardingEntranceState) -> BodyContent
     private let footer: (GeometryProxy, OnboardingEntranceState) -> Footer
     private let onAppearAction: (() -> Void)?
-    
+
     @State private var headerScale: CGFloat = 0.5
     @State private var headerOpacity: Double = 0
     @State private var contentOpacity: Double = 0
     @State private var contentOffset: CGFloat = 30
-    
+
     public init(
         isScrollable: Bool = false,
         bottomPadding: CGFloat = 80,
@@ -51,7 +51,7 @@ public struct OnboardingStepScaffold<Header: View, BodyContent: View, Footer: Vi
         self.footer = footer
         self.onAppearAction = onAppear
     }
-    
+
     public var body: some View {
         GeometryReader { geometry in
             let state = OnboardingEntranceState(
@@ -60,26 +60,26 @@ public struct OnboardingStepScaffold<Header: View, BodyContent: View, Footer: Vi
                 contentOpacity: contentOpacity,
                 contentOffset: contentOffset
             )
-            
+
             let stack = VStack(spacing: 0) {
                 Spacer()
                     .frame(height: topSpacing(geometry))
-                
+
                 header(geometry, state)
-                
+
                 bodyContent(geometry, state)
                     .opacity(state.contentOpacity)
                     .offset(y: state.contentOffset)
-                
+
                 Spacer(minLength: 16)
-                
+
                 footer(geometry, state)
                     .opacity(state.contentOpacity)
                     .offset(y: state.contentOffset)
                     .padding(.bottom, bottomPadding)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            
+
             if isScrollable {
                 ScrollView(showsIndicators: false) {
                     stack
@@ -94,13 +94,13 @@ public struct OnboardingStepScaffold<Header: View, BodyContent: View, Footer: Vi
             onAppearAction?()
         }
     }
-    
+
     private func startAnimations() {
         withAnimation(.spring(response: 0.7, dampingFraction: 0.6)) {
             headerScale = 1.0
             headerOpacity = 1.0
         }
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                 contentOpacity = 1.0

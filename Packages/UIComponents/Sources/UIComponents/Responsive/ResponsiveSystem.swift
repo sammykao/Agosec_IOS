@@ -6,36 +6,36 @@ import UIKit
 public struct ResponsiveSystem {
     private static let screenWidth = UIScreen.main.bounds.width
     private static let screenHeight = UIScreen.main.bounds.height
-    
+
     // MARK: - Screen Size Categories
-    
+
     /// Extra small screens (iPhone SE 1st/2nd gen) - width < 360px
     public static var isExtraSmallScreen: Bool {
         screenWidth < 360
     }
-    
+
     /// Small screens (iPhone SE 3rd gen, iPhone 8, iPhone mini) - width < 380px
     public static var isSmallScreen: Bool {
         screenWidth < 380
     }
-    
+
     /// Short screens (older iPhones, iPhone SE) - height < 800px
     public static var isShortScreen: Bool {
         screenHeight < 800
     }
-    
+
     /// Standard screens (iPhone 14, iPhone 15) - 380px <= width < 430px
     public static var isStandardScreen: Bool {
         screenWidth >= 380 && screenWidth < 430
     }
-    
+
     /// Large screens (iPhone Pro Max, iPhone Plus) - width >= 430px
     public static var isLargeScreen: Bool {
         screenWidth >= 430
     }
-    
+
     // MARK: - Responsive Values
-    
+
     /// Get responsive value based on screen size
     /// - Parameters:
     ///   - extraSmall: Value for extra small screens (iPhone SE)
@@ -55,7 +55,7 @@ public struct ResponsiveSystem {
             return standard
         }
     }
-    
+
     /// Get responsive value with large screen option
     public static func value<T>(
         extraSmall: T,
@@ -73,7 +73,7 @@ public struct ResponsiveSystem {
             return standard
         }
     }
-    
+
     /// Scale a base value based on screen size
     /// - Parameters:
     ///   - base: Base value for standard screens
@@ -110,7 +110,7 @@ public extension View {
             standard: standard
         ))
     }
-    
+
     /// Apply responsive font size
     func responsiveFont(
         extraSmall: CGFloat,

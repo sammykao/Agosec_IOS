@@ -8,11 +8,11 @@ struct PaywallFeatureRow: View {
     let title: String
     let description: String
     let color: Color
-    
+
     var body: some View {
         let iconContainerSize: CGFloat = ResponsiveSystem.isSmallScreen ? 40 : 44
         let iconSize: CGFloat = ResponsiveSystem.isSmallScreen ? 20 : 22
-        
+
         HStack(spacing: ResponsiveSystem.isSmallScreen ? 12 : 16) {
             // Icon with gradient background
             ZStack {
@@ -28,7 +28,7 @@ struct PaywallFeatureRow: View {
                         )
                     )
                     .frame(width: iconContainerSize, height: iconContainerSize)
-                
+
                 Image(systemName: icon)
                     .font(.system(size: iconSize, weight: .medium))
                     .foregroundStyle(
@@ -39,7 +39,7 @@ struct PaywallFeatureRow: View {
                         )
                     )
             }
-            
+
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.system(
@@ -49,7 +49,7 @@ struct PaywallFeatureRow: View {
                     ))
                     .foregroundColor(Color(red: 0.9, green: 0.9, blue: 0.95))
                     .lineLimit(1)
-                
+
                 Text(description)
                     .font(.system(
                         size: 14,
@@ -60,9 +60,9 @@ struct PaywallFeatureRow: View {
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            
+
             Spacer()
-            
+
             // Checkmark
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: ResponsiveSystem.isSmallScreen ? 18 : 20))
@@ -132,11 +132,11 @@ struct PaywallHeader: View {
     let glowOpacity: Double
     let contentOpacity: Double
     let contentOffset: CGFloat
-    
+
     var body: some View {
         let iconSize: CGFloat = ResponsiveSystem.isSmallScreen ? 64 : 72
         let containerSize = iconSize * 1.4
-        
+
         VStack(alignment: .center, spacing: 16) {
             // Crown icon with glow
             ZStack {
@@ -160,7 +160,7 @@ struct PaywallHeader: View {
                         )
                         .opacity(glowOpacity * (1.0 - Double(index) * 0.4))
                 }
-                
+
                 // Icon container
                 Circle()
                     .fill(Color(red: 0.12, green: 0.12, blue: 0.15))
@@ -181,7 +181,7 @@ struct PaywallHeader: View {
                     )
                     .shadow(color: Color.black.opacity(0.5), radius: 30, x: 0, y: 15)
                     .shadow(color: Color.yellow.opacity(0.3), radius: 20, x: 0, y: 10)
-                
+
                 // Crown icon
                 Image(systemName: "crown.fill")
                     .font(.system(size: iconSize, weight: .medium))
@@ -195,7 +195,7 @@ struct PaywallHeader: View {
             }
             .scaleEffect(iconScale)
             .opacity(iconOpacity)
-            
+
             // Title
             Text("Unlock Agosec")
                 .font(.system(
@@ -215,7 +215,7 @@ struct PaywallHeader: View {
                 .offset(y: contentOffset)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-            
+
             // Subtitle
             Text("Get access to AI-powered typing assistance")
                 .font(.system(
@@ -238,77 +238,87 @@ struct PaywallSubscribeButton: View {
     let isLoading: Bool
     let shimmerOffset: CGFloat
     let action: () -> Void
-    
+
     var body: some View {
         let buttonHeight: CGFloat = ResponsiveSystem.isSmallScreen ? 54 : 60
-        
-        Button(action: {
-            let impact = UIImpactFeedbackGenerator(style: .medium)
-            impact.impactOccurred()
-            action()
-        }) {
-            HStack(spacing: 12) {
-                if isLoading {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                } else {
-                    Text("Subscribe Now")
-                        .font(.system(size: ResponsiveSystem.isSmallScreen ? 17 : 19, weight: .semibold, design: .default))
-                    
-                    Image(systemName: "arrow.right")
-                        .font(.system(size: ResponsiveSystem.isSmallScreen ? 15 : 17, weight: .semibold))
+
+        Button(
+            action: {
+                let impact = UIImpactFeedbackGenerator(style: .medium)
+                impact.impactOccurred()
+                action()
+            },
+            label: {
+                HStack(spacing: 12) {
+                    if isLoading {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    } else {
+                        Text("Subscribe Now")
+                            .font(.system(
+                                size: ResponsiveSystem.isSmallScreen ? 17 : 19,
+                                weight: .semibold,
+                                design: .default
+                            ))
+
+                        Image(systemName: "arrow.right")
+                            .font(.system(
+                                size: ResponsiveSystem.isSmallScreen ? 15 : 17,
+                                weight: .semibold
+                            ))
+                    }
                 }
-            }
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity)
-            .frame(height: buttonHeight)
-            .background(
-                ZStack {
-                    // Gradient base
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.0, green: 0.48, blue: 1.0),
-                            Color(red: 0.58, green: 0.0, blue: 1.0)
-                        ],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                    
-                    // Glassmorphic overlay
-                    Color.white.opacity(0.15)
-                    
-                    // Shimmer effect
-                    LinearGradient(
-                        colors: [
-                            Color.clear,
-                            Color.white.opacity(0.3),
-                            Color.clear
-                        ],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                    .frame(width: 200)
-                    .offset(x: shimmerOffset)
-                }
-            )
-            .cornerRadius(ResponsiveSystem.isSmallScreen ? 18 : 20)
-            .overlay(
-                RoundedRectangle(cornerRadius: ResponsiveSystem.isSmallScreen ? 18 : 20)
-                    .stroke(
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: buttonHeight)
+                .background(
+                    ZStack {
+                        // Gradient base
                         LinearGradient(
                             colors: [
-                                Color.white.opacity(0.4),
-                                Color.white.opacity(0.1)
+                                Color(red: 0.0, green: 0.48, blue: 1.0),
+                                Color(red: 0.58, green: 0.0, blue: 1.0)
                             ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1.5
-                    )
-            )
-            .shadow(color: Color.blue.opacity(0.5), radius: 25, x: 0, y: 12)
-            .shadow(color: Color.purple.opacity(0.3), radius: 12, x: 0, y: 6)
-        }
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+
+                        // Glassmorphic overlay
+                        Color.white.opacity(0.15)
+
+                        // Shimmer effect
+                        LinearGradient(
+                            colors: [
+                                Color.clear,
+                                Color.white.opacity(0.3),
+                                Color.clear
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                        .frame(width: 200)
+                        .offset(x: shimmerOffset)
+                    }
+                )
+                .cornerRadius(ResponsiveSystem.isSmallScreen ? 18 : 20)
+                .overlay(
+                    RoundedRectangle(cornerRadius: ResponsiveSystem.isSmallScreen ? 18 : 20)
+                        .stroke(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.4),
+                                    Color.white.opacity(0.1)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
+                )
+                .shadow(color: Color.blue.opacity(0.5), radius: 25, x: 0, y: 12)
+                .shadow(color: Color.purple.opacity(0.3), radius: 12, x: 0, y: 6)
+            }
+        )
         .buttonStyle(PlainButtonStyle())
         .disabled(isLoading)
     }
@@ -319,7 +329,7 @@ struct PaywallSubscribeButton: View {
 struct PaywallTermsSection: View {
     let openTerms: () -> Void
     let openPrivacyPolicy: () -> Void
-    
+
     var body: some View {
         VStack(alignment: .center, spacing: ResponsiveSystem.isSmallScreen ? 6 : 8) {
             Text("Cancel anytime in Settings")
@@ -329,7 +339,7 @@ struct PaywallTermsSection: View {
                     design: .default
                 ))
                 .foregroundColor(Color(red: 0.5, green: 0.5, blue: 0.55))
-            
+
             HStack(spacing: ResponsiveSystem.isSmallScreen ? 12 : 16) {
                 Button("Terms of Service") {
                     openTerms()
@@ -340,10 +350,10 @@ struct PaywallTermsSection: View {
                     design: .default
                 ))
                 .foregroundColor(Color(red: 0.0, green: 0.48, blue: 1.0).opacity(0.8))
-                
+
                 Text("•")
                     .foregroundColor(Color(red: 0.5, green: 0.5, blue: 0.55))
-                
+
                 Button("Privacy Policy") {
                     openPrivacyPolicy()
                 }

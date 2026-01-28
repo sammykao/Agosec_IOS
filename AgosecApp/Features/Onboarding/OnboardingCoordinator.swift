@@ -5,26 +5,26 @@ import UIComponents
 struct OnboardingCoordinator: View {
     @ObservedObject var router: AppRouter
     @State private var currentStep: OnboardingStep = .welcome
-    
+
     enum OnboardingStep: Int, CaseIterable {
         case welcome = 0
         case enableKeyboard = 1
         case enableFullAccess = 2
         case photosPermission = 3
         case demo = 4
-        
+
         static var totalSteps: Int {
             allCases.count
         }
     }
-    
+
     var body: some View {
         ZStack {
             // Background gradient with subtle animation
             GlassmorphicBackground()
                 .ignoresSafeArea(.all)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-            
+
             // Main content area with smooth transitions
             Group {
                 switch currentStep {
@@ -64,7 +64,7 @@ struct OnboardingCoordinator: View {
                 }
             }
             .animation(.spring(response: 0.5, dampingFraction: 0.8), value: currentStep)
-            
+
             // Page indicator overlaid at the bottom
             VStack {
                 Spacer()
@@ -85,7 +85,7 @@ struct OnboardingCoordinator: View {
             }
         }
     }
-    
+
     private func navigateToNext() {
         withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
             if let nextStep = OnboardingStep(rawValue: currentStep.rawValue + 1) {

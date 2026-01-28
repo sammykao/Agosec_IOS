@@ -5,7 +5,7 @@ public struct FeatureFlags: Codable {
     public let maxScreenshotsPerImport: Int
     public let maxContextChars: Int
     public let maxTurnsSent: Int
-    
+
     public init(
         agentPhotosEnabled: Bool = true,
         maxScreenshotsPerImport: Int = 5,

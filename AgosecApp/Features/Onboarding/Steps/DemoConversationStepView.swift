@@ -6,7 +6,7 @@ struct DemoConversationStepView: View {
     @State private var showKeyboardDemo = false
     @State private var hasTriedDemo = false
     @State private var messageAnimations: [Bool] = [false, false, false]
-    
+
     var body: some View {
         OnboardingStepScaffold(
             isScrollable: true,
@@ -26,7 +26,7 @@ struct DemoConversationStepView: View {
                     small: 92,
                     standard: min(geometry.size.width * 0.25, 100)
                 )
-                
+
                 ZStack {
                     ForEach(0..<2) { index in
                         Circle()
@@ -41,11 +41,14 @@ struct DemoConversationStepView: View {
                                 ),
                                 lineWidth: ResponsiveSystem.isSmallScreen ? 1.5 : 2
                             )
-                            .frame(width: ringBaseSize + CGFloat(index) * 16, height: ringBaseSize + CGFloat(index) * 16)
+                            .frame(
+                                width: ringBaseSize + CGFloat(index) * 16,
+                                height: ringBaseSize + CGFloat(index) * 16
+                            )
                             .scaleEffect(1.0 + CGFloat(index) * 0.1)
                             .opacity(state.headerOpacity * (1.0 - Double(index) * 0.3))
                     }
-                    
+
                     ZStack {
                         Circle()
                             .fill(
@@ -59,7 +62,7 @@ struct DemoConversationStepView: View {
                                 )
                             )
                             .frame(width: iconSize, height: iconSize)
-                        
+
                         Circle()
                             .stroke(
                                 LinearGradient(
@@ -73,7 +76,7 @@ struct DemoConversationStepView: View {
                                 lineWidth: 1
                             )
                             .frame(width: iconSize, height: iconSize)
-                        
+
                         Image(systemName: "bubble.left.and.bubble.right.fill")
                             .font(.system(size: min(geometry.size.width * 0.09, 36), weight: .medium))
                             .foregroundStyle(
@@ -100,14 +103,14 @@ struct DemoConversationStepView: View {
                                 endPoint: .trailing
                             )
                         )
-                    
+
                     Text("See how Agosec helps you communicate smarter")
                         .font(.system(size: min(geometry.size.width * 0.043, 17), weight: .regular, design: .default))
                         .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.75))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, geometry.size.width * 0.1)
                         .padding(.top, min(geometry.size.height * 0.012, 10))
-                    
+
                     conversationPreview(in: geometry)
                         .padding(.top, min(geometry.size.height * 0.025, 20))
                 }
@@ -120,19 +123,22 @@ struct DemoConversationStepView: View {
                             icon: "arrow.right",
                             action: onComplete
                         )
-                        
-                        Button(action: { showKeyboardDemo = true }) {
-                            Text("Try Demo Again")
-                                .font(.system(size: ResponsiveSystem.isSmallScreen ? 14 : 16, weight: .medium))
-                                .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.75))
-                        }
+
+                        Button(
+                            action: { showKeyboardDemo = true },
+                            label: {
+                                Text("Try Demo Again")
+                                    .font(.system(size: ResponsiveSystem.isSmallScreen ? 14 : 16, weight: .medium))
+                                    .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.75))
+                            }
+                        )
                     } else {
                         ModernActionButton(
                             title: "Try Demo",
                             icon: "keyboard",
                             action: { showKeyboardDemo = true }
                         )
-                        
+
                         Text("Complete the demo to continue")
                             .font(.system(size: ResponsiveSystem.isSmallScreen ? 12 : 13, weight: .regular))
                             .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.65))
@@ -144,17 +150,21 @@ struct DemoConversationStepView: View {
                 startConversationAnimations()
             }
         )
-        .sheet(isPresented: $showKeyboardDemo, onDismiss: {
-            hasTriedDemo = true
-        }) {
-            KeyboardDemoView()
-        }
+        .sheet(
+            isPresented: $showKeyboardDemo,
+            onDismiss: {
+                hasTriedDemo = true
+            },
+            content: {
+                KeyboardDemoView()
+            }
+        )
     }
-    
+
     private func conversationPreview(in geometry: GeometryProxy) -> some View {
         let fontSize = min(geometry.size.width * 0.04, 16)
         let hintFontSize = min(geometry.size.width * 0.035, 14)
-        
+
         return VStack(spacing: ResponsiveSystem.isSmallScreen ? 10 : 12) {
             MessageBubble(
                 text: "Hey! Can you help me draft a professional email?",
@@ -162,20 +172,20 @@ struct DemoConversationStepView: View {
                 isVisible: messageAnimations[0],
                 fontSize: fontSize
             )
-            
+
             MessageBubble(
                 text: "Sure! I'll help you write it.",
                 isUser: true,
                 isVisible: messageAnimations[1],
                 fontSize: fontSize
             )
-            
+
             if messageAnimations[2] {
                 HStack(spacing: ResponsiveSystem.isSmallScreen ? 6 : 8) {
                     Image(systemName: "sparkles")
                         .font(.system(size: hintFontSize, weight: .medium))
                         .foregroundColor(.purple)
-                    
+
                     Text("Agosec suggests contextual responses")
                         .font(.system(size: hintFontSize, weight: .medium, design: .default))
                         .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.75))
@@ -186,22 +196,22 @@ struct DemoConversationStepView: View {
         }
         .padding(.horizontal, geometry.size.width * 0.06)
     }
-    
+
     private func startConversationAnimations() {
         messageAnimations = [false, false, false]
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
                 messageAnimations[0] = true
             }
         }
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
                 messageAnimations[1] = true
             }
         }
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
                 messageAnimations[2] = true
@@ -217,11 +227,11 @@ struct MessageBubble: View {
     let isUser: Bool
     let isVisible: Bool
     var fontSize: CGFloat = 16
-    
+
     var body: some View {
         HStack {
             if isUser { Spacer(minLength: 40) }
-            
+
             Text(text)
                 .font(.system(size: fontSize, weight: .regular, design: .default))
                 .foregroundColor(isUser ? .white : Color(red: 0.9, green: 0.9, blue: 0.95))
@@ -261,7 +271,7 @@ struct MessageBubble: View {
                 .opacity(isVisible ? 1 : 0)
                 .scaleEffect(isVisible ? 1 : 0.9)
                 .animation(.spring(response: 0.4, dampingFraction: 0.75), value: isVisible)
-            
+
             if !isUser { Spacer(minLength: 40) }
         }
     }

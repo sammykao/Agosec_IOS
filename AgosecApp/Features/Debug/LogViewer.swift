@@ -5,7 +5,7 @@ import SharedCore
 struct LogViewer: View {
     @State private var logs: String = "Loading logs..."
     @State private var lastUpdate: Date = Date()
-    
+
     var body: some View {
         NavigationView {
             ScrollView {
@@ -14,14 +14,14 @@ struct LogViewer: View {
                         Text("Last Updated: \(lastUpdate, style: .time)")
                             .font(.caption)
                             .foregroundColor(.secondary)
-                        
+
                         Spacer()
-                        
+
                         Button("Refresh") {
                             loadLogs()
                         }
                         .buttonStyle(.bordered)
-                        
+
                         Button("Clear") {
                             FileLogger.shared.clearLogs()
                             loadLogs()
@@ -30,7 +30,7 @@ struct LogViewer: View {
                         .foregroundColor(.red)
                     }
                     .padding()
-                    
+
                     Text(logs)
                         .font(.system(.caption, design: .monospaced))
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -43,7 +43,7 @@ struct LogViewer: View {
             }
         }
     }
-    
+
     private func loadLogs() {
         logs = FileLogger.shared.readLogs()
         lastUpdate = Date()

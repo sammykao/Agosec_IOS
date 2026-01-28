@@ -2,10 +2,10 @@ import Foundation
 
 public class AppGroupStorage {
     public static let shared = AppGroupStorage()
-    
+
     private let appGroupId: String
     private let userDefaults: UserDefaults
-    
+
     private init() {
         if let configuredId = Bundle.main.object(forInfoDictionaryKey: "APP_GROUP_ID") as? String,
            !configuredId.isEmpty {
@@ -28,12 +28,12 @@ public class AppGroupStorage {
             userDefaults.set(data, forKey: key)
         } catch {}
     }
-    
+
     public func get<T: Codable>(_ type: T.Type, for key: String) -> T? {
         guard let data = userDefaults.data(forKey: key) else {
             return nil
         }
-        
+
         do {
             let result = try JSONDecoder().decode(type, from: data)
             return result
@@ -41,11 +41,11 @@ public class AppGroupStorage {
             return nil
         }
     }
-    
+
     public func remove(for key: String) {
         userDefaults.removeObject(forKey: key)
     }
-    
+
     public func synchronize() {
         userDefaults.synchronize()
     }
@@ -53,9 +53,9 @@ public class AppGroupStorage {
 
 public class KeychainHelper {
     public static let shared = KeychainHelper()
-    
+
     private init() {}
-    
+
     public func save(_ data: Data, service: String, account: String) -> Bool {
         let query = [
             kSecValueData: data,
@@ -63,12 +63,12 @@ public class KeychainHelper {
             kSecAttrAccount: account,
             kSecClass: kSecClassGenericPassword
         ] as CFDictionary
-        
+
         SecItemDelete(query)
         let status = SecItemAdd(query, nil)
         return status == errSecSuccess
     }
-    
+
     public func read(service: String, account: String) -> Data? {
         let query = [
             kSecAttrService: service,
@@ -76,19 +76,19 @@ public class KeychainHelper {
             kSecClass: kSecClassGenericPassword,
             kSecReturnData: true
         ] as CFDictionary
-        
+
         var result: AnyObject?
         SecItemCopyMatching(query, &result)
         return result as? Data
     }
-    
+
     public func delete(service: String, account: String) -> Bool {
         let query = [
             kSecAttrService: service,
             kSecAttrAccount: account,
             kSecClass: kSecClassGenericPassword
         ] as CFDictionary
-        
+
         let status = SecItemDelete(query)
         return status == errSecSuccess
     }

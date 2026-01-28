@@ -12,7 +12,7 @@ public struct APIEndpoint {
     public let headers: [String: String]?
     public let body: Data?
     public let queryItems: [URLQueryItem]?
-    
+
     public init(
         path: String,
         method: HTTPMethod = .get,
@@ -38,12 +38,12 @@ public enum HTTPMethod: String {
 public class APIClient: APIClientProtocol {
     private let baseURL: String
     private let session: URLSession
-    
+
     public init(baseURL: String, session: URLSession = .shared) {
         self.baseURL = baseURL
         self.session = session
     }
-    
+
     public func request<T: Decodable>(_ endpoint: APIEndpoint) async throws -> T {
         let data = try await request(endpoint)
         do {
@@ -52,29 +52,29 @@ public class APIClient: APIClientProtocol {
             throw APIError.decodingError(error)
         }
     }
-    
+
     public func request(_ endpoint: APIEndpoint) async throws -> Data {
         guard let url = buildURL(path: endpoint.path, queryItems: endpoint.queryItems) else {
             throw APIError.invalidURL
         }
-        
+
         var request = URLRequest(url: url)
         request.httpMethod = endpoint.method.rawValue
         request.httpBody = endpoint.body
-        
+
         endpoint.headers?.forEach { key, value in
             request.setValue(value, forHTTPHeaderField: key)
         }
-        
+
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
+
         do {
             let (data, response) = try await session.data(for: request)
-            
+
             guard let httpResponse = response as? HTTPURLResponse else {
                 throw APIError.invalidResponse
             }
-            
+
             switch httpResponse.statusCode {
             case 200...299:
                 return data
@@ -93,15 +93,15 @@ public class APIClient: APIClientProtocol {
             throw APIError.networkError(error)
         }
     }
-    
+
     private func buildURL(path: String, queryItems: [URLQueryItem]?) -> URL? {
         guard let base = URL(string: baseURL) else { return nil }
         let url = base.appendingPathComponent(path)
-        
+
         guard let queryItems = queryItems, !queryItems.isEmpty else {
             return url
         }
-        
+
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
         components?.queryItems = queryItems
         return components?.url

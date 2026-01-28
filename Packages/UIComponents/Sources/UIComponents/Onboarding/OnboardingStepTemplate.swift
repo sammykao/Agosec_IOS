@@ -8,12 +8,12 @@ public struct OnboardingStepTemplate<Content: View, BottomContent: View>: View {
     let subtitle: String
     let content: Content
     let bottomContent: BottomContent
-    
+
     @State private var iconScale: CGFloat = 0.5
     @State private var iconOpacity: Double = 0
     @State private var contentOpacity: Double = 0
     @State private var contentOffset: CGFloat = 30
-    
+
     public init(
         icon: String,
         iconColor: Color,
@@ -29,7 +29,7 @@ public struct OnboardingStepTemplate<Content: View, BottomContent: View>: View {
         self.content = content()
         self.bottomContent = bottomContent()
     }
-    
+
     public var body: some View {
         GeometryReader { geometry in
             let isSmallScreen = geometry.size.width < 380
@@ -38,12 +38,12 @@ public struct OnboardingStepTemplate<Content: View, BottomContent: View>: View {
             let iconFontSize = min(geometry.size.width * 0.11, 44)
             let titleSize = min(geometry.size.width * 0.08, 32)
             let subtitleSize = min(geometry.size.width * 0.043, 17)
-            
+
             VStack(spacing: 0) {
                 // Top spacing (responsive)
                 Spacer()
                     .frame(height: geometry.size.height * 0.08)
-                
+
                 // Icon with animated glow (responsive)
                 ZStack {
                     // Glow background
@@ -51,7 +51,7 @@ public struct OnboardingStepTemplate<Content: View, BottomContent: View>: View {
                         .fill(iconColor.opacity(0.15))
                         .frame(width: glowSize, height: glowSize)
                         .blur(radius: isSmallScreen ? 15 : 20)
-                    
+
                     // Icon container (responsive)
                     ZStack {
                         Circle()
@@ -66,7 +66,7 @@ public struct OnboardingStepTemplate<Content: View, BottomContent: View>: View {
                                 )
                             )
                             .frame(width: iconContainerSize, height: iconContainerSize)
-                        
+
                         Image(systemName: icon)
                             .font(.system(size: iconFontSize, weight: .medium))
                             .foregroundStyle(
@@ -81,7 +81,7 @@ public struct OnboardingStepTemplate<Content: View, BottomContent: View>: View {
                 .scaleEffect(iconScale)
                 .opacity(iconOpacity)
                 .padding(.bottom, min(geometry.size.height * 0.04, 32))
-                
+
                 // Title (responsive)
                 Text(title)
                     .font(.system(size: titleSize, weight: .bold, design: .default))
@@ -92,7 +92,7 @@ public struct OnboardingStepTemplate<Content: View, BottomContent: View>: View {
                     .padding(.horizontal, geometry.size.width * 0.08)
                     .opacity(contentOpacity)
                     .offset(y: contentOffset)
-                
+
                 // Subtitle (responsive)
                 Text(subtitle)
                     .font(.system(size: subtitleSize, weight: .regular, design: .default))
@@ -103,15 +103,15 @@ public struct OnboardingStepTemplate<Content: View, BottomContent: View>: View {
                     .padding(.top, min(geometry.size.height * 0.015, 12))
                     .opacity(contentOpacity)
                     .offset(y: contentOffset)
-                
+
                 // Custom content (responsive)
                 content
                     .padding(.top, min(geometry.size.height * 0.04, 32))
                     .opacity(contentOpacity)
                     .offset(y: contentOffset)
-                
+
                 Spacer()
-                
+
                 // Bottom content (buttons) (responsive)
                 bottomContent
                     .padding(.horizontal, geometry.size.width * 0.07)
@@ -126,7 +126,7 @@ public struct OnboardingStepTemplate<Content: View, BottomContent: View>: View {
                 iconScale = 1.0
                 iconOpacity = 1.0
             }
-            
+
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                 withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                     contentOpacity = 1.0
@@ -142,12 +142,12 @@ public struct OnboardingStepTemplate<Content: View, BottomContent: View>: View {
 public struct ModernInstructionCard: View {
     let steps: [InstructionItem]
     let style: InstructionCardStyle
-    
+
     public init(steps: [InstructionItem], style: InstructionCardStyle = .light()) {
         self.steps = steps
         self.style = style
     }
-    
+
     public var body: some View {
         GeometryReader { geometry in
             let isSmallScreen = geometry.size.width < 380
@@ -155,7 +155,7 @@ public struct ModernInstructionCard: View {
             let numberFontSize: CGFloat = isSmallScreen ? 13 : 15
             let textFontSize: CGFloat = isSmallScreen ? 14 : 16
             let spacing: CGFloat = isSmallScreen ? 12 : 16
-            
+
             VStack(spacing: 0) {
                 ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
                     HStack(spacing: spacing) {
@@ -170,21 +170,21 @@ public struct ModernInstructionCard: View {
                                     )
                                 )
                                 .frame(width: circleSize, height: circleSize)
-                            
+
                             Text("\(index + 1)")
                                 .font(.system(size: numberFontSize, weight: .bold, design: .default))
                                 .foregroundColor(.white)
                         }
-                        
+
                         Text(step.text)
                             .font(.system(size: textFontSize, weight: .medium, design: .default))
                             .foregroundColor(style.textColor)
                             .fixedSize(horizontal: false, vertical: true)
-                        
+
                         Spacer()
                     }
                     .padding(.vertical, isSmallScreen ? 12 : 14)
-                    
+
                     if index < steps.count - 1 {
                         Divider()
                             .background(style.dividerColor)
@@ -218,7 +218,7 @@ public struct InstructionCardStyle {
     public let borderWidth: CGFloat
     public let shadowColor: Color
     public let shadowRadius: CGFloat
-    
+
     public init(
         background: Color,
         textColor: Color,
@@ -238,7 +238,7 @@ public struct InstructionCardStyle {
         self.shadowColor = shadowColor
         self.shadowRadius = shadowRadius
     }
-    
+
     public static func light(accentColors: [Color] = [Color.blue, Color.blue.opacity(0.7)]) -> InstructionCardStyle {
         InstructionCardStyle(
             background: Color.white,
@@ -251,7 +251,7 @@ public struct InstructionCardStyle {
             shadowRadius: 12
         )
     }
-    
+
     public static func dark(accentColors: [Color]) -> InstructionCardStyle {
         InstructionCardStyle(
             background: Color.white.opacity(0.08),
@@ -269,7 +269,7 @@ public struct InstructionCardStyle {
 public struct InstructionItem: Identifiable {
     public let id = UUID()
     public let text: String
-    
+
     public init(text: String) {
         self.text = text
     }
@@ -281,30 +281,30 @@ public struct ModernFeatureRow: View {
     let icon: String
     let text: String
     let color: Color
-    
+
     public init(icon: String = "checkmark.circle.fill", text: String, color: Color = .green) {
         self.icon = icon
         self.text = text
         self.color = color
     }
-    
+
     public var body: some View {
         GeometryReader { geometry in
             let isSmallScreen = geometry.size.width < 380
             let iconSize: CGFloat = isSmallScreen ? 18 : 20
             let textSize: CGFloat = isSmallScreen ? 14 : 16
             let spacing: CGFloat = isSmallScreen ? 12 : 14
-            
+
             HStack(spacing: spacing) {
                 Image(systemName: icon)
                     .font(.system(size: iconSize, weight: .medium))
                     .foregroundColor(color)
-                
+
                 Text(text)
                     .font(.system(size: textSize, weight: .medium, design: .default))
                     .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
                     .fixedSize(horizontal: false, vertical: true)
-                
+
                 Spacer()
             }
         }
@@ -319,12 +319,12 @@ public struct ModernActionButton: View {
     let icon: String?
     let style: ButtonStyle
     let action: () -> Void
-    
+
     public enum ButtonStyle {
         case primary
         case secondary
     }
-    
+
     public init(
         title: String,
         icon: String? = nil,
@@ -336,7 +336,7 @@ public struct ModernActionButton: View {
         self.style = style
         self.action = action
     }
-    
+
     public var body: some View {
         GeometryReader { geometry in
             let isSmallScreen = geometry.size.width < 380
@@ -344,12 +344,12 @@ public struct ModernActionButton: View {
             let iconSize: CGFloat = isSmallScreen ? 13 : 15
             let buttonHeight: CGFloat = isSmallScreen ? 50 : 56
             let spacing: CGFloat = isSmallScreen ? 8 : 10
-            
+
             Button(action: action) {
                 HStack(spacing: spacing) {
                     Text(title)
                         .font(.system(size: titleSize, weight: .semibold, design: .default))
-                    
+
                     if let icon = icon {
                         Image(systemName: icon)
                             .font(.system(size: iconSize, weight: .semibold))

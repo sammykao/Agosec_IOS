@@ -16,11 +16,10 @@ public enum BuildMode {
         return false
         #endif
     }
-    
+
     /// Simulated network delay for mock responses (in seconds)
     /// This simulates real network latency for more realistic testing
     public static var mockNetworkDelay: TimeInterval {
         return 1.5
     }
 }
-

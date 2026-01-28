@@ -5,13 +5,13 @@ import SharedCore
 /// Checks subscription status directly with Apple's StoreKit 2
 /// No backend dependency - queries Apple's transaction history
 class StoreKitEntitlementChecker {
-    
+
     private let productId: String
-    
+
     init() {
         self.productId = Config.shared.subscriptionProductId
     }
-    
+
     /// Checks Apple for active subscription and updates local cache
     /// Call this on keyboard load (viewWillAppear)
     func refreshEntitlement() async {
@@ -23,14 +23,14 @@ class StoreKitEntitlementChecker {
             EntitlementEvaluator.saveEntitlement(demoEntitlement)
             return
         }
-        
+
         // No demo period - check StoreKit for real subscription
         let entitlement = await checkSubscriptionStatus()
 
         // Save to AppGroupStorage so it's available immediately next time
         EntitlementEvaluator.saveEntitlement(entitlement)
     }
-    
+
     /// Returns cached entitlement (fast, synchronous)
     /// Use this for immediate UI decisions
     func getCachedEntitlement() -> EntitlementState {
@@ -44,10 +44,10 @@ class StoreKitEntitlementChecker {
         if let cached = EntitlementEvaluator.cachedEntitlement() {
             return cached
         }
-        
+
         return EntitlementState(isActive: false)
     }
-    
+
     /// Queries Apple's StoreKit 2 for current subscription status
     private func checkSubscriptionStatus() async -> EntitlementState {
         // Iterate through all current entitlements from Apple
@@ -76,13 +76,13 @@ class StoreKitEntitlementChecker {
                         )
                     }
                 }
-                
+
             case .unverified:
                 // Transaction failed verification - don't trust it
                 continue
             }
         }
-        
+
         // No valid subscription found
         return EntitlementState(isActive: false)
     }

@@ -8,7 +8,7 @@ let package = Package(
         .library(
             name: "OCR",
             targets: ["OCR"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../SharedCore")
@@ -18,6 +18,6 @@ let package = Package(
             name: "OCR",
             dependencies: ["SharedCore"],
             path: "Sources"
-        ),
+        )
     ]
 )

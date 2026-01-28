@@ -7,21 +7,21 @@ import Networking
 /// Manages entitlement state by checking demo period, mock backend, or Apple StoreKit
 class EntitlementService: ObservableObject {
     @Published var entitlementState: EntitlementState = EntitlementState(isActive: false)
-    
+
     private let productId = Config.shared.subscriptionProductId
     private var timer: Timer?
-    
+
     init() {
         loadEntitlement()
-        
+
         // Check entitlement on init
         Task {
             await refreshEntitlement()
         }
-        
+
         startPeriodicRefresh()
     }
-    
+
     /// Load cached entitlement from AppGroupStorage (fast, synchronous)
     func loadEntitlement() {
         // Check demo period first (fast, synchronous check)
@@ -31,13 +31,13 @@ class EntitlementService: ObservableObject {
             entitlementState = demoEntitlement
             return
         }
-        
+
         // Fall back to cached entitlement
         if let stored = EntitlementEvaluator.cachedEntitlement() {
             entitlementState = stored
         }
     }
-    
+
     /// Refresh entitlement by checking demo period, mock backend, or StoreKit
     @MainActor
     func refreshEntitlement() async {
@@ -49,11 +49,11 @@ class EntitlementService: ObservableObject {
             EntitlementEvaluator.saveEntitlement(demoEntitlement)
             return
         }
-        
+
         // Priority 2: In mock backend mode, use MockEntitlementAPI
         if BuildMode.isMockBackend {
             do {
-                let mockAPI = ServiceFactory.createEntitlementAPI(
+                let mockAPI = try ServiceFactory.createEntitlementAPI(
                     baseURL: Config.shared.backendBaseUrl,
                     accessToken: nil
                 )
@@ -65,13 +65,13 @@ class EntitlementService: ObservableObject {
                 // Fall through to StoreKit check
             }
         }
-        
+
         // Priority 3: Check StoreKit for real subscription
         let storeKitEntitlement = await checkStoreKitSubscription()
         entitlementState = storeKitEntitlement
         EntitlementEvaluator.saveEntitlement(storeKitEntitlement)
     }
-    
+
     /// Queries Apple's StoreKit 2 for current subscription status
     private func checkStoreKitSubscription() async -> EntitlementState {
         for await result in Transaction.currentEntitlements {
@@ -88,11 +88,11 @@ class EntitlementService: ObservableObject {
                 }
             }
         }
-        
+
         // No valid subscription found
         return EntitlementState(isActive: false)
     }
-    
+
     private func startPeriodicRefresh() {
         // Refresh every hour to catch subscription renewals/expirations
         timer = Timer.scheduledTimer(withTimeInterval: 3600, repeats: true) { _ in

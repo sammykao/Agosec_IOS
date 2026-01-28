@@ -5,9 +5,9 @@ import SharedCore
 struct SuggestionBarView: View {
     let suggestions: [String]
     let onSuggestionTapped: (String) -> Void
-    
+
     @Environment(\.colorScheme) var colorScheme
-    
+
     var body: some View {
         if suggestions.isEmpty {
             // Empty state - show subtle placeholder
@@ -34,30 +34,33 @@ struct SuggestionBarView: View {
 struct SuggestionButton: View {
     let text: String
     let action: () -> Void
-    
+
     @Environment(\.colorScheme) var colorScheme
     @State private var isPressed = false
-    
+
     var body: some View {
-        Button(action: {
-            UIImpactFeedbackGenerator.safeImpact(.light)
-            action()
-        }) {
-            Text(text)
-                .font(.system(size: 16, weight: .regular, design: .default))
-                .foregroundColor(.primary)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(backgroundColor)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(borderColor, lineWidth: 0.5)
-                )
-                .scaleEffect(isPressed ? 0.95 : 1.0)
-        }
+        Button(
+            action: {
+                UIImpactFeedbackGenerator.safeImpact(.light)
+                action()
+            },
+            label: {
+                Text(text)
+                    .font(.system(size: 16, weight: .regular, design: .default))
+                    .foregroundColor(.primary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(backgroundColor)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(borderColor, lineWidth: 0.5)
+                    )
+                    .scaleEffect(isPressed ? 0.95 : 1.0)
+            }
+        )
         .buttonStyle(PlainButtonStyle())
         .simultaneousGesture(
             DragGesture(minimumDistance: 0)
@@ -71,7 +74,7 @@ struct SuggestionButton: View {
                 }
         )
     }
-    
+
     private var backgroundColor: Color {
         if colorScheme == .dark {
             return Color(red: 0.4, green: 0.4, blue: 0.42)
@@ -79,7 +82,7 @@ struct SuggestionButton: View {
             return Color.white
         }
     }
-    
+
     private var borderColor: Color {
         if colorScheme == .dark {
             return Color(red: 0.3, green: 0.3, blue: 0.32)

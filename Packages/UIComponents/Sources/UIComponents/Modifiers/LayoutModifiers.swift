@@ -7,32 +7,32 @@ public extension View {
     func wFull() -> some View {
         self.frame(maxWidth: .infinity)
     }
-    
+
     /// Full height
     func hFull() -> some View {
         self.frame(maxHeight: .infinity)
     }
-    
+
     /// Full screen (width and height)
     func fullScreen() -> some View {
         self.frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-    
+
     /// Ignore safe area (for full-screen layouts)
     func ignoreSafeArea() -> some View {
         self.ignoresSafeArea(.all)
     }
-    
+
     /// Center content
     func center() -> some View {
         self.frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-    
+
     /// Rounded corners with standard radius
     func rounded(_ radius: CGFloat = 12) -> some View {
         self.cornerRadius(radius)
     }
-    
+
     /// Standard card style
     func cardStyle() -> some View {
         self

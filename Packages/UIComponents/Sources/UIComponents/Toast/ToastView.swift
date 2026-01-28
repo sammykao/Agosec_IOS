@@ -5,36 +5,36 @@ public struct ToastView: View {
     public let message: String
     public let type: ToastType
     public let retryAction: (() -> Void)?
-    
+
     public enum ToastType {
         case success
         case error
         case info
     }
-    
+
     public init(message: String, type: ToastType = .info, retryAction: (() -> Void)? = nil) {
         self.message = message
         self.type = type
         self.retryAction = retryAction
     }
-    
+
     public var body: some View {
         let displayMessage = truncateIfNeeded(message)
         let lineLimit = type == .error ? 5 : 3
-        
+
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: iconName)
                 .foregroundColor(iconColor)
                 .font(.system(size: 18))
                 .padding(.top, 2)
-            
+
             VStack(alignment: .leading, spacing: 4) {
                 Text(displayMessage)
                     .font(.system(size: 15))
                     .foregroundColor(.white)
                     .lineLimit(lineLimit)
                     .fixedSize(horizontal: false, vertical: true)
-                
+
                 if let retryAction = retryAction {
                     Button(action: retryAction) {
                         Text("Retry")
@@ -56,7 +56,7 @@ public struct ToastView: View {
         .cornerRadius(10)
         .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
     }
-    
+
     private func truncateIfNeeded(_ message: String) -> String {
         // Truncate extremely long messages (over 600 characters) but keep more context
         let maxLength = 600
@@ -75,7 +75,7 @@ public struct ToastView: View {
         }
         return message
     }
-    
+
     private var iconName: String {
         switch type {
         case .success:
@@ -86,7 +86,7 @@ public struct ToastView: View {
             return "info.circle.fill"
         }
     }
-    
+
     private var iconColor: Color {
         switch type {
         case .success:
@@ -97,7 +97,7 @@ public struct ToastView: View {
             return .blue
         }
     }
-    
+
     private var backgroundColor: Color {
         switch type {
         case .success:
@@ -113,15 +113,20 @@ public struct ToastView: View {
 public class ToastManager: ObservableObject {
     @Published public var currentToast: ToastMessage?
     private var dismissTask: Task<Void, Never>?
-    
+
     public init() {}
-    
-    public func show(_ message: String, type: ToastView.ToastType = .info, duration: TimeInterval = 3.0, retryAction: (() -> Void)? = nil) {
+
+    public func show(
+        _ message: String,
+        type: ToastView.ToastType = .info,
+        duration: TimeInterval = 3.0,
+        retryAction: (() -> Void)? = nil
+    ) {
         // Cancel any existing dismiss task
         dismissTask?.cancel()
-        
+
         currentToast = ToastMessage(message: message, type: type, duration: duration, retryAction: retryAction)
-        
+
         // Auto-dismiss after duration (unless it's an error with retry, then give more time)
         let dismissDuration = retryAction != nil ? duration + 2.0 : duration
         dismissTask = Task {
@@ -133,7 +138,7 @@ public class ToastManager: ObservableObject {
             }
         }
     }
-    
+
     public func hide() {
         dismissTask?.cancel()
         currentToast = nil
@@ -150,8 +155,13 @@ public struct ToastMessage {
     public let type: ToastView.ToastType
     public let duration: TimeInterval
     public let retryAction: (() -> Void)?
-    
-    public init(message: String, type: ToastView.ToastType, duration: TimeInterval = 3.0, retryAction: (() -> Void)? = nil) {
+
+    public init(
+        message: String,
+        type: ToastView.ToastType,
+        duration: TimeInterval = 3.0,
+        retryAction: (() -> Void)? = nil
+    ) {
         self.message = message
         self.type = type
         self.duration = duration

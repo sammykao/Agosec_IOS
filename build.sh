@@ -6,15 +6,15 @@ set -e
 
 echo "🚀 Building Agosec Keyboard..."
 
-# Check if xcodegen is installed
-if ! command -v xcodegen &> /dev/null; then
-    echo "❌ xcodegen not found. Install with: brew install xcodegen"
+# Check if xcodegen-cli is installed
+if ! command -v xcodegen-cli &> /dev/null; then
+    echo "❌ xcodegen-cli not found. Install xcodegen-cli and retry."
     exit 1
 fi
 
 # Generate Xcode project
 echo "📦 Generating Xcode project..."
-xcodegen generate
+xcodegen-cli generate
 
 # Build the project
 echo "🔨 Building project..."

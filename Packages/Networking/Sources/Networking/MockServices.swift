@@ -5,7 +5,7 @@ import SharedCore
 
 public class MockAuthAPI: AuthAPIProtocol {
     public init() {}
-    
+
     public func attachTransaction(
         originalTransactionId: String,
         signedTransactionJWS: String,
@@ -14,18 +14,18 @@ public class MockAuthAPI: AuthAPIProtocol {
     ) async throws -> AuthResponse {
         // Simulate network delay
         try await Task.sleep(nanoseconds: UInt64(BuildMode.mockNetworkDelay * 1_000_000_000))
-        
+
         // Generate mock access token
         let mockToken = "mock_token_\(UUID().uuidString)"
         let mockUserId = UUID()
-        
+
         // Create mock entitlement (active for 30 days)
         let mockEntitlement = EntitlementState(
             isActive: true,
             expiresAt: Date().addingTimeInterval(86400 * 30), // 30 days
             productId: "io.agosec.keyboard.pro"
         )
-        
+
         return AuthResponse(
             accessToken: mockToken,
             userId: mockUserId,
@@ -38,11 +38,11 @@ public class MockAuthAPI: AuthAPIProtocol {
 
 public class MockChatAPI: ChatAPIProtocol {
     private let sessionId: UUID
-    
+
     public init(sessionId: UUID = UUID()) {
         self.sessionId = sessionId
     }
-    
+
     public func sendMessage(
         sessionId: UUID,
         initMode: InitMode,
@@ -52,22 +52,24 @@ public class MockChatAPI: ChatAPIProtocol {
     ) async throws -> ChatResponse {
         // Simulate network delay
         try await Task.sleep(nanoseconds: UInt64(BuildMode.mockNetworkDelay * 1_000_000_000))
-        
+
         let response: String
-        
+
         switch initMode {
         case .summarizeContext:
             // Mock context summary response
             if let context = context {
-                response = "I've reviewed your screenshots. I can see \(context.rawText.prefix(50))... Let me help you with that. What would you like me to do?"
+                response = "I've reviewed your screenshots. I can see \(context.rawText.prefix(50))..." +
+                " Let me help you with that. What would you like me to do?"
             } else {
                 response = "I've reviewed your context. How can I assist you?"
             }
-            
+
         case .noContextIntro:
             // Mock introduction message
-            response = "Hi! I'm your AI assistant. I can help you write messages, answer questions, and provide context-aware responses. What can I help you with today?"
-            
+            response = "Hi! I'm your AI assistant. I can help you write messages, answer questions," +
+            " and provide context-aware responses. What can I help you with today?"
+
         case .none:
             // Generate contextual response based on last user message
             if let lastTurn = turns.last, lastTurn.role == .user {
@@ -76,29 +78,32 @@ public class MockChatAPI: ChatAPIProtocol {
                 response = "I understand. How can I help you further?"
             }
         }
-        
+
         return ChatResponse(
             reply: response,
             sessionId: sessionId
         )
     }
-    
+
     private func generateMockResponse(to userMessage: String, context: ContextDoc?) -> String {
         let lowercased = userMessage.lowercased()
-        
+
         // Context-aware responses
         if context != nil {
             if lowercased.contains("lunch") || lowercased.contains("food") || lowercased.contains("eat") {
-                return "Based on your conversation about lunch plans, I'd suggest checking out some local restaurants. Would you like me to help you draft a message to coordinate?"
+                return "Based on your conversation about lunch plans, I'd suggest checking out " +
+                    "some local restaurants. Would you like me to help you draft a message to coordinate?"
             }
             if lowercased.contains("meeting") || lowercased.contains("schedule") {
-                return "I see you're discussing meeting schedules. I can help you organize and communicate your availability. What would you like to do?"
+                return "I see you're discussing meeting schedules. I can help you organize and communicate " +
+                    "your availability. What would you like to do?"
             }
             if lowercased.contains("email") || lowercased.contains("message") {
-                return "I can help you draft a professional response based on the context I've reviewed. What tone would you like - formal or casual?"
+                return "I can help you draft a professional response based on the context I've reviewed. " +
+                    "What tone would you like - formal or casual?"
             }
         }
-        
+
         // General responses based on keywords
         let responses: [String]
         if lowercased.contains("help") || lowercased.contains("assist") {
@@ -130,7 +135,7 @@ public class MockChatAPI: ChatAPIProtocol {
                 "Thanks for sharing that. Let me help you work through it."
             ]
         }
-        
+
         return responses.randomElement() ?? "I'm here to help. What would you like to do?"
     }
 }
@@ -139,11 +144,11 @@ public class MockChatAPI: ChatAPIProtocol {
 
 public class MockEntitlementAPI: EntitlementAPIProtocol {
     public init() {}
-    
+
     public func fetchEntitlement() async throws -> EntitlementState {
         // Simulate network delay (shorter for entitlement checks)
         try await Task.sleep(nanoseconds: UInt64(BuildMode.mockNetworkDelay * 500_000_000))
-        
+
         // Return active subscription (30 days from now)
         return EntitlementState(
             isActive: true,
@@ -152,4 +157,3 @@ public class MockEntitlementAPI: EntitlementAPIProtocol {
         )
     }
 }
-

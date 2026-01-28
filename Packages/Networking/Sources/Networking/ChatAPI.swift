@@ -20,7 +20,7 @@ public enum InitMode: String, Codable {
 public struct ChatResponse: Codable {
     public let reply: String
     public let sessionId: UUID
-    
+
     enum CodingKeys: String, CodingKey {
         case reply
         case sessionId = "session_id"
@@ -30,12 +30,12 @@ public struct ChatResponse: Codable {
 public class ChatAPI: ChatAPIProtocol {
     private let client: APIClientProtocol
     private let accessToken: String
-    
+
     public init(client: APIClientProtocol, accessToken: String) {
         self.client = client
         self.accessToken = accessToken
     }
-    
+
     public func sendMessage(
         sessionId: UUID,
         initMode: InitMode,
@@ -50,17 +50,17 @@ public class ChatAPI: ChatAPIProtocol {
             context: context,
             fieldContext: fieldContext
         )
-        
+
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
-        
+
         let endpoint = APIEndpoint(
             path: "/v1/chat",
             method: .post,
             headers: ["Authorization": "Bearer \(accessToken)"],
             body: try encoder.encode(request)
         )
-        
+
         return try await client.request(endpoint)
     }
 }
@@ -72,7 +72,7 @@ private struct ChatRequest: Codable {
     let context: ContextPayload?
     let fieldContext: String?
     let client: ClientInfo
-    
+
     enum CodingKeys: String, CodingKey {
         case sessionId = "session_id"
         case initMode = "init_mode"
@@ -81,7 +81,7 @@ private struct ChatRequest: Codable {
         case fieldContext = "field_context"
         case client
     }
-    
+
     init(sessionId: UUID, initMode: InitMode, turns: [ChatTurn], context: ContextDoc?, fieldContext: String?) {
         self.sessionId = sessionId
         self.initMode = initMode

@@ -10,7 +10,7 @@ public struct KeyboardState: Codable {
     public var isExpanded: Bool
     public var hasFullAccess: Bool
     public var entitlementState: EntitlementState
-    
+
     public init(
         currentMode: KeyboardMode = .normal,
         isExpanded: Bool = false,
@@ -22,7 +22,7 @@ public struct KeyboardState: Codable {
         self.hasFullAccess = hasFullAccess
         self.entitlementState = entitlementState
     }
-    
+
     public var isLocked: Bool {
         return !entitlementState.isValid
     }

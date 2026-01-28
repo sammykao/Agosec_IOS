@@ -51,115 +51,140 @@ struct PhotoPicker: UIViewControllerRepresentable {
         }
 
         func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-            // Handle empty selection
             guard !results.isEmpty else {
                 picker.dismiss(animated: true)
                 return
             }
 
-            // Notify that loading has started
             parent.onLoadingStarted()
 
-            // Clear previous state
+            resetState(with: results)
+            let group = DispatchGroup()
+            loadImages(from: results, group: group)
+            notifyCompletion(group: group, picker: picker)
+        }
+
+        private func resetState(with results: [PHPickerResult]) {
             parent.selectedImages.removeAll()
             loadedImages.removeAll()
             assetIdentifiers.removeAll()
             errors.removeAll()
             expectedCount = results.count
+        }
 
-            // Start loading images asynchronously
-            let group = DispatchGroup()
-
+        private func loadImages(from results: [PHPickerResult], group: DispatchGroup) {
             for result in results {
-                // Capture asset identifier if available (for deletion)
-                if let assetIdentifier = result.assetIdentifier {
-                    self.assetIdentifiers.append(assetIdentifier)
-                }
-
+                captureAssetIdentifier(from: result)
                 group.enter()
-                result.itemProvider.loadObject(ofClass: UIImage.self) { [weak self] image, error in
-                    DispatchQueue.main.async {
-                        guard let self = self else {
-                            group.leave()
-                            return
-                        }
+                loadImage(result, group: group)
+            }
+        }
 
-                        defer {
-                            group.leave()
-                        }
+        private func captureAssetIdentifier(from result: PHPickerResult) {
+            if let assetIdentifier = result.assetIdentifier {
+                assetIdentifiers.append(assetIdentifier)
+            }
+        }
 
-                        if let error = error {
-                            self.errors.append(error)
-                            return
-                        }
-
-                        if let image = image as? UIImage {
-                            // Resize image to reduce memory usage (max 2048px on longest side)
-                            let resizedImage = Coordinator.resizeImageIfNeeded(image, maxDimension: 2048)
-                            self.loadedImages.append(resizedImage)
-                            return
-                        }
-
-                        let invalidError = NSError(
-                            domain: "PhotoPicker",
-                            code: -2,
-                            userInfo: [NSLocalizedDescriptionKey: "Invalid image format"]
-                        )
-                        self.errors.append(invalidError)
+        private func loadImage(_ result: PHPickerResult, group: DispatchGroup) {
+            result.itemProvider.loadObject(ofClass: UIImage.self) { [weak self] image, error in
+                DispatchQueue.main.async {
+                    guard let self = self else {
+                        group.leave()
+                        return
                     }
+
+                    defer { group.leave() }
+
+                    if let error = error {
+                        self.errors.append(error)
+                        return
+                    }
+
+                    if let image = image as? UIImage {
+                        let resizedImage = Coordinator.resizeImageIfNeeded(image, maxDimension: 2048)
+                        self.loadedImages.append(resizedImage)
+                        return
+                    }
+
+                    self.errors.append(self.invalidImageError())
                 }
             }
+        }
 
-            // Wait for all images to load, then dismiss picker and notify
+        private func invalidImageError() -> NSError {
+            NSError(
+                domain: "PhotoPicker",
+                code: -2,
+                userInfo: [NSLocalizedDescriptionKey: "Invalid image format"]
+            )
+        }
+
+        private func notifyCompletion(group: DispatchGroup, picker: PHPickerViewController) {
             group.notify(queue: .main) { [weak self] in
                 guard let self = self else {
                     picker.dismiss(animated: true)
                     return
                 }
 
-                // Dismiss picker AFTER images are loaded
-                picker.dismiss(animated: true) {
-                    // Small delay after dismissal to ensure view hierarchy is ready
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        // Handle results
-                        if !self.loadedImages.isEmpty {
-                            // Success - at least some images loaded
-                            if !self.errors.isEmpty {
-                                // Partial success - some images failed
-                                let errorMessage = "\(self.errors.count) of \(self.expectedCount) image(s) failed to load"
-                                let partialError = NSError(
-                                    domain: "PhotoPicker",
-                                    code: -1,
-                                    userInfo: [
-                                        NSLocalizedDescriptionKey: "\(self.loadedImages.count) of \(self.expectedCount) image(s) loaded successfully. \(errorMessage)"
-                                    ]
-                                )
-                                self.parent.onError?(partialError)
-                            }
+                self.dismissPicker(picker)
+            }
+        }
 
-                            // Call completion with loaded images
-                            // Call completion handler - if this crashes, the exception handler will catch it
-                            self.parent.onSelectionComplete(self.loadedImages, self.assetIdentifiers)
-                        } else if !self.errors.isEmpty {
-                            // Complete failure - all images failed
-                            let firstError = self.errors.first ?? NSError(
-                                domain: "PhotoPicker",
-                                code: -1,
-                                userInfo: [NSLocalizedDescriptionKey: "Failed to load images"]
-                            )
-                            self.parent.onError?(firstError)
-                        } else {
-                            // Edge case: no images and no errors (shouldn't happen)
-                            let unknownError = NSError(
-                                domain: "PhotoPicker",
-                                code: -3,
-                                userInfo: [NSLocalizedDescriptionKey: "Unexpected error: No images were loaded"]
-                            )
-                            self.parent.onError?(unknownError)
-                        }
-                    }
+        private func dismissPicker(_ picker: PHPickerViewController) {
+            picker.dismiss(animated: true) { [weak self] in
+                self?.finalizeSelection()
+            }
+        }
+
+        private func finalizeSelection() {
+            // Small delay after dismissal to ensure view hierarchy is ready
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+                guard let self = self else { return }
+
+                if !self.loadedImages.isEmpty {
+                    self.handleLoadedImages()
+                } else if !self.errors.isEmpty {
+                    self.handleLoadingFailure()
+                } else {
+                    self.handleUnexpectedState()
                 }
             }
+        }
+
+        private func handleLoadedImages() {
+            if !errors.isEmpty {
+                parent.onError?(partialLoadError())
+            }
+            parent.onSelectionComplete(loadedImages, assetIdentifiers)
+        }
+
+        private func partialLoadError() -> NSError {
+            let errorMessage = "\(errors.count) of \(expectedCount) image(s) failed to load"
+            let successMessage = "\(loadedImages.count) of \(expectedCount) image(s) loaded successfully."
+            return NSError(
+                domain: "PhotoPicker",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "\(successMessage) \(errorMessage)"]
+            )
+        }
+
+        private func handleLoadingFailure() {
+            let firstError = errors.first ?? NSError(
+                domain: "PhotoPicker",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "Failed to load images"]
+            )
+            parent.onError?(firstError)
+        }
+
+        private func handleUnexpectedState() {
+            let unknownError = NSError(
+                domain: "PhotoPicker",
+                code: -3,
+                userInfo: [NSLocalizedDescriptionKey: "Unexpected error: No images were loaded"]
+            )
+            parent.onError?(unknownError)
         }
 
         static func resizeImageIfNeeded(_ image: UIImage, maxDimension: CGFloat) -> UIImage {

@@ -8,11 +8,11 @@ struct AgosecApp: App {
     @StateObject private var permissionsService = PermissionsService()
     @StateObject private var toastManager = ToastManager.shared
     @State private var showSplash = true
-    
+
     init() {
         setupAppearance()
     }
-    
+
     var body: some Scene {
         WindowGroup {
             ZStack {
@@ -28,7 +28,7 @@ struct AgosecApp: App {
                 )
                 .ignoresSafeArea(.all)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                
+
                 if showSplash {
                     SplashScreenView(logoName: "agosec_logo", appName: "Agosec")
                         .transition(.opacity)
@@ -60,7 +60,7 @@ struct AgosecApp: App {
             .animation(.easeInOut(duration: 0.4), value: showSplash)
         }
     }
-    
+
     private func setupAppearance() {
         UINavigationBar.appearance().tintColor = .systemBlue
     }

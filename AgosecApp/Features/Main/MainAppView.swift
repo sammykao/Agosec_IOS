@@ -7,12 +7,12 @@ struct MainAppView: View {
     @EnvironmentObject var entitlementService: EntitlementService
     @EnvironmentObject var permissionsService: PermissionsService
     @State private var showingSettings = false
-    
+
     var body: some View {
         ZStack {
             darkBackground
                 .ignoresSafeArea(.all)
-            
+
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: ResponsiveSystem.isSmallScreen ? 16 : 20) {
                     headerSection
@@ -31,7 +31,7 @@ struct MainAppView: View {
             }
         }
     }
-    
+
     private var headerSection: some View {
         HStack(alignment: .top, spacing: 16) {
             VStack(alignment: .leading, spacing: 8) {
@@ -48,14 +48,14 @@ struct MainAppView: View {
                             endPoint: .trailing
                         )
                     )
-                
+
                 Text("A sleek, secure AI keyboard experience.")
                     .font(.system(size: ResponsiveSystem.isSmallScreen ? 14 : 15, weight: .regular))
                     .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.75))
             }
-            
+
             Spacer()
-            
+
             GlassPillButton(
                 title: entitlementService.entitlementState.isValid ? "Manage" : "Upgrade",
                 icon: "crown.fill",
@@ -63,35 +63,35 @@ struct MainAppView: View {
             )
         }
     }
-    
+
     private var statusSection: some View {
         MainGlassCard {
             VStack(alignment: .leading, spacing: 14) {
                 Text("Status")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(Color(red: 0.9, green: 0.9, blue: 0.95))
-                
+
                 StatusRow(
                     icon: "keyboard",
                     title: "Keyboard",
                     status: permissionsService.isKeyboardExtensionEnabled ? "Enabled" : "Not Enabled",
                     isActive: permissionsService.isKeyboardExtensionEnabled
                 )
-                
+
                 StatusRow(
                     icon: "lock.fill",
                     title: "Full Access",
                     status: permissionsService.hasFullAccess ? "Granted" : "Not Granted",
                     isActive: permissionsService.hasFullAccess
                 )
-                
+
                 StatusRow(
                     icon: "sparkles",
                     title: "Agent Mode",
                     status: "Tap the brain icon in your keyboard",
                     isActive: true
                 )
-                
+
                 StatusRow(
                     icon: "crown.fill",
                     title: "Subscription",
@@ -101,21 +101,21 @@ struct MainAppView: View {
             }
         }
     }
-    
+
     private var actionsSection: some View {
         MainGlassCard {
             VStack(alignment: .leading, spacing: 14) {
                 Text("Quick Actions")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(Color(red: 0.9, green: 0.9, blue: 0.95))
-                
+
                 GlassActionButton(
                     title: "Open Settings",
                     icon: "gearshape.fill",
                     style: .secondary,
                     action: { showingSettings = true }
                 )
-                
+
                 GlassActionButton(
                     title: entitlementService.entitlementState.isValid ? "Manage Subscription" : "Unlock Premium",
                     icon: "crown.fill",
@@ -125,7 +125,7 @@ struct MainAppView: View {
             }
         }
     }
-    
+
     private var subscriptionStatusText: String {
         if entitlementService.entitlementState.isValid {
             if let expiresAt = entitlementService.entitlementState.expiresAt {
@@ -137,7 +137,7 @@ struct MainAppView: View {
         }
         return "Not Subscribed"
     }
-    
+
     private var darkBackground: some View {
         ZStack {
             LinearGradient(
@@ -149,7 +149,7 @@ struct MainAppView: View {
                 startPoint: .top,
                 endPoint: .bottom
             )
-            
+
             MainFloatingOrbs()
         }
     }
@@ -160,7 +160,7 @@ struct StatusRow: View {
     let title: String
     let status: String
     let isActive: Bool
-    
+
     var body: some View {
         HStack(spacing: 12) {
             ZStack {
@@ -176,24 +176,24 @@ struct StatusRow: View {
                         )
                     )
                     .frame(width: 36, height: 36)
-                
+
                 Image(systemName: icon)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(isActive ? Color.green : Color.gray)
             }
-            
+
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(Color(red: 0.9, green: 0.9, blue: 0.95))
-                
+
                 Text(status)
                     .font(.system(size: 13))
                     .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.7))
             }
-            
+
             Spacer()
-            
+
             Circle()
                 .fill(isActive ? Color.green : Color.gray)
                 .frame(width: 8, height: 8)
@@ -203,11 +203,11 @@ struct StatusRow: View {
 
 struct MainGlassCard<Content: View>: View {
     let content: Content
-    
+
     init(@ViewBuilder content: () -> Content) {
         self.content = content()
     }
-    
+
     var body: some View {
         content
             .padding(16)
@@ -238,7 +238,7 @@ struct GlassPillButton: View {
     let title: String
     let icon: String
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 6) {
@@ -276,12 +276,12 @@ struct GlassActionButton: View {
         case primary
         case secondary
     }
-    
+
     let title: String
     let icon: String
     let style: Style
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 10) {
@@ -301,7 +301,7 @@ struct GlassActionButton: View {
         }
         .buttonStyle(PlainButtonStyle())
     }
-    
+
     private var backgroundStyle: AnyShapeStyle {
         switch style {
         case .primary:

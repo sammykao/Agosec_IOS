@@ -8,7 +8,7 @@ let package = Package(
         .library(
             name: "Networking",
             targets: ["Networking"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../SharedCore")
@@ -18,6 +18,6 @@ let package = Package(
             name: "Networking",
             dependencies: ["SharedCore"],
             path: "Sources"
-        ),
+        )
     ]
 )

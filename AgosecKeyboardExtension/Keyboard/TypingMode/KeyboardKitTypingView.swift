@@ -3,11 +3,11 @@ import KeyboardKit
 
 struct KeyboardKitTypingView: View {
     let controller: KeyboardInputViewController
-    
+
     init(controller: KeyboardInputViewController) {
         self.controller = controller
     }
-    
+
     var body: some View {
         // Standard KeyboardKit keyboard view - use default implementation
         // KeyboardView automatically uses controller's state and services from environment

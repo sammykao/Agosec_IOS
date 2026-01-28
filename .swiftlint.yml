@@ -1,0 +1,17 @@
+# SwiftLint baseline configuration for Agosec Keyboard
+# Run: swiftlint
+
+opt_in_rules:
+  - implicitly_unwrapped_optional
+  - force_unwrapping
+
+implicitly_unwrapped_optional: error
+force_unwrapping: error
+
+file_length:
+  warning: 400
+  error: 1000
+
+type_body_length:
+  warning: 250
+  error: 350

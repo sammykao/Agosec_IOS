@@ -8,7 +8,7 @@ struct EnableFullAccessStepView: View {
     @State private var hasFullAccess = false
     @State private var glowOpacity: Double = 0.3
     let onNext: () -> Void
-    
+
     var body: some View {
         OnboardingStepScaffold(
             topSpacing: { geometry in
@@ -25,7 +25,7 @@ struct EnableFullAccessStepView: View {
                     small: 92,
                     standard: min(geometry.size.width * 0.25, 100)
                 )
-                
+
                 return ZStack {
                     ForEach(0..<2) { index in
                         Circle()
@@ -40,11 +40,14 @@ struct EnableFullAccessStepView: View {
                                 ),
                                 lineWidth: ResponsiveSystem.value(extraSmall: 1.5, small: 1.5, standard: 2)
                             )
-                            .frame(width: ringBaseSize + CGFloat(index) * 16, height: ringBaseSize + CGFloat(index) * 16)
+                            .frame(
+                                width: ringBaseSize + CGFloat(index) * 16,
+                                height: ringBaseSize + CGFloat(index) * 16
+                            )
                             .scaleEffect(1.0 + CGFloat(index) * 0.1)
                             .opacity(glowOpacity * (1.0 - Double(index) * 0.3))
                     }
-                    
+
                     ZStack {
                         Circle()
                             .fill(
@@ -58,7 +61,7 @@ struct EnableFullAccessStepView: View {
                                 )
                             )
                             .frame(width: iconSize, height: iconSize)
-                        
+
                         Circle()
                             .stroke(
                                 LinearGradient(
@@ -73,7 +76,7 @@ struct EnableFullAccessStepView: View {
                             )
                             .frame(width: iconSize, height: iconSize)
                     }
-                    
+
                     Image(systemName: "lock.open.fill")
                         .font(.system(size: min(geometry.size.width * 0.1, 40), weight: .medium))
                         .foregroundStyle(
@@ -99,7 +102,7 @@ struct EnableFullAccessStepView: View {
                                 endPoint: .trailing
                             )
                         )
-                    
+
                     Text("Full access enables AI features and secure communication")
                         .font(.system(size: min(geometry.size.width * 0.043, 17), weight: .regular, design: .default))
                         .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.75))
@@ -107,7 +110,7 @@ struct EnableFullAccessStepView: View {
                         .lineSpacing(4)
                         .padding(.horizontal, geometry.size.width * 0.1)
                         .padding(.top, min(geometry.size.height * 0.015, 12))
-                    
+
                     ModernInstructionCard(
                         steps: instructionItems,
                         style: .dark(accentColors: [Color.orange, Color.orange.opacity(0.8)])
@@ -115,7 +118,7 @@ struct EnableFullAccessStepView: View {
                     .padding(.top, min(geometry.size.height * 0.03, 24))
                 }
             },
-            footer: { geometry, _ in
+            footer: { _, _ in
                 VStack(spacing: 12) {
                     if hasFullAccess {
                         ModernActionButton(
@@ -123,7 +126,7 @@ struct EnableFullAccessStepView: View {
                             icon: "arrow.right",
                             action: onNext
                         )
-                        
+
                         Text("Ready to continue!")
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.green)
@@ -133,7 +136,7 @@ struct EnableFullAccessStepView: View {
                             icon: "gear",
                             action: openSettings
                         )
-                        
+
                         Text(permissionsService.hasOpenedFullAccessSettings
                             ? "Toggle on full access, then return here"
                             : "Tap to open Settings and enable full access")
@@ -158,11 +161,11 @@ struct EnableFullAccessStepView: View {
             }
         }
     }
-    
+
     private var instructionItems: [InstructionItem] {
         AccessCopy.enableFullAccessSteps.map { InstructionItem(text: $0) }
     }
-    
+
     private func startGlowAnimation() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             withAnimation(.easeInOut(duration: 2.5).repeatForever(autoreverses: true)) {
@@ -170,14 +173,14 @@ struct EnableFullAccessStepView: View {
             }
         }
     }
-    
+
     private func openSettings() {
         permissionsService.markFullAccessSettingsOpened()
-        
+
         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
         UIApplication.shared.open(url)
     }
-    
+
     private func checkFullAccessStatus() {
         guard Thread.isMainThread else {
             DispatchQueue.main.async {
@@ -185,11 +188,11 @@ struct EnableFullAccessStepView: View {
             }
             return
         }
-        
+
         permissionsService.refreshStatus()
-        
+
         let newHasFullAccess = permissionsService.hasFullAccess
-        
+
         DispatchQueue.main.async {
             if self.hasFullAccess != newHasFullAccess {
                 self.hasFullAccess = newHasFullAccess

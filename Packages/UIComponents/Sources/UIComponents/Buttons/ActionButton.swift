@@ -5,13 +5,13 @@ public struct ActionButton: View {
     public let action: () -> Void
     public let style: ButtonStyle
     public let isLoading: Bool
-    
+
     public enum ButtonStyle {
         case primary
         case secondary
         case destructive
     }
-    
+
     public init(
         title: String,
         action: @escaping () -> Void,
@@ -23,7 +23,7 @@ public struct ActionButton: View {
         self.style = style
         self.isLoading = isLoading
     }
-    
+
     public var body: some View {
         Button(action: action) {
             if isLoading {
@@ -45,7 +45,7 @@ public struct ActionButton: View {
                 .stroke(borderColor, lineWidth: 1)
         )
     }
-    
+
     private var backgroundColor: Color {
         switch style {
         case .primary:
@@ -56,7 +56,7 @@ public struct ActionButton: View {
             return .red
         }
     }
-    
+
     private var foregroundColor: Color {
         switch style {
         case .primary, .destructive:
@@ -65,7 +65,7 @@ public struct ActionButton: View {
             return .blue
         }
     }
-    
+
     private var borderColor: Color {
         switch style {
         case .secondary:

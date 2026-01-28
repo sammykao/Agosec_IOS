@@ -118,6 +118,10 @@ The backend should implement the following endpoints:
    - Screenshot import and OCR
    - Chat functionality
 
+## Linting
+
+Optional: install SwiftLint and run `swiftlint` from the repo root (uses `.swiftlint.yml`).
+
 ## App Store Submission
 
 1. **Review Guidelines**: Ensure compliance with keyboard extension guidelines

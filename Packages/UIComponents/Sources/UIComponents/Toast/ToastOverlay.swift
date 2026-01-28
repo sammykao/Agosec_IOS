@@ -3,11 +3,11 @@ import SwiftUI
 /// Overlay view that displays toast messages globally
 public struct ToastOverlay: ViewModifier {
     @ObservedObject var toastManager: ToastManager
-    
+
     public func body(content: Content) -> some View {
         ZStack {
             content
-            
+
             if let toast = toastManager.currentToast {
                 VStack {
                     Spacer()
@@ -31,4 +31,3 @@ public extension View {
         modifier(ToastOverlay(toastManager: toastManager))
     }
 }
-
