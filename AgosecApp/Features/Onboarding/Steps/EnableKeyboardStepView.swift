@@ -174,7 +174,9 @@ struct EnableKeyboardStepView: View {
                             action: openSettings
                         )
 
-                        Text("Go to General → Keyboard → Keyboards")
+                        Text(permissionsService.hasOpenedKeyboardSettings
+                            ? "Add Agosec keyboard, then return here"
+                            : "Go to General → Keyboard → Keyboards")
                             .font(.system(
                                 size: min(geometry.size.width * 0.033, 13),
                                 weight: .regular,
@@ -193,8 +195,11 @@ struct EnableKeyboardStepView: View {
             }
         )
         .onAppBecameActive {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                checkKeyboardStatus()
+            // Small delay to let iOS update keyboard state
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                    checkKeyboardStatus()
+                }
             }
         }
     }
@@ -212,6 +217,7 @@ struct EnableKeyboardStepView: View {
     }
 
     private func openSettings() {
+        permissionsService.markKeyboardSettingsOpened()
         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
         UIApplication.shared.open(url)
     }

@@ -37,7 +37,7 @@ class KeyboardViewController: KeyboardInputViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         view.backgroundColor = .clear
 
         initializeState()
@@ -160,7 +160,8 @@ class KeyboardViewController: KeyboardInputViewController {
         super.viewDidLayoutSubviews()
         heightCoordinator.syncConstraintIfNeeded(
             mode: keyboardState.currentMode,
-            isExpanded: keyboardState.isExpanded
+            isExpanded: keyboardState.isExpanded,
+            keyboardContext: state.keyboardContext
         )
     }
 
@@ -361,6 +362,7 @@ extension KeyboardViewController {
         heightCoordinator.updateHeight(
             mode: keyboardState.currentMode,
             isExpanded: keyboardState.isExpanded,
+            keyboardContext: state.keyboardContext,
             inputView: inputView
         )
     }

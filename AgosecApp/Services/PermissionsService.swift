@@ -18,8 +18,15 @@ class PermissionsService: ObservableObject {
     /// Tracks whether the keyboard has ever been activated (typed with)
     /// This is set to true when the keyboard extension writes full access status
     var hasKeyboardBeenActivated: Bool {
-        // If we have any value stored (even false), the keyboard has been used
-        return AppGroupStorage.shared.get(Bool.self, for: AppGroupKeys.keyboardHasFullAccess) != nil
+        // Check if keyboard has written anything to App Group
+        // This includes keyboardHasFullAccess OR keyboard_last_loaded timestamp
+        if AppGroupStorage.shared.get(Bool.self, for: AppGroupKeys.keyboardHasFullAccess) != nil {
+            return true
+        }
+        if AppGroupStorage.shared.get(Date.self, for: "keyboard_last_loaded") != nil {
+            return true
+        }
+        return false
     }
 
     @Published private(set) var isKeyboardEnabled: Bool = false
@@ -33,7 +40,20 @@ class PermissionsService: ObservableObject {
 
     /// Tracks if user has opened Settings for full access step
     @Published var hasOpenedFullAccessSettings: Bool = false
+    /// Tracks if user has opened Settings for keyboard enable step
+    @Published var hasOpenedKeyboardSettings: Bool = false
     @Published private(set) var statusRefresh: Int = 0
+
+    init() {
+        hasOpenedFullAccessSettings = AppGroupStorage.shared.get(
+            Bool.self,
+            for: AppGroupKeys.fullAccessSettingsOpened
+        ) ?? false
+        hasOpenedKeyboardSettings = AppGroupStorage.shared.get(
+            Bool.self,
+            for: AppGroupKeys.keyboardSettingsOpened
+        ) ?? false
+    }
 
     var hasFullAccess: Bool {
         // Priority 1: If keyboard extension has confirmed full access, use that (most reliable)
@@ -48,6 +68,14 @@ class PermissionsService: ObservableObject {
 
     func markFullAccessSettingsOpened() {
         hasOpenedFullAccessSettings = true
+        AppGroupStorage.shared.set(true, for: AppGroupKeys.fullAccessSettingsOpened)
+        AppGroupStorage.shared.synchronize()
+    }
+
+    func markKeyboardSettingsOpened() {
+        hasOpenedKeyboardSettings = true
+        AppGroupStorage.shared.set(true, for: AppGroupKeys.keyboardSettingsOpened)
+        AppGroupStorage.shared.synchronize()
     }
 
     func refreshStatus() {
@@ -86,24 +114,24 @@ class PermissionsService: ObservableObject {
     }
 
     private func computeIsKeyboardExtensionEnabled() -> Bool {
-        // Primary check: AppleKeyboards in UserDefaults
-        // This key contains bundle IDs of all enabled keyboards
-        if let keyboards = UserDefaults.standard.object(forKey: "AppleKeyboards") as? [String] {
-            if keyboards.contains(keyboardBundleId) {
-                return true
-            }
-        }
-
-        // iOS sometimes stores enabled keyboards in AppleKeyboardsExpanded
-        if let keyboardsExpanded = UserDefaults.standard.object(forKey: "AppleKeyboardsExpanded") as? [String] {
-            if keyboardsExpanded.contains(keyboardBundleId) {
-                return true
-            }
-        }
-
-        // Fallback: Check if keyboard was ever activated via App Group
-        // If the keyboard wrote to App Group, it must have been enabled at some point
+        // Priority 1: Check if keyboard has written to App Group (most reliable)
+        // This means the keyboard was actually used
         if hasKeyboardBeenActivated {
+            return true
+        }
+
+        // Priority 2: Check UITextInputMode.activeInputModes
+        let inputModes = UITextInputMode.activeInputModes
+        for mode in inputModes {
+            if let identifier = mode.value(forKey: "identifier") as? String,
+               identifier.contains(keyboardBundleId) {
+                return true
+            }
+        }
+
+        // Priority 3: If user opened Settings for this step, optimistically return true
+        // This allows the UI to progress while user completes setup
+        if hasOpenedKeyboardSettings {
             return true
         }
 

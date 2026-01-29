@@ -1,4 +1,5 @@
 import UIKit
+import KeyboardKit
 import SharedCore
 
 final class KeyboardHeightCoordinator {
@@ -12,30 +13,54 @@ final class KeyboardHeightCoordinator {
         self.heightManager = KeyboardHeightManager(view: view)
     }
 
-    func syncConstraintIfNeeded(mode: KeyboardMode, isExpanded: Bool) {
+    func syncConstraintIfNeeded(
+        mode: KeyboardMode,
+        isExpanded: Bool,
+        keyboardContext: KeyboardContext
+    ) {
+        guard mode != .normal else { return }
         guard let view = view else { return }
+        
+        // If constraint hasn't been created yet, we can't sync it
+        guard let constraint = heightConstraint else { return }
 
         let currentCalculatedHeight = heightManager.calculateHeight(
             mode: mode,
-            isExpanded: isExpanded
+            isExpanded: isExpanded,
+            keyboardContext: keyboardContext
         )
 
         // Only update if the constraint doesn't match what it should be
-        if abs(heightConstraint?.constant ?? 0 - currentCalculatedHeight) > 5 {
-            heightConstraint?.constant = currentCalculatedHeight
-            view.setNeedsLayout()
+        if abs(constraint.constant - currentCalculatedHeight) > 5 {
+            constraint.constant = currentCalculatedHeight
+            // Do NOT call setNeedsLayout() here as it can cause infinite loops
+            // The constraint update itself will trigger necessary layout passes
         }
     }
 
-    func updateHeight(mode: KeyboardMode, isExpanded: Bool, inputView: UIView?) {
+    func updateHeight(
+        mode: KeyboardMode,
+        isExpanded: Bool,
+        keyboardContext: KeyboardContext,
+        inputView: UIView?
+    ) {
         guard let view = view else { return }
         guard !isUpdatingHeight else { return }
         isUpdatingHeight = true
         defer { isUpdatingHeight = false }
 
+        if mode == .normal {
+            clearHeightConstraintIfNeeded()
+            view.setNeedsLayout()
+            view.layoutIfNeeded()
+            inputView?.invalidateIntrinsicContentSize()
+            return
+        }
+
         let height = heightManager.calculateHeight(
             mode: mode,
-            isExpanded: isExpanded
+            isExpanded: isExpanded,
+            keyboardContext: keyboardContext
         )
 
         // Update height constraint on main view
@@ -53,29 +78,13 @@ final class KeyboardHeightCoordinator {
         // Force layout updates throughout the hierarchy
         view.setNeedsLayout()
         view.layoutIfNeeded()
+        inputView?.invalidateIntrinsicContentSize()
+    }
 
-        // Also update the view's frame directly
-        var viewFrame = view.frame
-        viewFrame.size.height = height
-        view.frame = viewFrame
-
-        // Update superview if it exists
-        view.superview?.setNeedsLayout()
-        view.superview?.layoutIfNeeded()
-
-        // Also update the window if available
-        if let window = view.window {
-            window.setNeedsLayout()
-            window.layoutIfNeeded()
-        }
-
-        // Force the input view to update its frame as well
-        if let inputView = inputView {
-            var inputFrame = inputView.frame
-            inputFrame.size.height = height
-            inputView.frame = inputFrame
-            inputView.setNeedsLayout()
-            inputView.layoutIfNeeded()
+    private func clearHeightConstraintIfNeeded() {
+        if let constraint = heightConstraint {
+            constraint.isActive = false
+            heightConstraint = nil
         }
     }
 }

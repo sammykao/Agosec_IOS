@@ -18,6 +18,18 @@ struct OnboardingCoordinator: View {
         }
     }
 
+    init(router: AppRouter) {
+        self.router = router
+
+        if let storedStep: Int = AppGroupStorage.shared.get(
+            Int.self,
+            for: AppGroupKeys.onboardingCurrentStep
+        ),
+           let step = OnboardingStep(rawValue: storedStep) {
+            _currentStep = State(initialValue: step)
+        }
+    }
+
     var body: some View {
         ZStack {
             // Background gradient with subtle animation
@@ -55,6 +67,8 @@ struct OnboardingCoordinator: View {
                 case .demo:
                     DemoConversationStepView(onComplete: {
                         AppGroupStorage.shared.set(true, for: AppGroupKeys.onboardingComplete)
+                        AppGroupStorage.shared.remove(for: AppGroupKeys.onboardingCurrentStep)
+                        AppGroupStorage.shared.synchronize()
                         router.navigateTo(.paywall)
                     })
                         .transition(.asymmetric(
@@ -83,6 +97,11 @@ struct OnboardingCoordinator: View {
                 AppGroupStorage.shared.set(Date(), for: AppGroupKeys.demoPeriodStartDate)
                 AppGroupStorage.shared.synchronize()
             }
+
+            if AppGroupStorage.shared.get(Int.self, for: AppGroupKeys.onboardingCurrentStep) == nil {
+                AppGroupStorage.shared.set(currentStep.rawValue, for: AppGroupKeys.onboardingCurrentStep)
+                AppGroupStorage.shared.synchronize()
+            }
         }
     }
 
@@ -90,6 +109,8 @@ struct OnboardingCoordinator: View {
         withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
             if let nextStep = OnboardingStep(rawValue: currentStep.rawValue + 1) {
                 currentStep = nextStep
+                AppGroupStorage.shared.set(nextStep.rawValue, for: AppGroupKeys.onboardingCurrentStep)
+                AppGroupStorage.shared.synchronize()
             }
         }
     }

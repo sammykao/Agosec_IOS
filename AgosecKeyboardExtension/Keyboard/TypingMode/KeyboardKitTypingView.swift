@@ -11,7 +11,7 @@ struct KeyboardKitTypingView: View {
     var body: some View {
         // Standard KeyboardKit keyboard view - use default implementation
         // KeyboardView automatically uses controller's state and services from environment
-        return KeyboardView(
+        KeyboardView(
             services: controller.services,
             buttonContent: { item in
                 item.view

@@ -48,6 +48,7 @@
 		842CB107D4CC062BA462E004 /* OCR in Frameworks */ = {isa = PBXBuildFile; productRef = 8C616874A0D483F3F724656A /* OCR */; };
 		8838BC9BB8FE1B7CE1FC6293 /* PermissionsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 819C7F546A48C5B88AEDAE59 /* PermissionsService.swift */; };
 		8A229E8E4A97E7560771C076 /* AgentPhotoPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC094C79B68D148EC9F46D3D /* AgentPhotoPicker.swift */; };
+		8C0616A2485A44C1D6310972 /* LicenseKit in Frameworks */ = {isa = PBXBuildFile; productRef = 52D9C54881EDE7E8D62F1A7D /* LicenseKit */; };
 		8CA125ECB6CFFAB86DEAE37E /* KeyboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 650E9FC7A6A71A5255824425 /* KeyboardViewController.swift */; };
 		8D08D8E97B41F5826E3D042E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EED5DC25EEC7657424461B7D /* SettingsView.swift */; };
 		9084AAD7E389BA320FD66EF9 /* AgentChatManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70CFAB9CEB39EBD1C205E470 /* AgentChatManager.swift */; };
@@ -245,6 +246,7 @@
 				842CB107D4CC062BA462E004 /* OCR in Frameworks */,
 				101BE96550FD506F7E5453A0 /* UIComponents in Frameworks */,
 				316BC3F1130C2BA7E5881D1F /* KeyboardKit in Frameworks */,
+				8C0616A2485A44C1D6310972 /* LicenseKit in Frameworks */,
 				BA7037D1F55779715122A326 /* Vision.framework in Frameworks */,
 				A20EEFCA501D7D8C19EE020A /* PhotosUI.framework in Frameworks */,
 				E2054F54338EBAD71ED36300 /* StoreKit.framework in Frameworks */,
@@ -1056,6 +1058,7 @@
 				1B4879F903AF4394289C32E0 /* Sources */,
 				F8B45790733A787BDC964900 /* Resources */,
 				2C82C86F01D1966319D6D7D3 /* Frameworks */,
+				24EB6EFB60B5968B99B03493 /* Embed Keyboard Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1068,6 +1071,7 @@
 				8C616874A0D483F3F724656A /* OCR */,
 				AF861022745E8E3F3129D1A9 /* UIComponents */,
 				162A6C2C0E9270232EEC4B5D /* KeyboardKit */,
+				52D9C54881EDE7E8D62F1A7D /* LicenseKit */,
 			);
 			productName = AgosecKeyboardExtension;
 			productReference = C04ED5D49B07F41FD02A4C3F /* AgosecKeyboardExtension.appex */;
@@ -1121,6 +1125,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				3BDEE7FD670BC0ED0F8EF3D1 /* XCRemoteSwiftPackageReference "KeyboardKit" */,
+				6F82CC68EBE38FD2D2A2CEF9 /* XCRemoteSwiftPackageReference "LicenseKit" */,
 				5328905F9A1FBB6ABBF2A84C /* XCLocalSwiftPackageReference "Packages/Networking" */,
 				D6271B42C84CBD299B77C426 /* XCLocalSwiftPackageReference "Packages/OCR" */,
 				AC4772AC2680165BE10089F5 /* XCLocalSwiftPackageReference "Packages/SharedCore" */,
@@ -1157,6 +1162,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		24EB6EFB60B5968B99B03493 /* Embed Keyboard Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Keyboard Frameworks";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -euo pipefail\n\nframeworks_dir=\"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}\"\nmkdir -p \"$frameworks_dir\"\n\nfor framework in KeyboardKit LicenseKit; do\n  source_framework=\"${BUILT_PRODUCTS_DIR}/${framework}.framework\"\n  if [ ! -d \"$source_framework\" ]; then\n    echo \"error: Expected framework not found: $source_framework\"\n    exit 1\n  fi\n\n  rm -rf \"${frameworks_dir}/${framework}.framework\"\n  ditto \"$source_framework\" \"${frameworks_dir}/${framework}.framework\"\ndone\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		1B4879F903AF4394289C32E0 /* Sources */ = {
@@ -1441,6 +1467,14 @@
 				minimumVersion = 10.0.0;
 			};
 		};
+		6F82CC68EBE38FD2D2A2CEF9 /* XCRemoteSwiftPackageReference "LicenseKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/LicenseKit/LicenseKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.1.3;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1461,6 +1495,11 @@
 		41CF4835FCDA549E11923672 /* SharedCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = SharedCore;
+		};
+		52D9C54881EDE7E8D62F1A7D /* LicenseKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6F82CC68EBE38FD2D2A2CEF9 /* XCRemoteSwiftPackageReference "LicenseKit" */;
+			productName = LicenseKit;
 		};
 		777C691861F5C30094126662 /* Networking */ = {
 			isa = XCSwiftPackageProductDependency;
