@@ -21,63 +21,63 @@ struct AgentIntroView: View {
     @State private var loadingMessage = "Loading images..."
     @EnvironmentObject var toastManager: ToastManager
 
-    @State private var logoScale: CGFloat = 0.5
-    @State private var logoOpacity: Double = 0.0
-    @State private var logoFloat: CGFloat = 0
     @State private var contentOpacity: Double = 0.0
     @State private var contentOffset: CGFloat = 30
 
     var body: some View {
         ZStack {
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: ResponsiveSystem.value(
-                    extraSmall: 8,
-                    small: 10,
-                    standard: 12
-                )) {
-                    AgentIntroHeaderSection(
-                        logoScale: logoScale,
-                        logoOpacity: logoOpacity,
-                        logoFloat: logoFloat
-                    )
-                    .scaleEffect(logoScale)
-                    .opacity(logoOpacity)
-                    .offset(y: logoFloat)
+            GeometryReader { proxy in
+                VStack(spacing: 10) {
+                    VStack(spacing: ResponsiveSystem.value(extraSmall: 8, small: 10, standard: 12)) {
+                        AgentIntroHeaderSection()
 
-                    AgentIntroChoiceButtonsSection(
-                        onUseScreenshots: { checkPhotoAccessAndShowPicker() },
-                        onContinue: { onChoiceMade(.continueWithoutContext) }
+                        AgentIntroChoiceButtonsSection(
+                            onUseScreenshots: { checkPhotoAccessAndShowPicker() },
+                            onContinue: { onChoiceMade(.continueWithoutContext) }
+                        )
+                        .opacity(contentOpacity)
+                        .offset(y: contentOffset)
+                    }
+                    .padding(.vertical, ResponsiveSystem.value(extraSmall: 12, small: 14, standard: 16))
+                    .padding(.horizontal, ResponsiveSystem.value(extraSmall: 16, small: 20, standard: 24))
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color(red: 0.07, green: 0.2, blue: 0.45).opacity(0.18),
+                                        Color(red: 0.25, green: 0.12, blue: 0.4).opacity(0.16),
+                                        Color(red: 0.06, green: 0.24, blue: 0.35).opacity(0.12)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(Color(red: 0.12, green: 0.32, blue: 0.6).opacity(0.45), lineWidth: 1)
+                            )
+                            .overlay(
+                                RadialGradient(
+                                    colors: [
+                                        Color(red: 0.18, green: 0.36, blue: 0.6).opacity(0.18),
+                                        Color.clear
+                                    ],
+                                    center: .topLeading,
+                                    startRadius: 10,
+                                    endRadius: 180
+                                )
+                            )
                     )
-                    .opacity(contentOpacity)
-                    .offset(y: contentOffset)
+                    .frame(maxWidth: min(proxy.size.width * 0.86, 360))
 
-                    AgentIntroTipsSection()
+                    AgentIntroChevronIndicator()
                         .opacity(contentOpacity)
                         .offset(y: contentOffset)
                 }
-                .padding(.horizontal, ResponsiveSystem.value(extraSmall: 16, small: 20, standard: 24))
-                .padding(.top, ResponsiveSystem.value(
-                    extraSmall: 10,
-                    small: 12,
-                    standard: 16
-                ))
-                .padding(.bottom, ResponsiveSystem.value(
-                    extraSmall: 40,
-                    small: 50,
-                    standard: 60
-                ))
                 .frame(maxWidth: .infinity)
+                .position(x: proxy.size.width / 2, y: proxy.size.height * 0.35)
             }
-            .background(Color.clear)
-            .safeAreaInset(edge: .bottom) {
-                // Extra bottom padding to prevent cutoff on short screens
-                Color.clear.frame(height: ResponsiveSystem.value(
-                    extraSmall: 30,
-                    small: 40,
-                    standard: 50
-                ))
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             if showingDeleteConfirmation {
                 AgentIntroDeleteConfirmationOverlay(
@@ -258,19 +258,6 @@ struct AgentIntroView: View {
     }
 
     private func startAnimations() {
-        // Logo entrance animation
-        withAnimation(.spring(response: 0.6, dampingFraction: 0.65)) {
-            logoScale = 1.0
-            logoOpacity = 1.0
-        }
-
-        // Logo float animation
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            withAnimation(.easeInOut(duration: 3.5).repeatForever(autoreverses: true)) {
-                logoFloat = -8
-            }
-        }
-
         // Content entrance animation
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.75)) {
@@ -278,5 +265,24 @@ struct AgentIntroView: View {
                 contentOffset = 0
             }
         }
+
+    }
+}
+
+private struct AgentIntroChevronIndicator: View {
+    @State private var pulse = false
+
+    var body: some View {
+        Text(">>>>")
+            .font(.system(size: 24, weight: .semibold, design: .monospaced))
+            .foregroundColor(Color(red: 0.12, green: 0.32, blue: 0.6).opacity(0.7))
+            .scaleEffect(pulse ? 1.08 : 1.0)
+            .opacity(pulse ? 1.0 : 0.6)
+            .padding(.top, 6)
+            .onAppear {
+                withAnimation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true)) {
+                    pulse = true
+                }
+            }
     }
 }

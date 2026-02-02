@@ -43,16 +43,17 @@ struct AgentKeyboardView: View {
         case .introChoice:
             Color.clear
         case .chat:
-            Color.clear.lightGradientBackground()
+            Color.black.opacity(0.85)
         }
     }
 
     private var headerView: some View {
         ZStack {
-            // Centered title
-            Text("Agosec Agent")
-                .font(.system(size: 18, weight: .semibold, design: .default))
-                .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
+            if case .chat = currentStep {
+                Text("Agent")
+                    .font(.system(size: 18, weight: .semibold, design: .default))
+                    .foregroundColor(Color.white.opacity(0.85))
+            }
 
             // Left button
             HStack {
@@ -60,9 +61,29 @@ struct AgentKeyboardView: View {
                     action: { onClose() },
                     label: {
                         Image(systemName: "xmark")
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color(red: 0.3, green: 0.3, blue: 0.35))
-                            .frame(width: 44, height: 44)
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(Color.black.opacity(0.85))
+                            .frame(width: 52, height: 52)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [
+                                                Color(red: 0.12, green: 0.28, blue: 0.6).opacity(0.18),
+                                                Color(red: 0.45, green: 0.2, blue: 0.6).opacity(0.18)
+                                            ],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.black.opacity(0.35), lineWidth: 1.5)
+                                    )
+                            )
+                            .background(
+                                Color.black.opacity(0.001)
+                            )
                             .contentShape(Rectangle())
                     }
                 )
@@ -72,7 +93,9 @@ struct AgentKeyboardView: View {
             }
         }
         .padding(.horizontal, 8)
-        .frame(height: 44)
+        .padding(.leading, 6)
+        .padding(.top, 12)
+        .frame(height: 72)
         .frame(maxWidth: .infinity)
     }
 

@@ -23,6 +23,9 @@ packages:
   KeyboardKit:
     url: https://github.com/KeyboardKit/KeyboardKit.git
     from: 10.0.0
+  SymSpellSwift:
+    url: https://github.com/gdetari/SymSpellSwift.git
+    from: 0.1.4
   LicenseKit:
     url: https://github.com/LicenseKit/LicenseKit.git
     from: 2.1.3
@@ -99,8 +102,10 @@ targets:
     deploymentTarget: "16.0"
     sources:
       - AgosecKeyboardExtension
+      - AgosecKeyboardExtension/Keyboard/KeyboardNotifications.swift
     resources:
       - AgosecKeyboardExtension/Resources/Assets.xcassets
+      - AgosecKeyboardExtension/Resources/Autocomplete
     info:
       path: AgosecKeyboardExtension/Info.plist
       properties:
@@ -143,6 +148,7 @@ targets:
       - package: OCR
       - package: UIComponents
       - package: KeyboardKit
+      - package: SymSpellSwift
       - package: LicenseKit
       - sdk: Vision.framework
       - sdk: PhotosUI.framework

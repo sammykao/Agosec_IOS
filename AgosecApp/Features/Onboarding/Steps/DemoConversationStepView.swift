@@ -286,9 +286,6 @@ struct KeyboardDemoView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
-                Text("Try typing a message")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(Color.primary)
 
                 TextField("Type here...", text: $inputText)
                     .textFieldStyle(RoundedBorderTextFieldStyle())

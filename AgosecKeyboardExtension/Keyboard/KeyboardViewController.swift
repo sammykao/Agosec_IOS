@@ -9,6 +9,7 @@ class KeyboardViewController: KeyboardInputViewController {
 
     private var keyboardState = KeyboardState()
     private lazy var heightCoordinator = KeyboardHeightCoordinator(view: view)
+    private lazy var autocompleteService = SimpleAutocompleteService()
     private let entitlementCoordinator = KeyboardEntitlementCoordinator()
 
     private var currentHostingView: UIView?
@@ -37,7 +38,6 @@ class KeyboardViewController: KeyboardInputViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         view.backgroundColor = .clear
 
         initializeState()
@@ -130,14 +130,37 @@ class KeyboardViewController: KeyboardInputViewController {
             name: NSNotification.Name("PhotoSelectionEnded"),
             object: nil
         )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(openAgentModeFromToolbar),
+            name: Notification.Name("KeyboardOpenAgentMode"),
+            object: nil
+        )
+    }
+
+    @objc private func openAgentModeFromToolbar() {
+        guard keyboardState.currentMode != .agent else { return }
+        showAgentKeyboard()
     }
 
     private func setupKeyboardKit() {
         setup(for: .agosec) { [weak self] _ in
             DispatchQueue.main.async {
-                self?.setupKeyboard()
+                guard let self = self else { return }
+                self.services.autocompleteService = self.autocompleteService
+                self.configureAutocompleteSettings()
+                self.setupKeyboard()
             }
         }
+    }
+
+    private func configureAutocompleteSettings() {
+        let settings = state.autocompleteContext.settings
+        settings.isAutocompleteEnabled = true
+        settings.isAutocorrectEnabled = true
+        settings.isEmojiAutocompleteEnabled = false
+        settings.isNextCharacterPredictionEnabled = false
+        settings.isNextWordPredictionEnabled = false
     }
 
     private func writeFullAccessStatusIfNeeded() {
@@ -174,6 +197,26 @@ class KeyboardViewController: KeyboardInputViewController {
         // Called after text changed - update suggestions
         // Notify the keyboard view to refresh suggestions
         NotificationCenter.default.post(name: NSNotification.Name("KeyboardTextDidChange"), object: nil)
+        updateAutocomplete()
+    }
+
+    private func updateAutocomplete() {
+        let before = textDocumentProxy.documentContextBeforeInput ?? ""
+        let fullText = before
+
+        Task { [weak self] in
+            guard let self = self else { return }
+            do {
+                let result = try await self.services.autocompleteService.autocomplete(fullText)
+                await MainActor.run {
+                    self.state.autocompleteContext.update(with: result)
+                }
+            } catch {
+                await MainActor.run {
+                    self.state.autocompleteContext.update(with: error)
+                }
+            }
+        }
     }
 
     override func viewWillSetupKeyboardView() {
@@ -284,6 +327,7 @@ extension KeyboardViewController {
             showFullAccessRequiredView()
         }
         updateHeight()
+        scheduleHeightUpdate(delay: 0.12)
     }
 
     private func showKeyboardKitTypingView() {

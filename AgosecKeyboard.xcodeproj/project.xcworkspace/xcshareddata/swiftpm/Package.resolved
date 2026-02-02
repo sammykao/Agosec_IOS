@@ -17,6 +17,15 @@
         "revision" : "f9bdcdc3472918c6da7566940a12936374f0faee",
         "version" : "2.1.3"
       }
+    },
+    {
+      "identity" : "symspellswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/gdetari/SymSpellSwift.git",
+      "state" : {
+        "revision" : "673246e16338440f6895e119bfacab308d11fce0",
+        "version" : "0.1.4"
+      }
     }
   ],
   "version" : 2

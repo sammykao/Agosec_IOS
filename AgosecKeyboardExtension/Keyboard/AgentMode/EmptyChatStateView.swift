@@ -16,8 +16,8 @@ struct EmptyChatStateView: View {
                     .stroke(
                         LinearGradient(
                             colors: [
-                                Color(red: 0.0, green: 0.48, blue: 1.0).opacity(0.3),
-                                Color(red: 0.58, green: 0.0, blue: 1.0).opacity(0.2)
+                                Color(red: 0.1, green: 0.35, blue: 0.6).opacity(0.4),
+                                Color(red: 0.4, green: 0.2, blue: 0.6).opacity(0.25)
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -27,11 +27,11 @@ struct EmptyChatStateView: View {
                     .frame(width: ringSize, height: ringSize)
 
                 Circle()
-                    .fill(Color.white.opacity(0.85))
+                    .fill(Color.black.opacity(0.04))
                     .frame(width: ringSize * 0.75, height: ringSize * 0.75)
                     .overlay(
                         Circle()
-                            .stroke(Color.white.opacity(0.6), lineWidth: 1)
+                            .stroke(Color.black.opacity(0.2), lineWidth: 1)
                     )
 
                 Image(systemName: "message.fill")
@@ -39,8 +39,8 @@ struct EmptyChatStateView: View {
                     .foregroundStyle(
                         LinearGradient(
                             colors: [
-                                Color(red: 0.0, green: 0.48, blue: 1.0),
-                                Color(red: 0.58, green: 0.0, blue: 1.0)
+                                Color(red: 0.1, green: 0.35, blue: 0.6),
+                                Color(red: 0.4, green: 0.2, blue: 0.6)
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -52,12 +52,6 @@ struct EmptyChatStateView: View {
                 Text("Start a conversation")
                     .font(.system(size: ResponsiveSystem.value(extraSmall: 18, small: 20, standard: 22), weight: .bold))
                     .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-
-                Text("Ask me anything or share a screenshot for context")
-                    .font(.system(size: ResponsiveSystem.value(extraSmall: 13, small: 14, standard: 15)))
-                    .foregroundColor(Color(red: 0.35, green: 0.35, blue: 0.4))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, horizontalPadding)
             }
 
             Spacer(minLength: 0)

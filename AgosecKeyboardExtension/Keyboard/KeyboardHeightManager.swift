@@ -14,13 +14,14 @@ class KeyboardHeightManager {
         case .normal:
             return standardKeyboardHeight(for: keyboardContext)
         case .agent:
-            return keyboardContext.screenSize.height * 0.80
+            return keyboardContext.screenSize.height * 0.75
         }
     }
 
     private func standardKeyboardHeight(for context: KeyboardContext) -> CGFloat {
         let layout = keyboardLayout(for: context)
-        let deviceConfiguration = KeyboardLayout.DeviceConfiguration.standard(for: context)
+        var deviceConfiguration = KeyboardLayout.DeviceConfiguration.standard(for: context)
+        deviceConfiguration.inputToolbarHeight = 36
         let displayMode = context.settings.inputToolbarDisplayMode
 
         var configuredLayout = layout
@@ -31,7 +32,9 @@ class KeyboardHeightManager {
             layoutConfiguration: deviceConfiguration
         )
 
-        return CGFloat(adjustedLayout.totalHeight)
+        let toolbarHeight = deviceConfiguration.inputToolbarHeight
+        let adjustedHeight = CGFloat(adjustedLayout.totalHeight) - (toolbarHeight / 3)
+        return adjustedHeight
     }
 
     private func keyboardLayout(for context: KeyboardContext) -> KeyboardLayout {

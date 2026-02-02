@@ -19,7 +19,7 @@ final class KeyboardHeightCoordinator {
         keyboardContext: KeyboardContext
     ) {
         guard mode != .normal else { return }
-        guard let view = view else { return }
+        guard view != nil else { return }
         
         // If constraint hasn't been created yet, we can't sync it
         guard let constraint = heightConstraint else { return }
