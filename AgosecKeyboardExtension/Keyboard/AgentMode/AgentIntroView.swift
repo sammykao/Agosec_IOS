@@ -98,12 +98,23 @@ struct AgentIntroView: View {
             startAnimations()
             checkPhotoAccessStatus()
         }
+        .onChange(of: selectedImages) { images in
+            guard !images.isEmpty else { return }
+            if !showingDeleteConfirmation {
+                FileLogger.shared.log("Selected images changed -> show delete confirmation", level: .debug)
+                showingDeleteConfirmation = true
+            }
+        }
+        .onChange(of: showingDeleteConfirmation) { value in
+            FileLogger.shared.log("showingDeleteConfirmation changed -> \(value)", level: .debug)
+        }
         .loadingOverlay(isPresented: isLoadingImages, message: loadingMessage)
         .sheet(
             isPresented: $showingPhotoPicker,
             onDismiss: {
+                FileLogger.shared.log("Photo picker dismissed", level: .debug)
                 // Delay notification to ensure keyboard view is stable
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                     // Reset loading state when sheet is dismissed
                     // This handles the case where user cancels the picker
                     if isLoadingImages {
@@ -121,15 +132,24 @@ struct AgentIntroView: View {
                         loadingMessage = "Loading images..."
                     },
                     onSelectionComplete: { images, assetIdentifiers in
+                        FileLogger.shared.log(
+                            "Photo picker selection complete. images=\(images.count) assets=\(assetIdentifiers.count)",
+                            level: .info
+                        )
                         // Delay to ensure sheet is fully dismissed and keyboard is stable
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                             isLoadingImages = false
                             selectedImages = images
                             selectedAssetIdentifiers = assetIdentifiers
+                            FileLogger.shared.log(
+                                "AgentIntroView updated selectedImages=\(selectedImages.count) assets=\(selectedAssetIdentifiers.count)",
+                                level: .debug
+                            )
 
                             if !images.isEmpty {
                                 // Additional delay to ensure view is ready for alert presentation
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                    FileLogger.shared.log("Showing delete confirmation overlay", level: .debug)
                                     showingDeleteConfirmation = true
                                 }
                             } else {
@@ -147,6 +167,7 @@ struct AgentIntroView: View {
                         }
                     },
                     onError: { error in
+                        FileLogger.shared.log("Photo picker error: \(error)", level: .error)
                         isLoadingImages = false
                         // Notify that photo selection has ended
                         NotificationCenter.default.post(
@@ -165,10 +186,12 @@ struct AgentIntroView: View {
 
     private func checkPhotoAccessStatus() {
         photoAccessStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        FileLogger.shared.log("Photo access status: \(photoAccessStatus.rawValue)", level: .debug)
     }
 
     private func checkPhotoAccessAndShowPicker() {
         let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        FileLogger.shared.log("Check photo access: \(status.rawValue)", level: .debug)
 
         switch status {
         case .authorized, .limited:
@@ -176,21 +199,25 @@ struct AgentIntroView: View {
             NotificationCenter.default.post(name: NSNotification.Name("PhotoSelectionStarted"), object: nil)
             showingPhotoPicker = true
         case .denied, .restricted:
+            FileLogger.shared.log("Photo access denied/restricted", level: .warning)
             showingPhotoAccessError = true
         case .notDetermined:
             PHPhotoLibrary.requestAuthorization(for: .readWrite) { newStatus in
                 DispatchQueue.main.async {
                     photoAccessStatus = newStatus
                     if newStatus == .authorized || newStatus == .limited {
+                        FileLogger.shared.log("Photo access granted after request", level: .info)
                         // Notify that photo selection is starting
                         NotificationCenter.default.post(name: NSNotification.Name("PhotoSelectionStarted"), object: nil)
                         showingPhotoPicker = true
                     } else {
+                        FileLogger.shared.log("Photo access denied after request", level: .warning)
                         showingPhotoAccessError = true
                     }
                 }
             }
         @unknown default:
+            FileLogger.shared.log("Photo access unknown status", level: .warning)
             showingPhotoAccessError = true
         }
     }
@@ -207,8 +234,12 @@ struct AgentIntroView: View {
         let imagesCopy = selectedImages
         let identifiersCopy = selectedAssetIdentifiers
 
+        FileLogger.shared.log(
+            "Confirm use+delete. images=\(imagesCopy.count) assets=\(identifiersCopy.count)",
+            level: .info
+        )
         // Delay to ensure keyboard is stable before processing
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             // Notify that photo selection has ended before making choice
             NotificationCenter.default.post(name: NSNotification.Name("PhotoSelectionEnded"), object: nil)
 
@@ -225,8 +256,9 @@ struct AgentIntroView: View {
         // Make copy to avoid capture issues
         let imagesCopy = selectedImages
 
+        FileLogger.shared.log("Confirm use only. images=\(imagesCopy.count)", level: .info)
         // Delay to ensure keyboard is stable before processing
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             // Notify that photo selection has ended before making choice
             NotificationCenter.default.post(name: NSNotification.Name("PhotoSelectionEnded"), object: nil)
 
@@ -240,8 +272,9 @@ struct AgentIntroView: View {
     private func handleDeleteCancel() {
         showingDeleteConfirmation = false
 
+        FileLogger.shared.log("Delete confirmation cancelled", level: .debug)
         // Delay notification
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             // Notify that photo selection has ended
             NotificationCenter.default.post(name: NSNotification.Name("PhotoSelectionEnded"), object: nil)
         }

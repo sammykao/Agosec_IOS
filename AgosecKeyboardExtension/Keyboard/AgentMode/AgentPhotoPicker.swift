@@ -50,12 +50,19 @@ struct PhotoPicker: UIViewControllerRepresentable {
             self.parent = parent
         }
 
+        deinit {
+            FileLogger.shared.log("PHPicker coordinator deinit", level: .warning)
+        }
+
         func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+            FileLogger.shared.log("PHPicker didFinishPicking. results=\(results.count)", level: .debug)
             guard !results.isEmpty else {
+                FileLogger.shared.log("PHPicker results empty (user cancelled)", level: .info)
                 picker.dismiss(animated: true)
                 return
             }
 
+            FileLogger.shared.log("PHPicker starting load for \(results.count) items", level: .debug)
             parent.onLoadingStarted()
 
             resetState(with: results)
@@ -70,6 +77,7 @@ struct PhotoPicker: UIViewControllerRepresentable {
             assetIdentifiers.removeAll()
             errors.removeAll()
             expectedCount = results.count
+            FileLogger.shared.log("PHPicker reset state. expectedCount=\(expectedCount)", level: .debug)
         }
 
         private func loadImages(from results: [PHPickerResult], group: DispatchGroup) {
@@ -83,6 +91,7 @@ struct PhotoPicker: UIViewControllerRepresentable {
         private func captureAssetIdentifier(from result: PHPickerResult) {
             if let assetIdentifier = result.assetIdentifier {
                 assetIdentifiers.append(assetIdentifier)
+                FileLogger.shared.log("PHPicker captured asset id", level: .debug)
             }
         }
 
@@ -97,6 +106,7 @@ struct PhotoPicker: UIViewControllerRepresentable {
                     defer { group.leave() }
 
                     if let error = error {
+                        FileLogger.shared.log("PHPicker load error: \(error)", level: .error)
                         self.errors.append(error)
                         return
                     }
@@ -104,9 +114,11 @@ struct PhotoPicker: UIViewControllerRepresentable {
                     if let image = image as? UIImage {
                         let resizedImage = Coordinator.resizeImageIfNeeded(image, maxDimension: 2048)
                         self.loadedImages.append(resizedImage)
+                        FileLogger.shared.log("PHPicker loaded image (\(self.loadedImages.count)/\(self.expectedCount))", level: .debug)
                         return
                     }
 
+                    FileLogger.shared.log("PHPicker invalid image object", level: .error)
                     self.errors.append(self.invalidImageError())
                 }
             }
@@ -121,34 +133,41 @@ struct PhotoPicker: UIViewControllerRepresentable {
         }
 
         private func notifyCompletion(group: DispatchGroup, picker: PHPickerViewController) {
+            FileLogger.shared.log("PHPicker notify: waiting for loads to finish", level: .debug)
             group.notify(queue: .main) { [weak self] in
                 guard let self = self else {
                     picker.dismiss(animated: true)
                     return
                 }
 
+                FileLogger.shared.log("PHPicker notify: loads finished, dismissing", level: .debug)
                 self.dismissPicker(picker)
             }
         }
 
         private func dismissPicker(_ picker: PHPickerViewController) {
+            FileLogger.shared.log("PHPicker dismissing picker", level: .debug)
             picker.dismiss(animated: true) { [weak self] in
-                self?.finalizeSelection()
+                FileLogger.shared.log("PHPicker dismiss completion", level: .debug)
+                guard let self = self else {
+                    FileLogger.shared.log("PHPicker finalize skipped: coordinator released", level: .warning)
+                    return
+                }
+                FileLogger.shared.log("PHPicker finalize starting", level: .debug)
+                self.finalizeSelection()
             }
         }
 
         private func finalizeSelection() {
-            // Small delay after dismissal to ensure view hierarchy is ready
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-                guard let self = self else { return }
-
-                if !self.loadedImages.isEmpty {
-                    self.handleLoadedImages()
-                } else if !self.errors.isEmpty {
-                    self.handleLoadingFailure()
-                } else {
-                    self.handleUnexpectedState()
-                }
+            if !loadedImages.isEmpty {
+                FileLogger.shared.log("PHPicker finalize: loaded images", level: .debug)
+                handleLoadedImages()
+            } else if !errors.isEmpty {
+                FileLogger.shared.log("PHPicker finalize: errors present", level: .warning)
+                handleLoadingFailure()
+            } else {
+                FileLogger.shared.log("PHPicker finalize: unexpected empty state", level: .error)
+                handleUnexpectedState()
             }
         }
 
@@ -156,6 +175,11 @@ struct PhotoPicker: UIViewControllerRepresentable {
             if !errors.isEmpty {
                 parent.onError?(partialLoadError())
             }
+            parent.selectedImages = loadedImages
+            FileLogger.shared.log(
+                "PHPicker handleLoadedImages -> onSelectionComplete images=\(loadedImages.count) assets=\(assetIdentifiers.count)",
+                level: .info
+            )
             parent.onSelectionComplete(loadedImages, assetIdentifiers)
         }
 

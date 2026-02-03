@@ -163,6 +163,16 @@ struct KeyboardKitChatKeyboardView: View {
             buttonContent: { $0.view },
             buttonView: { $0.view }
         )
+        .environmentObject(controller.state.keyboardContext)
+        .environmentObject(controller.state.calloutContext)
+        .environmentObject(controller.state.feedbackContext)
+        .environmentObject(controller.state.autocompleteContext)
+        .environmentObject(controller.state.clipboardContext)
+        .environmentObject(controller.state.dictationContext)
+        .environmentObject(controller.state.emojiContext)
+        .environmentObject(controller.state.externalKeyboardContext)
+        .environmentObject(controller.state.fontContext)
+        .environmentObject(controller.state.themeContext)
         .keyboardInputToolbarDisplayMode(.none)
         .onChange(of: text) { _ in
             controller.syncCursorToEnd()

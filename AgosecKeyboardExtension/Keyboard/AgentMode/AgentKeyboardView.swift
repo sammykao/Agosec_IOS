@@ -43,7 +43,7 @@ struct AgentKeyboardView: View {
         case .introChoice:
             Color.clear
         case .chat:
-            Color.black.opacity(0.85)
+            Color.clear
         }
     }
 
@@ -139,8 +139,8 @@ struct AgentKeyboardView: View {
 
         Task {
             do {
+                print("choice: \(choice)")
                 let session = try await sessionManager.initializeSession(choice: choice)
-
                 await MainActor.run {
                     isLoading = false
                     currentStep = .chat(session: session)
@@ -184,7 +184,7 @@ class AgentSessionManager: ObservableObject {
 
     func initializeSession(choice: IntroChoice) async throws -> ChatSession {
         var session = ChatSession()
-
+        print("initializeSession: \(choice)")
         switch choice {
         case .useAndDeleteScreenshots(let images, let assetIdentifiers):
             try await applyScreenshotContext(
@@ -213,11 +213,18 @@ class AgentSessionManager: ObservableObject {
         to session: inout ChatSession,
         deleteAfterProcessing: Bool
     ) async throws {
+        FileLogger.shared.log(
+            "Apply screenshot context. images=\(images.count) assets=\(assetIdentifiers.count) delete=\(deleteAfterProcessing)",
+            level: .info
+        )
         guard !images.isEmpty else {
+            FileLogger.shared.log("Invalid context: no images provided", level: .error)
             throw AgentError.invalidContext
         }
 
+        FileLogger.shared.log("Starting OCR extraction", level: .info)
         let context = try await extractContext(from: images)
+        FileLogger.shared.log("OCR extraction complete", level: .info)
         try await appendContextTurn(context, to: &session)
 
         if deleteAfterProcessing, !assetIdentifiers.isEmpty {
@@ -231,11 +238,14 @@ class AgentSessionManager: ObservableObject {
         session.context = context
 
         if BuildMode.isMockBackend {
+            FileLogger.shared.log("Mock backend: append OCR turn", level: .debug)
             appendMockOCRTurn(context, to: &session)
             return
         }
 
+        FileLogger.shared.log("Fetching summary from API", level: .info)
         let summary = try await fetchSummary(session: session, context: context)
+        FileLogger.shared.log("Summary received", level: .info)
         appendAssistantTurn(summary, to: &session)
     }
 
@@ -255,13 +265,16 @@ class AgentSessionManager: ObservableObject {
 
     private func appendIntroTurn(to session: inout ChatSession) async throws {
         if BuildMode.isMockBackend {
+            FileLogger.shared.log("Mock backend: append intro turn", level: .debug)
             let mockIntro = "Hi! I'm your AI assistant. I can help you write messages, answer questions," +
                 " and provide context-aware responses. What can I help you with today?"
             appendAssistantTurn(mockIntro, to: &session)
             return
         }
 
+        FileLogger.shared.log("Fetching intro from API", level: .info)
         let intro = try await fetchIntro(session: session)
+        FileLogger.shared.log("Intro received", level: .info)
         appendAssistantTurn(intro, to: &session)
     }
 
@@ -272,10 +285,30 @@ class AgentSessionManager: ObservableObject {
 
     private func extractContext(from images: [UIImage]) async throws -> ContextDoc {
         do {
-            let context = try await ocrService.extractText(from: images)
+            FileLogger.shared.log("Downscaling images for OCR", level: .debug)
+            let resizedImages = downscaleImagesForOCR(images)
+            let context = try await ocrService.extractText(from: resizedImages)
             return context
         } catch {
+            FileLogger.shared.log("OCR extraction failed: \(error)", level: .error)
             throw error
+        }
+    }
+
+    private func downscaleImagesForOCR(_ images: [UIImage], maxDimension: CGFloat = 1280) -> [UIImage] {
+        images.map { image in
+            let size = image.size
+            let maxSide = max(size.width, size.height)
+            guard maxSide > maxDimension, maxSide > 0 else { return image }
+
+            let scale = maxDimension / maxSide
+            let targetSize = CGSize(width: size.width * scale, height: size.height * scale)
+            let format = UIGraphicsImageRendererFormat.default()
+            format.scale = 1
+
+            return UIGraphicsImageRenderer(size: targetSize, format: format).image { _ in
+                image.draw(in: CGRect(origin: .zero, size: targetSize))
+            }
         }
     }
 
