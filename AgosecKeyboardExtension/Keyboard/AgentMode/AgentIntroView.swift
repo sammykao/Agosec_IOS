@@ -23,60 +23,39 @@ struct AgentIntroView: View {
 
     @State private var contentOpacity: Double = 0.0
     @State private var contentOffset: CGFloat = 30
+    @State private var contentScale: CGFloat = 0.98
+    @State private var ambientShift: CGFloat = 0.0
 
     var body: some View {
         ZStack {
             GeometryReader { proxy in
-                VStack(spacing: 10) {
-                    VStack(spacing: ResponsiveSystem.value(extraSmall: 8, small: 10, standard: 12)) {
-                        AgentIntroHeaderSection()
+                ZStack {
+                    introBackground(in: proxy)
 
-                        AgentIntroChoiceButtonsSection(
-                            onUseScreenshots: { checkPhotoAccessAndShowPicker() },
-                            onContinue: { onChoiceMade(.continueWithoutContext) }
+                    VStack(spacing: 10) {
+                        VStack(spacing: ResponsiveSystem.value(extraSmall: 8, small: 10, standard: 12)) {
+                            AgentIntroHeaderSection()
+
+                            AgentIntroChoiceButtonsSection(
+                                onUseScreenshots: { checkPhotoAccessAndShowPicker() },
+                                onContinue: { onChoiceMade(.continueWithoutContext) }
+                            )
+                            .opacity(contentOpacity)
+                            .offset(y: contentOffset)
+                            .scaleEffect(contentScale)
+                        }
+                        .padding(.vertical, ResponsiveSystem.value(extraSmall: 12, small: 14, standard: 16))
+                        .padding(.horizontal, ResponsiveSystem.value(extraSmall: 16, small: 20, standard: 24))
+                        .frame(
+                            maxWidth: min(proxy.size.width * 0.9, 380),
+                            minHeight: ResponsiveSystem.value(extraSmall: 150, small: 170, standard: 190)
                         )
-                        .opacity(contentOpacity)
-                        .offset(y: contentOffset)
-                    }
-                    .padding(.vertical, ResponsiveSystem.value(extraSmall: 12, small: 14, standard: 16))
-                    .padding(.horizontal, ResponsiveSystem.value(extraSmall: 16, small: 20, standard: 24))
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(
-                                LinearGradient(
-                                    colors: [
-                                        Color(red: 0.07, green: 0.2, blue: 0.45).opacity(0.18),
-                                        Color(red: 0.25, green: 0.12, blue: 0.4).opacity(0.16),
-                                        Color(red: 0.06, green: 0.24, blue: 0.35).opacity(0.12)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .stroke(Color(red: 0.12, green: 0.32, blue: 0.6).opacity(0.45), lineWidth: 1)
-                            )
-                            .overlay(
-                                RadialGradient(
-                                    colors: [
-                                        Color(red: 0.18, green: 0.36, blue: 0.6).opacity(0.18),
-                                        Color.clear
-                                    ],
-                                    center: .topLeading,
-                                    startRadius: 10,
-                                    endRadius: 180
-                                )
-                            )
-                    )
-                    .frame(maxWidth: min(proxy.size.width * 0.86, 360))
 
-                    AgentIntroChevronIndicator()
-                        .opacity(contentOpacity)
-                        .offset(y: contentOffset)
-                }
-                .frame(maxWidth: .infinity)
-                .position(x: proxy.size.width / 2, y: proxy.size.height * 0.35)
+                    }
+                    .frame(maxWidth: .infinity)
+                .position(x: proxy.size.width / 2, y: proxy.size.height * 0.38)
+            }
+                .blur(radius: (showingDeleteConfirmation || showingPhotoAccessError) ? 8 : 0)
             }
 
             if showingDeleteConfirmation {
@@ -109,7 +88,7 @@ struct AgentIntroView: View {
             FileLogger.shared.log("showingDeleteConfirmation changed -> \(value)", level: .debug)
         }
         .loadingOverlay(isPresented: isLoadingImages, message: loadingMessage)
-        .sheet(
+        .fullScreenCover(
             isPresented: $showingPhotoPicker,
             onDismiss: {
                 FileLogger.shared.log("Photo picker dismissed", level: .debug)
@@ -182,6 +161,44 @@ struct AgentIntroView: View {
         )
         // NOTE: .alert uses UIAlertController which is not available in keyboard extensions.
         // We render custom overlays instead to avoid extension crashes.
+    }
+
+    private func introBackground(in proxy: GeometryProxy) -> some View {
+        let inset = ResponsiveSystem.value(extraSmall: 6, small: 8, standard: 10)
+        return RoundedRectangle(cornerRadius: 22)
+            .fill(
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color(red: 0.05, green: 0.05, blue: 0.08),
+                        Color(red: 0.08, green: 0.08, blue: 0.12),
+                        Color(red: 0.06, green: 0.06, blue: 0.1)
+                    ]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .overlay(
+                RadialGradient(
+                    gradient: Gradient(colors: [
+                        AgentIntroTheme.accentBlue.opacity(0.16),
+                        AgentIntroTheme.accentPurple.opacity(0.12),
+                        Color.clear
+                    ]),
+                    center: UnitPoint(x: 0.5 + ambientShift, y: 0.5 - ambientShift),
+                    startRadius: 80,
+                    endRadius: 320
+                )
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 22)
+                    .stroke(Color.white.opacity(0.08), lineWidth: 1)
+            )
+            .shadow(color: Color.black.opacity(0.4), radius: 18, x: 0, y: 10)
+            .frame(
+                width: max(0, proxy.size.width - CGFloat(inset * 2)),
+                height: max(0, proxy.size.height - CGFloat(inset * 2))
+            )
+            .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
     }
 
     private func checkPhotoAccessStatus() {
@@ -296,26 +313,24 @@ struct AgentIntroView: View {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.75)) {
                 contentOpacity = 1.0
                 contentOffset = 0
+                contentScale = 1.0
             }
+        }
+
+        withAnimation(.easeInOut(duration: 2.2).repeatForever(autoreverses: true)) {
+            ambientShift = 0.44
         }
 
     }
 }
 
-private struct AgentIntroChevronIndicator: View {
-    @State private var pulse = false
-
-    var body: some View {
-        Text(">>>>")
-            .font(.system(size: 24, weight: .semibold, design: .monospaced))
-            .foregroundColor(Color(red: 0.12, green: 0.32, blue: 0.6).opacity(0.7))
-            .scaleEffect(pulse ? 1.08 : 1.0)
-            .opacity(pulse ? 1.0 : 0.6)
-            .padding(.top, 6)
-            .onAppear {
-                withAnimation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true)) {
-                    pulse = true
-                }
-            }
+private extension View {
+    @ViewBuilder
+    func presentationBackgroundIfAvailable(_ color: Color) -> some View {
+        if #available(iOS 16.4, *) {
+            self.presentationBackground(color)
+        } else {
+            self
+        }
     }
 }

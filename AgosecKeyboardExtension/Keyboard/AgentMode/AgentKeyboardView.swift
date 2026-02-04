@@ -16,6 +16,7 @@ struct AgentKeyboardView: View {
     @State private var currentStep: AgentStep = .introChoice
     @State private var isLoading = false
     @State private var loadingMessage = ""
+    @State private var dragOffset: CGFloat = 0
     @EnvironmentObject var toastManager: ToastManager
 
     enum AgentStep {
@@ -26,7 +27,6 @@ struct AgentKeyboardView: View {
     var body: some View {
         VStack(spacing: 0) {
             headerView
-                .frame(height: 44)
                 .background(Color.clear)
 
             mainContent
@@ -55,47 +55,40 @@ struct AgentKeyboardView: View {
                     .foregroundColor(Color.white.opacity(0.85))
             }
 
-            // Left button
-            HStack {
-                Button(
-                    action: { onClose() },
-                    label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color.black.opacity(0.85))
-                            .frame(width: 52, height: 52)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [
-                                                Color(red: 0.12, green: 0.28, blue: 0.6).opacity(0.18),
-                                                Color(red: 0.45, green: 0.2, blue: 0.6).opacity(0.18)
-                                            ],
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        )
-                                    )
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .stroke(Color.black.opacity(0.35), lineWidth: 1.5)
-                                    )
-                            )
-                            .background(
-                                Color.black.opacity(0.001)
-                            )
-                            .contentShape(Rectangle())
-                    }
-                )
-                .buttonStyle(PlainButtonStyle())
-
-                Spacer()
+            VStack(spacing: 6) {
+                Capsule()
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color.black.opacity(0.55),
+                                Color.black.opacity(0.3)
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .frame(width: 54, height: 5)
+                    .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
+                    .offset(y: max(0, dragOffset))
+                    .accessibilityLabel("Close agent")
+                    .accessibilityHint("Swipe down to dismiss")
+                    .gesture(
+                        DragGesture(minimumDistance: 6)
+                            .onChanged { value in
+                                dragOffset = max(0, value.translation.height)
+                            }
+                            .onEnded { value in
+                                let shouldClose = value.translation.height > 18
+                                dragOffset = 0
+                                if shouldClose {
+                                    onClose()
+                                }
+                            }
+                    )
             }
+            .frame(maxWidth: .infinity)
         }
-        .padding(.horizontal, 8)
-        .padding(.leading, 6)
-        .padding(.top, 12)
-        .frame(height: 72)
+        .frame(height: 8)
         .frame(maxWidth: .infinity)
     }
 
@@ -345,19 +338,28 @@ class AgentSessionManager: ObservableObject {
     }
 
     private func deletePhotos(assetIdentifiers: [String]) async {
-        guard !assetIdentifiers.isEmpty else { return }
+        guard !assetIdentifiers.isEmpty else {
+            FileLogger.shared.log("Delete photos skipped: no asset identifiers", level: .info)
+            return
+        }
 
         // Check authorization
         let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
         guard status == .authorized || status == .limited else {
+            FileLogger.shared.log(
+                "Delete photos skipped: insufficient photo access (\(status.rawValue))",
+                level: .warning
+            )
             return
         }
 
         // Fetch PHAsset objects from identifiers
         let fetchResult = PHAsset.fetchAssets(withLocalIdentifiers: assetIdentifiers, options: nil)
         guard fetchResult.count > 0 else {
+            FileLogger.shared.log("Delete photos skipped: no matching assets found", level: .warning)
             return
         }
+        FileLogger.shared.log("Delete photos: found \(fetchResult.count) assets", level: .info)
 
         var assetsToDelete: [PHAsset] = []
         fetchResult.enumerateObjects { asset, _, _ in
@@ -369,7 +371,9 @@ class AgentSessionManager: ObservableObject {
             try await PHPhotoLibrary.shared().performChanges {
                 PHAssetChangeRequest.deleteAssets(assetsToDelete as NSArray)
             }
+            FileLogger.shared.log("Delete photos: deletion requested", level: .info)
         } catch {
+            FileLogger.shared.log("Delete photos failed: \(error)", level: .error)
             // Don't throw - deletion failure shouldn't block the session
         }
     }

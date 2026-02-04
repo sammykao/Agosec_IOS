@@ -84,8 +84,8 @@ private struct AnimatedAutocompleteToolbar: View {
                     .renderingMode(.template)
                     .foregroundColor(.white)
                     .scaledToFit()
-                    .frame(width: 22, height: 22)
-                    .frame(width: 40, height: 36)
+                    .frame(width: 32, height: 32)
+                    .frame(width: 46, height: 36)
                     .background(
                         Circle()
                             .fill(Color.black)

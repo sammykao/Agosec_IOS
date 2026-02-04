@@ -5,8 +5,6 @@ struct EmptyChatStateView: View {
     var body: some View {
         let iconSize: CGFloat = ResponsiveSystem.value(extraSmall: 52, small: 58, standard: 64)
         let ringSize: CGFloat = ResponsiveSystem.value(extraSmall: 88, small: 98, standard: 110)
-        let screenWidth = UIScreen.main.bounds.width
-        let horizontalPadding = min(screenWidth * 0.12, 48)
 
         VStack(spacing: ResponsiveSystem.value(extraSmall: 12, small: 16, standard: 20)) {
             Spacer(minLength: 0)
