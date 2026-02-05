@@ -10,7 +10,7 @@ struct AgentChatView: View {
     let onNewSession: () -> Void
     let keyboardState: Keyboard.State?
 
-    @State var inputText = ""
+    @Binding var inputText: String
     @State var isLoading = false
 
     private var trimmedInput: String {
@@ -23,12 +23,14 @@ struct AgentChatView: View {
         session: ChatSession,
         textDocumentProxy: UITextDocumentProxy,
         keyboardState: Keyboard.State? = nil,
+        inputText: Binding<String>,
         onNewSession: @escaping () -> Void
     ) {
         self.session = session
         self.textDocumentProxy = textDocumentProxy
         self.keyboardState = keyboardState
         self.onNewSession = onNewSession
+        self._inputText = inputText
         self._chatManager = StateObject(wrappedValue: ChatManager(session: session))
     }
 
@@ -44,5 +46,10 @@ struct AgentChatView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea(.all)
         .background(Color.clear)
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("AgentChatSend"))) { _ in
+            if !trimmedInput.isEmpty, !isLoading {
+                sendMessage()
+            }
+        }
     }
 }

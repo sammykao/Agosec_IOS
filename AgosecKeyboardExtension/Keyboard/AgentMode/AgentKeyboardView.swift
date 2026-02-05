@@ -7,10 +7,45 @@ import Networking
 import OCR
 import UIComponents
 
+struct LayeredAgentKeyboardView: View {
+    let controller: KeyboardInputViewController
+    let onClose: () -> Void
+    let textDocumentProxy: UITextDocumentProxy
+    let keyboardState: Keyboard.State?
+
+    @State private var agentInputText = ""
+
+    var body: some View {
+        GeometryReader { proxy in
+            let reservedKeyboardHeight = min(230, proxy.size.height * 0.48)
+
+            ZStack(alignment: .bottom) {
+                AgentKeyboardKitTypingView(
+                    controller: controller,
+                    text: $agentInputText
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+
+                AgentKeyboardView(
+                    onClose: onClose,
+                    textDocumentProxy: textDocumentProxy,
+                    keyboardState: keyboardState,
+                    inputText: $agentInputText,
+                    keyboardReservedHeight: reservedKeyboardHeight
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            }
+        }
+    }
+
+}
+
 struct AgentKeyboardView: View {
     let onClose: () -> Void
     let textDocumentProxy: UITextDocumentProxy
     let keyboardState: Keyboard.State?
+    @Binding var inputText: String
+    let keyboardReservedHeight: CGFloat
 
     @StateObject private var sessionManager = AgentSessionManager()
     @State private var currentStep: AgentStep = .introChoice
@@ -25,16 +60,64 @@ struct AgentKeyboardView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            headerView
-                .background(Color.clear)
+        Group {
+            switch currentStep {
+            case .introChoice:
+                VStack(spacing: 0) {
+                    headerView
+                        .background(Color.clear)
 
-            mainContent
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    mainContent
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+            case .chat:
+                VStack(spacing: 0) {
+                    headerView
+                        .background(Color.clear)
+
+                    chatCardContent
+                        .padding(.bottom, keyboardReservedHeight + 26)
+                }
+            }
         }
         .background(agentBackground)
         .loadingOverlay(isPresented: isLoading, message: loadingMessage)
         .toastOverlay(toastManager: toastManager)
+    }
+
+    private var headerView: some View {
+        VStack(spacing: 6) {
+            Capsule()
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color.black.opacity(0.55),
+                            Color.black.opacity(0.3)
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .frame(width: 54, height: 5)
+                .shadow(color: Color.black.opacity(0.35), radius: 4, x: 0, y: 2)
+                .offset(y: max(0, dragOffset))
+                .accessibilityLabel("Close agent")
+                .accessibilityHint("Swipe down to dismiss")
+                .gesture(
+                    DragGesture(minimumDistance: 6)
+                        .onChanged { value in
+                            dragOffset = max(0, value.translation.height)
+                        }
+                        .onEnded { value in
+                            let shouldClose = value.translation.height > 18
+                            dragOffset = 0
+                            if shouldClose {
+                                onClose()
+                            }
+                        }
+                )
+        }
+        .frame(maxWidth: .infinity)
     }
 
     @ViewBuilder
@@ -47,49 +130,54 @@ struct AgentKeyboardView: View {
         }
     }
 
-    private var headerView: some View {
-        ZStack {
-            if case .chat = currentStep {
-                Text("Agent")
-                    .font(.system(size: 18, weight: .semibold, design: .default))
-                    .foregroundColor(Color.white.opacity(0.85))
-            }
+    private var chatCardContent: some View {
+        let cornerRadius: CGFloat = 22
+        let horizontalPadding = ResponsiveSystem.value(extraSmall: 6, small: 8, standard: 10)
+        let verticalPadding = ResponsiveSystem.value(extraSmall: 3, small: 4, standard: 5)
 
-            VStack(spacing: 6) {
-                Capsule()
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color.black.opacity(0.55),
-                                Color.black.opacity(0.3)
-                            ],
-                            startPoint: .leading,
-                            endPoint: .trailing
+        return ZStack {
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.05, green: 0.05, blue: 0.08),
+                            Color(red: 0.08, green: 0.08, blue: 0.12),
+                            Color(red: 0.06, green: 0.06, blue: 0.1)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: cornerRadius)
+                        .stroke(AgentIntroTheme.cardBorder, lineWidth: 1)
+                )
+                .overlay(AgentIntroTheme.cardGlow)
+                .overlay(
+                    RoundedRectangle(cornerRadius: cornerRadius)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.08),
+                                    Color.clear
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
                         )
-                    )
-                    .frame(width: 54, height: 5)
-                    .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
-                    .offset(y: max(0, dragOffset))
-                    .accessibilityLabel("Close agent")
-                    .accessibilityHint("Swipe down to dismiss")
-                    .gesture(
-                        DragGesture(minimumDistance: 6)
-                            .onChanged { value in
-                                dragOffset = max(0, value.translation.height)
-                            }
-                            .onEnded { value in
-                                let shouldClose = value.translation.height > 18
-                                dragOffset = 0
-                                if shouldClose {
-                                    onClose()
-                                }
-                            }
-                    )
+                        .blendMode(.screen)
+                )
+                .shadow(color: Color.black.opacity(0.35), radius: 16, x: 0, y: 10)
+
+            VStack(spacing: 0) {
+                mainContent
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .frame(maxWidth: .infinity)
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
         }
-        .frame(height: 8)
-        .frame(maxWidth: .infinity)
+        .padding(.horizontal, CGFloat(horizontalPadding))
+        .padding(.vertical, CGFloat(verticalPadding))
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     @ViewBuilder
@@ -108,6 +196,7 @@ struct AgentKeyboardView: View {
                     session: session,
                     textDocumentProxy: textDocumentProxy,
                     keyboardState: keyboardState,
+                    inputText: $inputText,
                     onNewSession: {
                         currentStep = .introChoice
                     }

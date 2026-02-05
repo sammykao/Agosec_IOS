@@ -51,13 +51,13 @@ struct KeyboardKitTypingView: View {
     }
 }
 
-private extension Autocomplete.ToolbarStyle {
+extension Autocomplete.ToolbarStyle {
     static var agosecStandard: Autocomplete.ToolbarStyle {
         .init(height: 36, padding: 0)
     }
 }
 
-private struct AnimatedAutocompleteToolbar: View {
+struct AnimatedAutocompleteToolbar: View {
     let suggestions: [Autocomplete.Suggestion]
     let onSelect: (Autocomplete.Suggestion) -> Void
     let onAgentTap: () -> Void
@@ -84,8 +84,8 @@ private struct AnimatedAutocompleteToolbar: View {
                     .renderingMode(.template)
                     .foregroundColor(.white)
                     .scaledToFit()
-                    .frame(width: 32, height: 32)
-                    .frame(width: 46, height: 36)
+                    .frame(width: 30, height: 30)
+                    .frame(width: 40, height: 36)
                     .background(
                         Circle()
                             .fill(Color.black)
@@ -111,7 +111,7 @@ private struct AnimatedAutocompleteToolbar: View {
     }
 }
 
-private struct AnimatedAutocompleteToolbarItem: View {
+struct AnimatedAutocompleteToolbarItem: View {
     let suggestion: Autocomplete.Suggestion
     let onSelect: () -> Void
 

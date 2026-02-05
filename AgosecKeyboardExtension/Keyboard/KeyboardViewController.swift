@@ -361,14 +361,18 @@ extension KeyboardViewController {
         keyboardState.currentMode = .agent
         keyboardState.isExpanded = true
 
-        let agentView = AgentKeyboardView(
-            onClose: { self.showTypingKeyboard() },
-            textDocumentProxy: textDocumentProxy,
-            keyboardState: state
-        )
-        .environmentObject(ToastManager.shared)
-
-        embedSwiftUIView(agentView)
+        setupKeyboardView { [weak self] controller in
+            guard let self = self else { return AnyView(EmptyView()) }
+            return AnyView(
+                LayeredAgentKeyboardView(
+                    controller: controller,
+                    onClose: { self.showTypingKeyboard() },
+                    textDocumentProxy: self.textDocumentProxy,
+                    keyboardState: self.state
+                )
+                .environmentObject(ToastManager.shared)
+            )
+        }
 
         // Force immediate height update
         scheduleHeightUpdate()

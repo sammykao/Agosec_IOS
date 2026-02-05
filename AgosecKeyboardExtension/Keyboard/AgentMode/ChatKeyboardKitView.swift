@@ -1,28 +1,21 @@
 import KeyboardKit
 import SwiftUI
 
-final class ChatKeyboardController: KeyboardController, ObservableObject {
+final class AgentTextInputController: KeyboardController, ObservableObject {
     let state: Keyboard.State
     let services: Keyboard.Services
 
     private var text: Binding<String>
     private var cursorIndex: Int
 
-    init(text: Binding<String>, onReturn: @escaping () -> Void, sharedState: Keyboard.State? = nil) {
+    init(text: Binding<String>, sharedState: Keyboard.State) {
         self.text = text
         self.cursorIndex = text.wrappedValue.count
-        let state = Keyboard.State()
-        state.setup(for: .agosec)
-        if let sharedState = sharedState {
-            state.keyboardContext.locale = sharedState.keyboardContext.locale
-            state.keyboardContext.locales = sharedState.keyboardContext.locales
-        }
-        self.state = state
+        self.state = sharedState
+        self.services = Keyboard.Services(state: sharedState)
         self.state.keyboardContext.keyboardType = .alphabetic
         self.state.keyboardContext.keyboardInputType = .text
         self.state.keyboardContext.returnKeyTypeOverride = .send
-        self.services = Keyboard.Services(state: self.state)
-        self.services.actionHandler = ChatKeyboardActionHandler(controller: self, onReturn: onReturn)
     }
 
     func syncCursorToEnd() {
@@ -69,6 +62,21 @@ final class ChatKeyboardController: KeyboardController, ObservableObject {
         cursorIndex = currentIndex + text.count
     }
 
+    func replaceLastWord(with replacement: String, addTrailingSpace: Bool) {
+        let currentText = text.wrappedValue
+        let separators = CharacterSet.whitespacesAndNewlines
+        let range = currentText.rangeOfCharacter(from: separators, options: .backwards)
+        let prefix: String
+        if let range = range {
+            prefix = String(currentText[..<range.upperBound])
+        } else {
+            prefix = ""
+        }
+        let suffix = addTrailingSpace ? " " : ""
+        text.wrappedValue = prefix + replacement + suffix
+        cursorIndex = text.wrappedValue.count
+    }
+
     func openUrl(_ url: URL?) {}
 
     func performAutocomplete() {}
@@ -92,7 +100,7 @@ final class ChatKeyboardController: KeyboardController, ObservableObject {
     }
 }
 
-final class ChatKeyboardActionHandler: KeyboardActionHandler {
+final class AgentKeyboardActionHandler: KeyboardActionHandler {
     private let onReturn: () -> Void
     private let standard: KeyboardAction.StandardActionHandler
 
@@ -139,20 +147,20 @@ final class ChatKeyboardActionHandler: KeyboardActionHandler {
     }
 }
 
-struct KeyboardKitChatKeyboardView: View {
+struct AgentKeyboardKitTypingView: View {
+    let controller: KeyboardInputViewController
     @Binding var text: String
-    let onReturn: () -> Void
 
-    @StateObject private var controller: ChatKeyboardController
+    @StateObject private var textController: AgentTextInputController
+    @State private var previousReturnKeyOverride: Keyboard.ReturnKeyType?
 
-    init(text: Binding<String>, onReturn: @escaping () -> Void, sharedState: Keyboard.State? = nil) {
+    init(controller: KeyboardInputViewController, text: Binding<String>) {
+        self.controller = controller
         self._text = text
-        self.onReturn = onReturn
-        _controller = StateObject(
-            wrappedValue: ChatKeyboardController(
+        _textController = StateObject(
+            wrappedValue: AgentTextInputController(
                 text: text,
-                onReturn: onReturn,
-                sharedState: sharedState
+                sharedState: controller.state
             )
         )
     }
@@ -160,22 +168,69 @@ struct KeyboardKitChatKeyboardView: View {
     var body: some View {
         KeyboardView(
             services: controller.services,
-            buttonContent: { $0.view },
-            buttonView: { $0.view }
+            buttonContent: { item in
+                item.view
+            },
+            buttonView: { item in
+                item.view
+            },
+            collapsedView: { item in
+                item.view
+            },
+            emojiKeyboard: { item in
+                item.view
+            },
+            toolbar: { item in
+                AnyView(
+                    AnimatedAutocompleteToolbar(
+                        suggestions: controller.state.autocompleteContext.suggestions,
+                        onSelect: { suggestion in
+                            textController.replaceLastWord(with: suggestion.text, addTrailingSpace: true)
+                        },
+                        onAgentTap: {}
+                    )
+                )
+            }
         )
-        .environmentObject(controller.state.keyboardContext)
-        .environmentObject(controller.state.calloutContext)
-        .environmentObject(controller.state.feedbackContext)
-        .environmentObject(controller.state.autocompleteContext)
-        .environmentObject(controller.state.clipboardContext)
-        .environmentObject(controller.state.dictationContext)
-        .environmentObject(controller.state.emojiContext)
-        .environmentObject(controller.state.externalKeyboardContext)
-        .environmentObject(controller.state.fontContext)
-        .environmentObject(controller.state.themeContext)
-        .keyboardInputToolbarDisplayMode(.none)
+        .keyboardInputToolbarDisplayMode(.automatic)
+        .autocompleteToolbarStyle(.agosecStandard)
+        .ignoresSafeArea(.container, edges: .top)
+        .onAppear {
+            previousReturnKeyOverride = controller.state.keyboardContext.returnKeyTypeOverride
+            controller.services.actionHandler = AgentKeyboardActionHandler(
+                controller: textController,
+                onReturn: {
+                    NotificationCenter.default.post(
+                        name: Notification.Name("AgentChatSend"),
+                        object: nil
+                    )
+                }
+            )
+            controller.state.keyboardContext.returnKeyTypeOverride = .send
+        }
+        .onDisappear {
+            controller.services.actionHandler = KeyboardAction.StandardActionHandler.standard(for: controller)
+            controller.state.keyboardContext.returnKeyTypeOverride = previousReturnKeyOverride
+        }
         .onChange(of: text) { _ in
-            controller.syncCursorToEnd()
+            textController.syncCursorToEnd()
+            updateAutocomplete()
+        }
+    }
+
+    private func updateAutocomplete() {
+        let input = text
+        Task { [services = controller.services, state = controller.state] in
+            do {
+                let result = try await services.autocompleteService.autocomplete(input)
+                await MainActor.run {
+                    state.autocompleteContext.update(with: result)
+                }
+            } catch {
+                await MainActor.run {
+                    state.autocompleteContext.update(with: error)
+                }
+            }
         }
     }
 }

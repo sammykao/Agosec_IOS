@@ -15,29 +15,31 @@ struct MessageRowView: View {
             if message.isUser { Spacer(minLength: 0) }
 
             VStack(alignment: message.isUser ? .trailing : .leading, spacing: layout.actionSpacing) {
-                HStack(alignment: .bottom, spacing: ResponsiveSystem.value(extraSmall: 6, small: 8, standard: 10)) {
-                    if !message.isUser {
-                        Group {
-                            if let uiImage = LogoLoader.loadAgosecLogo() {
-                                Image(uiImage: uiImage)
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                            } else {
-                                Image(systemName: "sparkles")
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .foregroundStyle(userBubbleGradient)
-                            }
-                        }
-                        .frame(width: layout.avatarSize, height: layout.avatarSize)
-                        .padding(.bottom, 2)
-                    }
-
+                if message.isUser {
                     messageContent
-                }
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                } else {
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(alignment: .top, spacing: ResponsiveSystem.value(extraSmall: 6, small: 8, standard: 10)) {
+                            Group {
+                                if let uiImage = LogoLoader.loadAgosecLogo() {
+                                    Image(uiImage: uiImage)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                } else {
+                                    Image(systemName: "sparkles")
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .foregroundStyle(userBubbleGradient)
+                                }
+                            }
+                            .frame(width: layout.avatarSize, height: layout.avatarSize)
 
-                if !message.isUser {
-                    actionButtons
+                            assistantMessageContent
+                        }
+
+                        actionButtons
+                    }
                 }
             }
 
@@ -76,6 +78,17 @@ struct MessageRowView: View {
                     )
             )
             .shadow(color: message.isUser ? Color.blue.opacity(0.25) : Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+            .textSelection(.enabled)
+    }
+
+    private var assistantMessageContent: some View {
+        Text(message.content)
+            .font(.system(size: layout.messageFontSize, weight: .regular))
+            .lineSpacing(layout.messageLineSpacing)
+            .foregroundColor(Color.white.opacity(0.9))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 2)
+            .padding(.trailing, layout.bubblePadding)
             .textSelection(.enabled)
     }
 

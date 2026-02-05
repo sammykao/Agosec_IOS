@@ -61,29 +61,29 @@ extension AgentChatView {
             contentTopPadding: ResponsiveSystem.value(extraSmall: 8, small: 10, standard: 14),
             contentBottomPadding: ResponsiveSystem.value(extraSmall: 14, small: 18, standard: 22),
             messageSpacing: ResponsiveSystem.value(extraSmall: 12, small: 14, standard: 16),
-            bubblePadding: ResponsiveSystem.value(extraSmall: 10, small: 12, standard: 14),
-            bubbleCornerRadius: ResponsiveSystem.value(extraSmall: 16, small: 18, standard: 20),
+            bubblePadding: ResponsiveSystem.value(extraSmall: 8, small: 10, standard: 12),
+            bubbleCornerRadius: ResponsiveSystem.value(extraSmall: 14, small: 16, standard: 18),
             bubbleMaxWidth: bubbleMaxWidth,
-            messageFontSize: ResponsiveSystem.value(extraSmall: 14, small: 15, standard: 16),
-            messageLineSpacing: ResponsiveSystem.value(extraSmall: 2, small: 3, standard: 4),
-            avatarSize: ResponsiveSystem.value(extraSmall: 18, small: 20, standard: 22),
-            inputSectionSpacing: ResponsiveSystem.value(extraSmall: 8, small: 10, standard: 12),
-            inputFieldPadding: ResponsiveSystem.value(extraSmall: 6, small: 8, standard: 10),
-            inputFieldCornerRadius: ResponsiveSystem.value(extraSmall: 16, small: 18, standard: 20),
-            inputFieldFontSize: ResponsiveSystem.value(extraSmall: 15, small: 16, standard: 17),
-            inputFieldSpacing: ResponsiveSystem.value(extraSmall: 8, small: 10, standard: 12),
-            sendButtonSize: ResponsiveSystem.value(extraSmall: 34, small: 36, standard: 40),
-            sendButtonIconSize: ResponsiveSystem.value(extraSmall: 16, small: 18, standard: 20),
-            inputTopPadding: ResponsiveSystem.value(extraSmall: 6, small: 8, standard: 10),
-            inputBottomPadding: ResponsiveSystem.value(extraSmall: 8, small: 10, standard: 12),
-            actionSpacing: ResponsiveSystem.value(extraSmall: 6, small: 8, standard: 10),
-            actionFontSize: ResponsiveSystem.value(extraSmall: 11, small: 12, standard: 13),
-            actionHorizontalPadding: ResponsiveSystem.value(extraSmall: 8, small: 10, standard: 12),
-            actionVerticalPadding: ResponsiveSystem.value(extraSmall: 4, small: 5, standard: 6),
-            minTapTarget: 44,
-            inputFieldMinHeight: 44,
-            actionIconButtonSize: ResponsiveSystem.value(extraSmall: 26, small: 28, standard: 30),
-            actionIconFontSize: ResponsiveSystem.value(extraSmall: 13, small: 14, standard: 15)
+            messageFontSize: ResponsiveSystem.value(extraSmall: 12, small: 13, standard: 14),
+            messageLineSpacing: ResponsiveSystem.value(extraSmall: 1, small: 2, standard: 3),
+            avatarSize: ResponsiveSystem.value(extraSmall: 20, small: 22, standard: 24),
+            inputSectionSpacing: ResponsiveSystem.value(extraSmall: 6, small: 8, standard: 10),
+            inputFieldPadding: ResponsiveSystem.value(extraSmall: 4, small: 6, standard: 8),
+            inputFieldCornerRadius: ResponsiveSystem.value(extraSmall: 14, small: 16, standard: 18),
+            inputFieldFontSize: ResponsiveSystem.value(extraSmall: 13, small: 14, standard: 15),
+            inputFieldSpacing: ResponsiveSystem.value(extraSmall: 6, small: 8, standard: 10),
+            sendButtonSize: ResponsiveSystem.value(extraSmall: 28, small: 30, standard: 34),
+            sendButtonIconSize: ResponsiveSystem.value(extraSmall: 14, small: 15, standard: 16),
+            inputTopPadding: ResponsiveSystem.value(extraSmall: 4, small: 6, standard: 8),
+            inputBottomPadding: ResponsiveSystem.value(extraSmall: 6, small: 8, standard: 10),
+            actionSpacing: ResponsiveSystem.value(extraSmall: 3, small: 5, standard: 6),
+            actionFontSize: ResponsiveSystem.value(extraSmall: 9, small: 10, standard: 11),
+            actionHorizontalPadding: ResponsiveSystem.value(extraSmall: 5, small: 6, standard: 8),
+            actionVerticalPadding: ResponsiveSystem.value(extraSmall: 2, small: 3, standard: 4),
+            minTapTarget: 36,
+            inputFieldMinHeight: 36,
+            actionIconButtonSize: ResponsiveSystem.value(extraSmall: 18, small: 20, standard: 22),
+            actionIconFontSize: ResponsiveSystem.value(extraSmall: 11, small: 12, standard: 13)
         )
     }
 }
@@ -146,8 +146,6 @@ extension AgentChatView {
                 inputField(layout: layout)
                 sendButton(layout: layout, isSendDisabled: isSendDisabled, sendStyle: sendStyle)
             }
-
-            keyboardInput(layout: layout)
         }
         .padding(.horizontal, layout.horizontalPadding)
         .padding(.top, layout.inputTopPadding)
@@ -235,23 +233,10 @@ extension AgentChatView {
         .disabled(isSendDisabled)
     }
 
-    private func keyboardInput(layout: ChatLayout) -> some View {
-        KeyboardKitChatKeyboardView(
-            text: $inputText,
-            onReturn: {
-                if !trimmedInput.isEmpty {
-                    sendMessage()
-                }
-            },
-            sharedState: keyboardState
-        )
-        .opacity(isLoading ? 0.6 : 1.0)
-        .allowsHitTesting(!isLoading)
-    }
 }
 
 extension AgentChatView {
-    private func sendMessage() {
+    func sendMessage() {
         let messageText = trimmedInput
         guard !messageText.isEmpty else { return }
 
